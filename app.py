@@ -1,0 +1,258 @@
+"""
+Aplicación web Flask para clasificación de frutas usando el modelo CNN entrenado.
+Permite subir imágenes y obtener predicciones en tiempo real.
+"""
+
+from flask import Flask, render_template, request, jsonify
+import os
+import numpy as np
+from PIL import Image
+import tensorflow as tf
+from tensorflow import keras
+import json
+from pathlib import Path
+import io
+import base64
+
+app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+
+# Crear carpeta de uploads si no existe
+Path(app.config['UPLOAD_FOLDER']).mkdir(parents=True, exist_ok=True)
+
+# Variables globales para el modelo
+model = None
+class_names = None
+img_size = (100, 100)
+
+
+def load_model_and_classes():
+    """Carga el modelo y el mapeo de clases."""
+    global model, class_names
+    
+    # Intentar cargar formato .keras primero, luego .h5
+    model_path_keras = 'models/fruit_classifier.keras'
+    model_path_h5 = 'models/fruit_classifier.h5'
+    mapping_path = 'models/class_mapping.json'
+    
+    model_path = None
+    if Path(model_path_keras).exists():
+        model_path = model_path_keras
+    elif Path(model_path_h5).exists():
+        model_path = model_path_h5
+    
+    if not model_path:
+        print("⚠️  Advertencia: No se encontró el modelo entrenado.")
+        print("Por favor, ejecuta 'train_model.py' primero.")
+        return False
+    
+    # Cargar modelo con custom objects para MobileNetV2
+    print(f"📦 Cargando modelo desde: {model_path}")
+    try:
+        # Intentar cargar normalmente
+        model = keras.models.load_model(model_path, compile=False)
+        
+        # Recompilar el modelo
+        model.compile(
+            optimizer=keras.optimizers.Adam(learning_rate=0.001),
+            loss='categorical_crossentropy',
+            metrics=['accuracy']
+        )
+        print("✅ Modelo cargado exitosamente")
+    except Exception as e:
+        print(f"❌ Error al cargar modelo: {e}")
+        print("\n💡 Solución: Re-entrena el modelo con:")
+        print("   python3 scripts/train_model.py")
+        print("   (Guardará en formato .keras compatible)")
+        return False
+    
+    # Cargar mapeo de clases
+    if Path(mapping_path).exists():
+        with open(mapping_path, 'r') as f:
+            class_mapping = json.load(f)
+            class_names = class_mapping['class_names']
+    else:
+        class_names = ['manzana', 'banano', 'mango', 'naranja', 'pera']
+    
+    print(f"✅ Clases cargadas: {class_names}")
+    return True
+
+
+def preprocess_image(image_file):
+    """
+    Preprocesa una imagen para predicción.
+    
+    Args:
+        image_file: Archivo de imagen
+        
+    Returns:
+        tuple: (imagen_procesada, imagen_original, es_válida, mensaje_error)
+    """
+    try:
+        # Leer imagen
+        img = Image.open(image_file)
+        
+        # Guardar copia original para mostrar
+        img_original = img.copy()
+        
+        # Convertir a RGB si es necesario
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+        
+        # Verificar dimensiones mínimas
+        if img.size[0] < 50 or img.size[1] < 50:
+            return None, None, False, "La imagen es demasiado pequeña (mínimo 50x50 píxeles)"
+        
+        # Redimensionar
+        img_resized = img.resize(img_size)
+        
+        # Convertir a array y normalizar
+        img_array = np.array(img_resized).astype(np.float32) / 255.0
+        
+        # Añadir dimensión de batch
+        img_batch = np.expand_dims(img_array, axis=0)
+        
+        return img_batch, img_original, True, None
+        
+    except Exception as e:
+        return None, None, False, f"Error al procesar la imagen: {str(e)}"
+
+
+def predict_fruit(image_file):
+    """
+    Realiza la predicción de la fruta.
+    
+    Args:
+        image_file: Archivo de imagen
+        
+    Returns:
+        dict: Resultado de la predicción
+    """
+    if model is None:
+        return {
+            'success': False,
+            'error': 'Modelo no cargado. Por favor, entrena el modelo primero.'
+        }
+    
+    # Preprocesar imagen
+    img_processed, img_original, is_valid, error_msg = preprocess_image(image_file)
+    
+    if not is_valid:
+        return {
+            'success': False,
+            'error': error_msg
+        }
+    
+    # Realizar predicción
+    predictions = model.predict(img_processed, verbose=0)
+    predicted_class_idx = np.argmax(predictions[0])
+    confidence = float(predictions[0][predicted_class_idx])
+    
+    # Obtener todas las probabilidades
+    all_predictions = []
+    for idx, prob in enumerate(predictions[0]):
+        all_predictions.append({
+            'class': class_names[idx],
+            'probability': float(prob),
+            'percentage': f"{float(prob) * 100:.2f}"
+        })
+    
+    # Ordenar por probabilidad
+    all_predictions.sort(key=lambda x: x['probability'], reverse=True)
+    
+    # Convertir imagen original a base64 para mostrar
+    buffered = io.BytesIO()
+    img_original.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode()
+    
+    return {
+        'success': True,
+        'predicted_class': class_names[predicted_class_idx],
+        'confidence': confidence,
+        'confidence_percentage': f"{confidence * 100:.2f}",
+        'all_predictions': all_predictions,
+        'image_data': img_str
+    }
+
+
+@app.route('/')
+def index():
+    """Página principal."""
+    return render_template('index.html')
+
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    """Endpoint para realizar predicciones."""
+    if 'file' not in request.files:
+        return jsonify({
+            'success': False,
+            'error': 'No se proporcionó ningún archivo'
+        })
+    
+    file = request.files['file']
+    
+    if file.filename == '':
+        return jsonify({
+            'success': False,
+            'error': 'No se seleccionó ningún archivo'
+        })
+    
+    # Verificar extensión
+    allowed_extensions = {'.jpg', '.jpeg', '.png', '.JPG', '.JPEG', '.PNG'}
+    file_ext = Path(file.filename).suffix
+    
+    if file_ext not in allowed_extensions:
+        return jsonify({
+            'success': False,
+            'error': f'Formato de archivo no válido. Use: {", ".join(allowed_extensions)}'
+        })
+    
+    # Realizar predicción
+    result = predict_fruit(file)
+    
+    return jsonify(result)
+
+
+@app.route('/health')
+def health():
+    """Endpoint de salud para verificar que la app está funcionando."""
+    return jsonify({
+        'status': 'ok',
+        'model_loaded': model is not None,
+        'classes': class_names
+    })
+
+
+@app.route('/dataset-info')
+def dataset_info():
+    """Endpoint para obtener información del dataset."""
+    viz_path = Path('dataset/processed/visualizations')
+    
+    info = {
+        'visualizations_available': viz_path.exists()
+    }
+    
+    if viz_path.exists():
+        info['visualizations'] = [
+            str(f.name) for f in viz_path.glob('*.png')
+        ]
+    
+    return jsonify(info)
+
+
+if __name__ == '__main__':
+    print("\n🍎 APLICACIÓN WEB - CLASIFICADOR DE FRUTAS 🍌")
+    print("=" * 60)
+    
+    # Cargar modelo
+    if load_model_and_classes():
+        print("\n🚀 Iniciando servidor Flask...")
+        print("📱 Accede a la aplicación en: http://localhost:5000")
+        print("=" * 60)
+        
+        app.run(debug=True, host='0.0.0.0', port=5000)
+    else:
+        print("\n❌ No se pudo iniciar la aplicación.")
+        print("Asegúrate de haber entrenado el modelo primero ejecutando 'train_model.py'")
