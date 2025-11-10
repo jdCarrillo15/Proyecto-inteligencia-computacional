@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clasificador de Frutas - CNN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .upload-section {
+            text-align: center;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px 20px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #e8eaff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.2em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .upload-subtext {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .preview-section {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .predicted-fruit {
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 10px;
+            text-transform: capitalize;
+        }
+
+        .confidence {
+            font-size: 1.5em;
+            color: #764ba2;
+            font-weight: bold;
+        }
+
+        .predictions-list {
+            margin-top: 30px;
+        }
+
+        .prediction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .prediction-item:hover {
+            background: #f0f2ff;
+            transform: translateX(5px);
+        }
+
+        .prediction-item.top {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .fruit-name {
+            font-size: 1.2em;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .probability-bar {
+            flex: 1;
+            margin: 0 20px;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .probability-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s ease;
+        }
+
+        .prediction-item.top .probability-bar {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .prediction-item.top .probability-fill {
+            background: white;
+        }
+
+        .percentage {
+            font-size: 1.1em;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: right;
+        }
+
+        .error-message {
+            background: #ff6b6b;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-top: 30px;
+        }
+
+        .info-title {
+            font-size: 1.8em;
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .fruit-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .fruit-card {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .fruit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .fruit-emoji {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .fruit-label {
+            font-weight: 500;
+            color: #333;
+            text-transform: capitalize;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .fruit-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍎 Clasificador de Frutas 🍌</h1>
+            <p class="subtitle">Red Neuronal Convolucional con TensorFlow & Keras</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Sección de carga -->
+            <div class="card upload-section">
+                <h2 style="margin-bottom: 20px; color: #333;">Subir Imagen</h2>
+                
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📸</div>
+                    <div class="upload-text">Arrastra una imagen aquí</div>
+                    <div class="upload-subtext">o haz clic para seleccionar</div>
+                    <div class="upload-subtext" style="margin-top: 10px;">Formatos: JPG, PNG</div>
+                </div>
+
+                <input type="file" id="fileInput" accept="image/jpeg,image/png,image/jpg">
+                
+                <div class="preview-section" id="previewSection">
+                    <img id="previewImage" class="preview-image" alt="Vista previa">
+                    <button class="btn" id="predictBtn">🔍 Clasificar Fruta</button>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 15px; color: #667eea;">Analizando imagen...</p>
+                </div>
+
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+
+            <!-- Sección de resultados -->
+            <div class="card results-section" id="resultsSection">
+                <h2 style="margin-bottom: 20px; color: #333;">Resultados</h2>
+                
+                <div class="result-header">
+                    <div class="predicted-fruit" id="predictedFruit">-</div>
+                    <div class="confidence">Confianza: <span id="confidenceValue">0%</span></div>
+                </div>
+
+                <div class="predictions-list" id="predictionsList"></div>
+            </div>
+        </div>
+
+        <!-- Información del sistema -->
+        <div class="info-section">
+            <h3 class="info-title">Clases de Frutas Detectables</h3>
+            <div class="fruit-grid">
+                <div class="fruit-card">
+                    <div class="fruit-emoji">🍎</div>
+                    <div class="fruit-label">Manzana</div>
+                </div>
+                <div class="fruit-card">
+                    <div class="fruit-emoji">🍌</div>
+                    <div class="fruit-label">Banano</div>
+                </div>
+                <div class="fruit-card">
+                    <div class="fruit-emoji">🥭</div>
+                    <div class="fruit-label">Mango</div>
+                </div>
+                <div class="fruit-card">
+                    <div class="fruit-emoji">🍊</div>
+                    <div class="fruit-label">Naranja</div>
+                </div>
+                <div class="fruit-card">
+                    <div class="fruit-emoji">🍐</div>
+                    <div class="fruit-label">Pera</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewSection = document.getElementById('previewSection');
+        const previewImage = document.getElementById('previewImage');
+        const predictBtn = document.getElementById('predictBtn');
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('errorMessage');
+        const resultsSection = document.getElementById('resultsSection');
+        const predictedFruit = document.getElementById('predictedFruit');
+        const confidenceValue = document.getElementById('confidenceValue');
+        const predictionsList = document.getElementById('predictionsList');
+
+        let selectedFile = null;
+
+        // Emojis para cada fruta
+        const fruitEmojis = {
+            'manzana': '🍎',
+            'banano': '🍌',
+            'mango': '🥭',
+            'naranja': '🍊',
+            'pera': '🍐'
+        };
+
+        // Click en área de carga
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // Selección de archivo
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // Manejar archivo seleccionado
+        function handleFile(file) {
+            selectedFile = file;
+            
+            // Verificar tipo de archivo
+            if (!file.type.match('image.*')) {
+                showError('Por favor, selecciona una imagen válida (JPG o PNG)');
+                return;
+            }
+
+            // Mostrar vista previa
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                previewSection.style.display = 'block';
+                errorMessage.style.display = 'none';
+                resultsSection.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Realizar predicción
+        predictBtn.addEventListener('click', async () => {
+            if (!selectedFile) {
+                showError('Por favor, selecciona una imagen primero');
+                return;
+            }
+
+            // Mostrar loading
+            loading.style.display = 'block';
+            predictBtn.disabled = true;
+            errorMessage.style.display = 'none';
+            resultsSection.style.display = 'none';
+
+            // Crear FormData
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    displayResults(result);
+                } else {
+                    showError(result.error || 'Error al procesar la imagen');
+                }
+            } catch (error) {
+                showError('Error de conexión: ' + error.message);
+            } finally {
+                loading.style.display = 'none';
+                predictBtn.disabled = false;
+            }
+        });
+
+        // Mostrar resultados
+        function displayResults(result) {
+            // Mostrar clase predicha
+            const emoji = fruitEmojis[result.predicted_class] || '🍓';
+            predictedFruit.textContent = emoji + ' ' + result.predicted_class;
+            confidenceValue.textContent = result.confidence_percentage + '%';
+
+            // Mostrar todas las predicciones
+            predictionsList.innerHTML = '';
+            result.all_predictions.forEach((pred, index) => {
+                const item = document.createElement('div');
+                item.className = 'prediction-item' + (index === 0 ? ' top' : '');
+                
+                const emoji = fruitEmojis[pred.class] || '🍓';
+                
+                item.innerHTML = `
+                    <span class="fruit-name">${emoji} ${pred.class}</span>
+                    <div class="probability-bar">
+                        <div class="probability-fill" style="width: ${pred.percentage}%"></div>
+                    </div>
+                    <span class="percentage">${pred.percentage}%</span>
+                `;
+                
+                predictionsList.appendChild(item);
+            });
+
+            resultsSection.style.display = 'block';
+        }
+
+        // Mostrar error
+        function showError(message) {
+            errorMessage.textContent = '❌ ' + message;
+            errorMessage.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
