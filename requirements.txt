@@ -1,0 +1,22 @@
+# Dependencias del proyecto - Clasificador de Frutas CNN
+# Compatible con Python 3.12
+
+# Deep Learning
+tensorflow>=2.18.0
+keras>=3.6.0
+
+# Procesamiento de imágenes
+opencv-python>=4.8.0
+Pillow>=10.0.0
+
+# Análisis de datos y visualización
+numpy>=1.26.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
+
+# Machine Learning
+scikit-learn>=1.3.0
+
+# Aplicación web
+Flask>=3.0.0
+Werkzeug>=3.0.0
