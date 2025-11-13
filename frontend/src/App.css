@@ -401,22 +401,53 @@
   color: #666;
 }
 
+.supported-plants-title {
+  margin-top: 25px;
+  margin-bottom: 5px;
+}
+
+.supported-plants-title h4 {
+  color: #059669;
+  font-size: 1.2em;
+  font-weight: 600;
+  margin: 0;
+}
+
 .supported-fruits {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   justify-content: center;
-  margin-top: 30px;
+  margin-top: 20px;
 }
 
 .fruit-chip {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
-  padding: 10px 20px;
+  padding: 12px 24px;
   border-radius: 25px;
   font-weight: 600;
   font-size: 1em;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  cursor: help;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fruit-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.chip-count {
+  font-size: 0.85em;
+  opacity: 0.9;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 8px;
+  border-radius: 12px;
 }
 
 /* Footer */

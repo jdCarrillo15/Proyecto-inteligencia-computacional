@@ -298,11 +298,22 @@ function App() {
                   <div className="placeholder-icon">🎯</div>
                   <h3>Esperando imagen...</h3>
                   <p>Sube una foto de una hoja de planta para comenzar el diagnóstico</p>
+                  <div className="supported-plants-title">
+                    <h4>🌱 Cultivos Soportados</h4>
+                  </div>
                   <div className="supported-fruits">
-                    <div className="fruit-chip">🍎 Manzana</div>
-                    <div className="fruit-chip">🌽 Maíz</div>
-                    <div className="fruit-chip">🥔 Papa</div>
-                    <div className="fruit-chip">🍅 Tomate</div>
+                    <div className="fruit-chip" title="Mancha negra, Sarna, Roya del cedro, Saludable">
+                      🍎 Manzana <span className="chip-count">(4 clases)</span>
+                    </div>
+                    <div className="fruit-chip" title="Roya común, Tizón del norte, Saludable">
+                      🌽 Maíz <span className="chip-count">(3 clases)</span>
+                    </div>
+                    <div className="fruit-chip" title="Tizón temprano, Tizón tardío, Saludable">
+                      🥔 Papa <span className="chip-count">(3 clases)</span>
+                    </div>
+                    <div className="fruit-chip" title="Mancha bacteriana, Tizón temprano, Tizón tardío, Moho de hoja, Saludable">
+                      🍅 Tomate <span className="chip-count">(5 clases)</span>
+                    </div>
                   </div>
                 </div>
               </div>
