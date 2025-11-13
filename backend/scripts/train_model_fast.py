@@ -369,7 +369,13 @@ class FastFruitClassifier:
 
 
 def main():
-    """Función principal de entrenamiento rápido."""
+    """
+    Función principal de entrenamiento rápido.
+    
+    IMPORTANTE: Si actualizaste las clases del modelo, debes limpiar el cache anterior:
+        python backend/utils/manage_cache.py
+        Opción [2] - Limpiar cache
+    """
     print("\n🚀 ENTRENAMIENTO ULTRA-RÁPIDO CON CACHE PKL")
     print("=" * 60)
     
@@ -392,9 +398,26 @@ def main():
     # Cargar datos desde cache
     cache = DataCache()
     
+    # Configuración con las 15 clases específicas del dataset
     config = {
         'img_size': IMG_SIZE,
-        'classes': ['Apple', 'Corn', 'Potato', 'Tomato'],
+        'classes': [
+            'Apple___Apple_scab',
+            'Apple___Black_rot',
+            'Apple___Cedar_apple_rust',
+            'Apple___healthy',
+            'Corn_(maize)___Common_rust_',
+            'Corn_(maize)___healthy',
+            'Corn_(maize)___Northern_Leaf_Blight',
+            'Potato___Early_blight',
+            'Potato___healthy',
+            'Potato___Late_blight',
+            'Tomato___Bacterial_spot',
+            'Tomato___Early_blight',
+            'Tomato___healthy',
+            'Tomato___Late_blight',
+            'Tomato___Leaf_Mold'
+        ],
         'balance': False
     }
     
