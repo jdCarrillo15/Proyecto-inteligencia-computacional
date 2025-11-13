@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './App.css';
 
 // Componentes
@@ -8,6 +8,7 @@ import ImageUpload from './components/ImageUpload';
 import TipsCard from './components/TipsCard';
 import SystemInfoCard from './components/SystemInfoCard';
 import PredictionResults from './components/PredictionResults';
+import PredictionSkeleton from './components/SkeletonLoaders';
 
 // Utilidades
 import { predictDisease } from './utils/api';
@@ -21,7 +22,33 @@ function App() {
   const [dragActive, setDragActive] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [imageZoomed, setImageZoomed] = useState(false);
+  const [showSkeleton, setShowSkeleton] = useState(false);
   const fileInputRef = useRef(null);
+  const skeletonTimerRef = useRef(null);
+
+  // Efecto para controlar el timing del skeleton (300ms)
+  useEffect(() => {
+    if (loading) {
+      // Iniciar timer de 300ms antes de mostrar skeleton
+      skeletonTimerRef.current = setTimeout(() => {
+        setShowSkeleton(true);
+      }, 300);
+    } else {
+      // Limpiar timer y ocultar skeleton cuando termine la carga
+      if (skeletonTimerRef.current) {
+        clearTimeout(skeletonTimerRef.current);
+        skeletonTimerRef.current = null;
+      }
+      setShowSkeleton(false);
+    }
+
+    // Cleanup al desmontar
+    return () => {
+      if (skeletonTimerRef.current) {
+        clearTimeout(skeletonTimerRef.current);
+      }
+    };
+  }, [loading]);
 
   const handleFileSelect = (file) => {
     if (file) {
@@ -165,7 +192,11 @@ function App() {
           </section>
 
           <section className="results-section" aria-label="Sección de resultados del diagnóstico">
-            <PredictionResults prediction={prediction} />
+            {showSkeleton ? (
+              <PredictionSkeleton />
+            ) : (
+              <PredictionResults prediction={prediction} />
+            )}
           </section>
         </main>
 

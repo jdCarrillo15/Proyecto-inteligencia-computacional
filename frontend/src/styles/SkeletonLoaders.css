@@ -1,0 +1,395 @@
+/* ============================================
+   SKELETON LOADERS - COMPONENTES BASE
+   ============================================ */
+
+/* Variables para skeleton loaders */
+:root {
+  --skeleton-base-color: #e0e0e0;
+  --skeleton-highlight-color: #f5f5f5;
+  --skeleton-animation-duration: 1.5s;
+  --skeleton-border-radius: 8px;
+}
+
+.dark-mode {
+  --skeleton-base-color: #2a2a2a;
+  --skeleton-highlight-color: #3a3a3a;
+}
+
+/* ============================================
+   ANIMACIÓN PULSE GRADIENT
+   ============================================ */
+
+@keyframes skeletonPulse {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Clase base para todos los skeletons */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-base-color) 0%,
+    var(--skeleton-highlight-color) 50%,
+    var(--skeleton-base-color) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeletonPulse var(--skeleton-animation-duration) ease-in-out infinite;
+  border-radius: var(--skeleton-border-radius);
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ============================================
+   SKELETON PRIMITIVOS
+   ============================================ */
+
+/* Skeleton Circle - Para emojis/avatares */
+.skeleton-circle {
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Skeleton Line - Para textos */
+.skeleton-line {
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.skeleton-line:last-child {
+  margin-bottom: 0;
+}
+
+/* Variantes de líneas */
+.skeleton-title {
+  margin-bottom: 16px;
+  border-radius: 6px;
+}
+
+.skeleton-text {
+  opacity: 0.8;
+}
+
+/* ============================================
+   SKELETON CARD
+   ============================================ */
+
+.skeleton-card {
+  padding: 24px;
+  border-radius: var(--card-border-radius);
+  background: var(--card-bg);
+  box-shadow: var(--shadow-sm);
+}
+
+.skeleton-card-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.skeleton-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ============================================
+   PREDICTION SKELETON (ESPECIALIZADO)
+   ============================================ */
+
+.skeleton-results {
+  /* Evita flash de contenido */
+  min-height: 600px;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Banner de estado skeleton */
+.skeleton-status-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--skeleton-base-color);
+  border-radius: var(--skeleton-border-radius);
+  margin-bottom: 24px;
+  animation: skeletonPulse var(--skeleton-animation-duration) ease-in-out infinite;
+}
+
+/* Resultado principal skeleton */
+.skeleton-main-result {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 32px;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: var(--skeleton-border-radius);
+}
+
+.dark-mode .skeleton-main-result {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.skeleton-emoji {
+  flex-shrink: 0;
+}
+
+.skeleton-result-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeleton-disease-name {
+  border-radius: 6px;
+}
+
+.skeleton-plant-type {
+  opacity: 0.7;
+}
+
+/* ============================================
+   SECCIONES DE GRÁFICAS SKELETON
+   ============================================ */
+
+.skeleton-chart-section,
+.skeleton-info-section,
+.skeleton-timeline-section,
+.skeleton-heatmap-section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px solid var(--border-light);
+}
+
+.skeleton-section-title {
+  margin-bottom: 20px;
+  border-radius: 6px;
+}
+
+/* Gráfica radial skeleton */
+.skeleton-radial-chart {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+/* Gráfica de barras skeleton */
+.skeleton-bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.skeleton-bar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.skeleton-bar {
+  flex: 1;
+  height: 28px;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+/* Timeline skeleton */
+.skeleton-timeline {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  padding: 24px 0;
+}
+
+.skeleton-timeline-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Heatmap skeleton */
+.skeleton-heatmap-section {
+  padding-bottom: 24px;
+}
+
+.skeleton-leaf-container {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+.skeleton-leaf {
+  position: relative;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .skeleton-main-result {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .skeleton-result-text {
+    align-items: center;
+  }
+
+  .skeleton-timeline {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .skeleton-bar-chart {
+    gap: 12px;
+  }
+
+  .skeleton-card {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .skeleton-timeline {
+    grid-template-columns: 1fr;
+  }
+
+  .skeleton-main-result {
+    padding: 16px;
+  }
+
+  .skeleton-emoji {
+    width: 80px !important;
+    height: 80px !important;
+  }
+}
+
+/* ============================================
+   ACCESIBILIDAD
+   ============================================ */
+
+/* Reduce motion para usuarios con preferencias */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton,
+  .skeleton-status-banner {
+    animation: none;
+    background: var(--skeleton-base-color);
+  }
+
+  .skeleton-results {
+    animation: none;
+  }
+}
+
+/* Mejora para lectores de pantalla */
+.skeleton[role="status"],
+.skeleton-card[role="status"],
+.skeleton-results[role="status"] {
+  position: relative;
+}
+
+.skeleton[role="status"]::after,
+.skeleton-card[role="status"]::after,
+.skeleton-results[role="status"]::after {
+  content: attr(aria-label);
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* ============================================
+   ESTADOS Y VARIANTES
+   ============================================ */
+
+/* Skeleton con menor opacidad (secundario) */
+.skeleton-secondary {
+  opacity: 0.6;
+}
+
+/* Skeleton más rápido (interacciones rápidas) */
+.skeleton-fast {
+  animation-duration: 1s;
+}
+
+/* Skeleton más lento (cargas pesadas) */
+.skeleton-slow {
+  animation-duration: 2s;
+}
+
+/* ============================================
+   TRANSICIONES SUAVES
+   ============================================ */
+
+/* Fade out del skeleton cuando aparece contenido real */
+.skeleton-fade-out {
+  animation: fadeOut 0.3s ease-out forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Contenedor que gestiona el intercambio skeleton → contenido */
+.skeleton-container {
+  position: relative;
+  min-height: 100px;
+}
+
+.skeleton-container .skeleton-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 1;
+  transition: opacity 0.3s ease-out;
+}
+
+.skeleton-container .skeleton-content.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.skeleton-container .real-content {
+  opacity: 0;
+  animation: fadeIn 0.4s ease-in 0.2s forwards;
+}
+
+/* ============================================
+   DARK MODE ENHANCEMENTS
+   ============================================ */
+
+.dark-mode .skeleton-card {
+  background: var(--card-bg-dark);
+}
+
+.dark-mode .skeleton-chart-section,
+.dark-mode .skeleton-info-section,
+.dark-mode .skeleton-timeline-section,
+.dark-mode .skeleton-heatmap-section {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
