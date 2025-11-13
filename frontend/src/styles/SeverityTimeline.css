@@ -1,0 +1,479 @@
+/* ===============================
+   SEVERITY TIMELINE
+   =============================== */
+
+.severity-timeline {
+  margin-top: var(--space-xl);
+  padding: var(--space-xl);
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.App.dark-mode .severity-timeline {
+  background: var(--bg-tertiary);
+  border-color: var(--border-dark);
+}
+
+/* ===============================
+   TIMELINE HEADER
+   =============================== */
+.timeline-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.timeline-title {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.timeline-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+  align-self: flex-start;
+}
+
+.App.dark-mode .timeline-status {
+  background: var(--bg-secondary);
+  border-color: var(--border-dark);
+}
+
+.timeline-status.healthy {
+  background: var(--success-light);
+  border-color: var(--success);
+}
+
+.App.dark-mode .timeline-status.healthy {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: var(--success);
+}
+
+.status-icon {
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+.status-text {
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-normal);
+  color: var(--text-secondary);
+}
+
+.status-text strong {
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+}
+
+/* ===============================
+   TIMELINE CONTAINER
+   =============================== */
+.timeline-container {
+  position: relative;
+  padding: var(--space-lg) 0;
+}
+
+/* Línea conectora horizontal */
+.timeline-track {
+  position: absolute;
+  top: 50%;
+  left: 5%;
+  right: 5%;
+  height: 4px;
+  background: var(--gray-200);
+  border-radius: 2px;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.App.dark-mode .timeline-track {
+  background: var(--gray-700);
+}
+
+/* Progreso de la línea */
+.timeline-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.8s ease-out, background-color 0.3s ease;
+  animation: progressGrow 1s ease-out;
+}
+
+@keyframes progressGrow {
+  from {
+    width: 0;
+  }
+}
+
+/* ===============================
+   TIMELINE STAGES
+   =============================== */
+.timeline-stages {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-sm);
+  position: relative;
+  z-index: 2;
+}
+
+.timeline-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  padding: var(--space-md);
+  transition: transform 0.3s ease;
+}
+
+.timeline-stage.active {
+  transform: scale(1.05);
+}
+
+.timeline-stage.disabled {
+  opacity: 0.5;
+}
+
+/* ===============================
+   STAGE MARKER
+   =============================== */
+.stage-marker {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 3px solid #d1d5db;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-md);
+  transition: all 0.4s ease;
+  position: relative;
+  z-index: 3;
+}
+
+.timeline-stage.active .stage-marker {
+  animation: pulseMarker 2s ease-in-out infinite;
+}
+
+@keyframes pulseMarker {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.stage-icon {
+  font-size: 1.8em;
+  line-height: 1;
+  filter: grayscale(0.5);
+  transition: filter 0.3s ease;
+}
+
+.timeline-stage.active .stage-icon,
+.timeline-stage.passed .stage-icon {
+  filter: grayscale(0);
+}
+
+.timeline-stage.future .stage-icon {
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+
+/* ===============================
+   STAGE INFO
+   =============================== */
+.stage-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.stage-label {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: #6b7280;
+  transition: color 0.3s ease;
+}
+
+.timeline-stage.active .stage-label,
+.timeline-stage.passed .stage-label {
+  color: var(--text-primary);
+}
+
+.stage-description {
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-normal);
+  color: var(--text-tertiary);
+}
+
+.stage-range {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  color: var(--text-tertiary);
+  margin-top: var(--space-xs);
+  padding: 2px 8px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.App.dark-mode .stage-range {
+  background: var(--bg-primary);
+}
+
+/* ===============================
+   STAGE BADGE
+   =============================== */
+.stage-badge {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 10px;
+  background: var(--primary);
+  color: white;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  box-shadow: var(--shadow-md);
+  animation: badgeBounce 0.5s ease-out;
+}
+
+@keyframes badgeBounce {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  50% {
+    transform: translateX(-50%) translateY(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ===============================
+   TIMELINE NOTE
+   =============================== */
+.timeline-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--bg-tertiary);
+  border-left: 3px solid var(--primary);
+  border-radius: 6px;
+  margin-top: var(--space-xl);
+}
+
+.App.dark-mode .timeline-note {
+  background: var(--bg-secondary);
+}
+
+.note-icon {
+  font-size: 1.2em;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.note-text {
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-relaxed);
+  color: var(--text-secondary);
+}
+
+/* ===============================
+   RESPONSIVE
+   =============================== */
+@media (max-width: 1024px) {
+  .timeline-stages {
+    gap: var(--space-xs);
+  }
+
+  .timeline-stage {
+    padding: var(--space-sm);
+  }
+
+  .stage-marker {
+    width: 48px;
+    height: 48px;
+  }
+
+  .stage-icon {
+    font-size: 1.5em;
+  }
+
+  .stage-label {
+    font-size: var(--font-size-small);
+  }
+
+  .stage-description {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 768px) {
+  .severity-timeline {
+    padding: var(--space-lg);
+  }
+
+  .timeline-title {
+    font-size: var(--font-size-h4);
+  }
+
+  .timeline-stages {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-lg);
+  }
+
+  .timeline-track {
+    display: none;
+  }
+
+  .timeline-stage {
+    padding: var(--space-md);
+  }
+
+  .stage-marker {
+    width: 52px;
+    height: 52px;
+  }
+
+  .stage-icon {
+    font-size: 1.6em;
+  }
+
+  .stage-label {
+    font-size: var(--font-size-base);
+  }
+
+  .stage-description {
+    font-size: var(--font-size-small);
+  }
+
+  .stage-badge {
+    position: static;
+    transform: none;
+    margin-top: var(--space-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .severity-timeline {
+    padding: var(--space-md);
+  }
+
+  .timeline-header {
+    gap: var(--space-sm);
+  }
+
+  .timeline-title {
+    font-size: var(--font-size-base);
+  }
+
+  .timeline-status {
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  .status-text {
+    font-size: 11px;
+  }
+
+  .timeline-stages {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  .stage-marker {
+    width: 48px;
+    height: 48px;
+  }
+
+  .stage-icon {
+    font-size: 1.5em;
+  }
+
+  .stage-label {
+    font-size: var(--font-size-small);
+  }
+
+  .stage-description {
+    font-size: 11px;
+  }
+
+  .stage-range {
+    font-size: 10px;
+  }
+
+  .timeline-note {
+    padding: var(--space-sm);
+  }
+
+  .note-text {
+    font-size: 11px;
+  }
+}
+
+/* ===============================
+   ANIMATION ENTRANCE
+   =============================== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===============================
+   ACCESSIBILITY
+   =============================== */
+.timeline-stage:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+/* Mejorar visibilidad en modo oscuro */
+.App.dark-mode .stage-marker {
+  border-color: var(--gray-600);
+  background: var(--gray-700);
+}
+
+.App.dark-mode .timeline-stage.future .stage-marker {
+  background: var(--gray-800);
+  border-color: var(--gray-700);
+}

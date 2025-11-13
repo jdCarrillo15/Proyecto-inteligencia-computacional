@@ -1,0 +1,239 @@
+/* ===============================
+   TOP PREDICTIONS CHART
+   =============================== */
+
+.top-predictions-chart {
+  margin-top: var(--space-xl);
+  padding-top: var(--space-xl);
+  border-top: 2px solid var(--border-light);
+}
+
+.App.dark-mode .top-predictions-chart {
+  border-top-color: var(--border-dark);
+}
+
+/* Chart Title */
+.predictions-chart-title {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--space-lg);
+  color: var(--text-primary);
+}
+
+/* Chart Container */
+.recharts-wrapper {
+  font-family: var(--font-body);
+}
+
+/* Y-axis labels styling */
+.recharts-cartesian-axis-tick text {
+  font-family: var(--font-body);
+}
+
+/* Bar styling in dark mode */
+.App.dark-mode .recharts-bar-rectangle {
+  opacity: 0.95;
+}
+
+/* Grid lines */
+.recharts-cartesian-grid-horizontal line {
+  stroke: var(--border-light);
+  opacity: 0.5;
+}
+
+.App.dark-mode .recharts-cartesian-grid-horizontal line {
+  stroke: var(--border-dark);
+  opacity: 0.3;
+}
+
+/* ===============================
+   CUSTOM TOOLTIP
+   =============================== */
+.top-predictions-tooltip {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: var(--space-md);
+  box-shadow: var(--shadow-lg);
+  max-width: 280px;
+  animation: tooltipFadeIn 0.2s ease-out;
+}
+
+.App.dark-mode .top-predictions-tooltip {
+  background: var(--bg-secondary);
+  border-color: var(--border-dark);
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Tooltip Header */
+.tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.tooltip-emoji {
+  font-size: 1.5em;
+  line-height: 1;
+}
+
+.tooltip-title {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+/* Tooltip Value */
+.tooltip-value {
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-normal);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-xs);
+}
+
+.tooltip-value strong {
+  color: var(--primary);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Tooltip Badge */
+.tooltip-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  margin-top: var(--space-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* ===============================
+   CHART NOTE
+   =============================== */
+.predictions-chart-note {
+  margin-top: var(--space-lg);
+  padding: var(--space-md);
+  background: var(--bg-tertiary);
+  border-left: 3px solid var(--primary);
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-relaxed);
+  color: var(--text-secondary);
+}
+
+.App.dark-mode .predictions-chart-note {
+  background: var(--bg-secondary);
+  border-left-color: var(--primary);
+}
+
+/* ===============================
+   RESPONSIVE
+   =============================== */
+@media (max-width: 768px) {
+  .predictions-chart-title {
+    font-size: var(--font-size-h4);
+    margin-bottom: var(--space-md);
+  }
+
+  .top-predictions-chart .recharts-wrapper {
+    margin-left: -20px;
+  }
+
+  .predictions-chart-note {
+    font-size: 11px;
+    padding: var(--space-sm);
+  }
+
+  /* Reducir margen izquierdo en mobile */
+  .recharts-surface {
+    overflow: visible;
+  }
+}
+
+@media (max-width: 480px) {
+  .predictions-chart-title {
+    font-size: var(--font-size-base);
+  }
+
+  .top-predictions-chart {
+    padding-top: var(--space-lg);
+  }
+
+  /* Ajustar tooltip en pantallas pequeñas */
+  .top-predictions-tooltip {
+    max-width: 240px;
+    padding: var(--space-sm);
+  }
+
+  .tooltip-title {
+    font-size: var(--font-size-small);
+  }
+
+  .tooltip-value {
+    font-size: 11px;
+  }
+
+  .predictions-chart-note {
+    font-size: 10px;
+  }
+}
+
+/* ===============================
+   ANIMATION ENTRANCE
+   =============================== */
+.top-predictions-chart {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===============================
+   ACCESSIBILITY
+   =============================== */
+.recharts-surface:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Mejorar contraste en modo oscuro */
+.App.dark-mode .recharts-text {
+  fill: var(--text-secondary);
+}
+
+.App.dark-mode .recharts-cartesian-axis-line,
+.App.dark-mode .recharts-cartesian-axis-tick-line {
+  stroke: var(--border-dark);
+}

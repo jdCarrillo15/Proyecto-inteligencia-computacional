@@ -1,7 +1,19 @@
 /* Imports de estilos modulares */
+@import './styles/typography.css';
+@import './styles/colors.css';
+@import './styles/shadows.css';
+@import './styles/grid.css';
+@import './styles/cards.css';
 @import './styles/base.css';
 @import './styles/Header.css';
 @import './styles/Footer.css';
 @import './styles/ImageUpload.css';
 @import './styles/InfoCards.css';
 @import './styles/PredictionResults.css';
+@import './styles/ConfidenceRadialChart.css';
+@import './styles/TopPredictionsChart.css';
+@import './styles/SeverityTimeline.css';
+@import './styles/LeafDamageHeatmap.css';
+@import './styles/StatCards.css';
+@import './styles/SkeletonLoaders.css';
+@import './styles/ProgressStepper.css';

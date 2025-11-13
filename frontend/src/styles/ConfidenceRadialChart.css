@@ -1,0 +1,119 @@
+/* ===============================
+   CONFIDENCE RADIAL CHART
+   =============================== */
+
+.confidence-radial-chart {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-md);
+}
+
+.radial-chart-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Texto central superpuesto */
+.radial-chart-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* Porcentaje grande */
+.confidence-percentage {
+  font-family: var(--font-heading);
+  font-size: 36px;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/* Label "Confianza" */
+.confidence-label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.App.dark-mode .confidence-label {
+  color: var(--text-secondary);
+}
+
+/* Nivel de confianza (Alta/Media/Baja) */
+.confidence-level {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: var(--space-xs);
+}
+
+/* Animación de entrada */
+.confidence-radial-chart {
+  animation: scaleIn 0.5s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Background del radial bar en modo oscuro */
+.App.dark-mode .recharts-radial-bar-background-sector {
+  fill: var(--bg-tertiary);
+  opacity: 0.3;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .confidence-radial-chart {
+    padding: var(--space-sm);
+  }
+  
+  .confidence-percentage {
+    font-size: 32px;
+  }
+  
+  .confidence-label {
+    font-size: 11px;
+  }
+  
+  .confidence-level {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .confidence-percentage {
+    font-size: 28px;
+  }
+  
+  .confidence-label {
+    font-size: 10px;
+  }
+  
+  .confidence-level {
+    font-size: 9px;
+  }
+}

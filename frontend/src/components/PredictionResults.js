@@ -4,13 +4,16 @@ import {
   isHealthy, 
   getHealthStatus, 
   getSeverityLevel,
-  getConfidenceColor,
   getDiseaseInfo,
   getPlantType,
   getHealthyClassName,
   getResourceLinks,
   getResourceIcon
 } from '../utils/diseaseHelpers';
+import ConfidenceRadialChart from './ConfidenceRadialChart';
+import TopPredictionsChart from './TopPredictionsChart';
+import SeverityTimeline from './SeverityTimeline';
+import LeafDamageHeatmap from './LeafDamageHeatmap';
 
 const PredictionResults = ({ prediction }) => {
   const [showComparison, setShowComparison] = useState(false);
@@ -98,50 +101,34 @@ const PredictionResults = ({ prediction }) => {
           )}
         </div>
 
-        <div className="confidence-container">
-          <div className="confidence-label">Confianza del Modelo</div>
-          <div 
-            className="confidence-value"
-            style={{ color: getConfidenceColor(prediction.confidence) }}
-          >
-            {prediction.confidence_percentage}%
-          </div>
-          <div className="confidence-bar">
-            <div 
-              className="confidence-fill"
-              style={{ 
-                width: `${prediction.confidence * 100}%`,
-                backgroundColor: getConfidenceColor(prediction.confidence)
-              }}
-            />
-          </div>
-        </div>
+        {/* Gráfica Radial de Confianza */}
+        <ConfidenceRadialChart 
+          confidence={prediction.confidence_percentage}
+          size={180}
+        />
       </div>
 
-      {/* Todas las Predicciones */}
-      <div className="all-predictions">
-        <h4 className="predictions-title">📊 Todas las Predicciones</h4>
-        {prediction.all_predictions.map((pred, index) => (
-          <div key={index} className="prediction-item">
-            <div className="prediction-label">
-              <span className="prediction-emoji">{getDiseaseEmoji(pred.class)}</span>
-              <span className="prediction-class">
-                {pred.class.charAt(0).toUpperCase() + pred.class.slice(1)}
-              </span>
-            </div>
-            <div className="prediction-bar-container">
-              <div 
-                className="prediction-bar"
-                style={{ 
-                  width: `${pred.probability * 100}%`,
-                  backgroundColor: index === 0 ? getConfidenceColor(pred.probability) : '#e5e7eb'
-                }}
-              />
-            </div>
-            <div className="prediction-percentage">{pred.percentage}%</div>
-          </div>
-        ))}
-      </div>
+      {/* Top 5 Predicciones - Bar Chart Horizontal */}
+      <TopPredictionsChart 
+        predictions={prediction.all_predictions}
+        maxPredictions={5}
+      />
+
+      {/* Timeline de Severidad */}
+      {!isHealthy(prediction.predicted_class) && (
+        <SeverityTimeline 
+          severityLevel={getSeverityLevel(prediction.predicted_class, prediction.confidence).level}
+          confidence={prediction.confidence_percentage}
+        />
+      )}
+
+      {/* Heatmap de Área Afectada */}
+      {!isHealthy(prediction.predicted_class) && (
+        <LeafDamageHeatmap 
+          diseaseName={prediction.predicted_class}
+          confidence={prediction.confidence_percentage}
+        />
+      )}
 
       {/* Información de Enfermedad */}
       {!isHealthy(prediction.predicted_class) && diseaseData && (

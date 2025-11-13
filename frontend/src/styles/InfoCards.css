@@ -1,26 +1,34 @@
-/* Info Cards (TipsCard, SystemInfoCard) */
+/* Info Cards (TipsCard, SystemInfoCard) - Usando sistema de cards */
 .info-card {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  color: white;
-  border-radius: 15px;
-  padding: 25px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  /* Usa card-glass del nuevo sistema */
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text-primary);
+  border-radius: 16px;
+  padding: var(--padding-card);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
   animation: slideUp 0.6s ease-out;
 }
 
 .App.dark-mode .info-card {
-  background: #1f2937;
-  color: #e5e7eb;
+  background: rgba(30, 41, 59, 0.7);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
 }
 
 .info-card h3 {
-  font-size: 1.3em;
-  margin-bottom: 15px;
-  font-weight: 600;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--space-md);
 }
 
 .App.dark-mode .info-card h3 {
-  color: #f9fafb;
+  color: var(--text-primary);
 }
 
 .info-list {
@@ -29,9 +37,11 @@
 }
 
 .info-list li {
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  font-size: 0.95em;
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid hsl(0, 0%, 100%, 0.2);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
 }
 
 .info-list li:last-child {
@@ -39,17 +49,21 @@
 }
 
 .App.dark-mode .info-list li {
-  color: #d1d5db;
-  border-bottom-color: rgba(75, 85, 99, 0.5);
+  color: var(--text-secondary);
+  border-bottom-color: var(--border-light);
 }
 
-/* Tips Card specific */
+/* Tips Card specific - Glass card variant */
 .tips-card {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  background: rgba(99, 102, 241, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(99, 102, 241, 0.3);
 }
 
 .App.dark-mode .tips-card {
-  background: linear-gradient(135deg, #92400e 0%, #78350f 100%);
+  background: rgba(99, 102, 241, 0.05);
+  border-color: rgba(99, 102, 241, 0.2);
 }
 
 .tips-list {
@@ -62,7 +76,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid hsl(0, 0%, 100%, 0.2);
 }
 
 .tip-item:last-child {
@@ -75,10 +89,12 @@
 }
 
 .tip-text {
-  font-size: 0.95em;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
   flex: 1;
 }
 
 .App.dark-mode .tip-text {
-  color: #d1d5db;
+  color: var(--text-secondary);
 }

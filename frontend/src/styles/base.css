@@ -19,12 +19,12 @@
 }
 
 *:focus-visible {
-  outline: 3px solid #3b82f6;
+  outline: 3px solid var(--info);
   outline-offset: 2px;
 }
 
 .App.dark-mode *:focus-visible {
-  outline-color: #60a5fa;
+  outline-color: var(--info-dark);
 }
 
 /* Animaciones */
@@ -71,66 +71,44 @@
 /* App Container */
 .App {
   min-height: 100vh;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  padding: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  background: var(--gradient-primary);
+  padding: var(--space-lg);
+  font-family: var(--font-body);
   transition: background 0.3s ease;
 }
 
 .App.dark-mode {
-  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  background: var(--gradient-primary);
 }
 
 .container {
-  max-width: 1400px;
+  max-width: var(--container-max-width);
   margin: 0 auto;
+  padding-left: var(--container-padding);
+  padding-right: var(--container-padding);
 }
 
 .main-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  margin-bottom: 30px;
+  gap: var(--gap-lg);
+  margin-bottom: var(--margin-section-lg);
 }
 
 @media (max-width: 1024px) {
   .main-content {
     grid-template-columns: 1fr;
+    gap: var(--gap-md);
   }
 }
 
-/* Cards base */
-.card {
-  background: white;
-  border-radius: 20px;
-  padding: 30px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  animation: slideUp 0.5s ease-out;
-}
-
-.App.dark-mode .card {
-  background: #1f2937;
-  color: #e5e7eb;
-}
-
-.card-title {
-  font-size: 1.5em;
-  margin-bottom: 20px;
-  color: #333;
-  font-weight: 600;
-}
-
-.App.dark-mode .card-title {
-  color: #f9fafb;
-}
+/* Cards - Definiciones movidas a cards.css */
 
 /* Sections */
 .upload-section {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--gap-md);
 }
 
 .results-section {
@@ -146,22 +124,22 @@
 }
 
 .alert-error {
-  background: #fee2e2;
-  color: #991b1b;
-  border: 2px solid #fecaca;
+  background: var(--danger-light);
+  color: var(--danger-text);
+  border: 2px solid var(--danger-border);
 }
 
 .App.dark-mode .alert-error {
-  background: #7f1d1d;
-  color: #fecaca;
-  border-color: #991b1b;
+  background: var(--danger-dark);
+  color: var(--danger-light);
+  border-color: var(--danger-border);
 }
 
 /* Buttons */
 .button-group {
   display: flex;
-  gap: 15px;
-  margin-top: 20px;
+  gap: var(--gap-sm);
+  margin-top: var(--space-lg);
   flex-wrap: wrap;
 }
 
@@ -170,42 +148,46 @@
   padding: 15px 30px;
   border: none;
   border-radius: 12px;
-  font-size: 1.1em;
-  font-weight: 600;
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-normal);
   cursor: pointer;
   transition: all 0.3s ease;
   min-width: 200px;
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
+  background: var(--gradient-success);
+  color: var(--text-on-primary);
 }
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-secondary {
-  background: #e5e7eb;
-  color: #1f2937;
-  border: 2px solid #9ca3af;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 2px solid var(--border-medium);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #d1d5db;
-  border-color: #6b7280;
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
   transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
 }
 
 .App.dark-mode .btn-secondary {
-  background: #374151;
-  color: #e5e7eb;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
 .App.dark-mode .btn-secondary:hover:not(:disabled) {
-  background: #4b5563;
+  background: var(--bg-hover);
 }
 
 .btn:disabled {
@@ -214,7 +196,7 @@
 }
 
 .btn:focus-visible {
-  outline: 3px solid #3b82f6;
+  outline: 3px solid var(--info);
   outline-offset: 2px;
 }
 

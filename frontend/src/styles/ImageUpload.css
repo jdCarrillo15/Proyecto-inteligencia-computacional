@@ -1,12 +1,14 @@
-/* ImageUpload Styles */
+/* ImageUpload Styles - Usando card-primary variant */
 .upload-area {
-  border: 3px dashed #10b981;
-  border-radius: 15px;
-  padding: 40px 20px;
-  margin: 20px 0;
+  /* Card interactivo con estados del nuevo sistema */
+  border: 3px dashed var(--primary-500);
+  border-radius: 16px;
+  padding: var(--space-2xl) var(--space-lg);
+  margin: var(--space-lg) 0;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: #f0fdf4;
+  background: var(--primary-50);
+  box-shadow: var(--shadow-md);
   min-height: 300px;
   display: flex;
   flex-direction: column;
@@ -15,32 +17,34 @@
 }
 
 .upload-area:hover {
-  border-color: #059669;
-  background: #dcfce7;
+  border-color: var(--primary-600);
+  background: var(--primary-100);
+  box-shadow: var(--shadow-lg);
   transform: translateY(-2px);
 }
 
 .upload-area.drag-active {
-  border-color: #059669;
-  background: #bbf7d0;
-  transform: scale(1.02);
+  border-color: var(--primary-600);
+  background: var(--primary-200);
+  box-shadow: var(--shadow-xl);
+  transform: scale(0.98);
 }
 
 .App.dark-mode .upload-area {
-  background: #374151;
-  border-color: #10b981;
+  background: var(--bg-tertiary);
+  border-color: var(--primary-500);
 }
 
 .App.dark-mode .upload-area:hover {
-  background: #4b5563;
+  background: var(--bg-hover);
 }
 
 .App.dark-mode .upload-area.drag-active {
-  background: #6b7280;
+  background: var(--bg-active);
 }
 
 .upload-area:focus-visible {
-  outline: 3px solid #3b82f6;
+  outline: 3px solid var(--info);
   outline-offset: 2px;
 }
 
@@ -50,34 +54,40 @@
 }
 
 .upload-text {
-  font-size: 1.3em;
-  color: #059669;
+  font-family: var(--font-body);
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  color: var(--primary-600);
   margin-bottom: 8px;
-  font-weight: 600;
 }
 
 .App.dark-mode .upload-text {
-  color: #10b981;
+  color: var(--primary-500);
 }
 
 .upload-subtext {
-  color: #4b5563;
-  font-size: 1em;
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+  color: var(--text-secondary);
   margin-bottom: 10px;
 }
 
 .App.dark-mode .upload-subtext {
-  color: #d1d5db;
+  color: var(--text-secondary);
 }
 
 .upload-formats {
-  color: #6b7280;
-  font-size: 0.85em;
-  margin-top: 10px;
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-normal);
+  color: var(--text-tertiary);
+  margin-top: var(--space-sm);
 }
 
 .App.dark-mode .upload-formats {
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .preview-container {
@@ -87,14 +97,14 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: var(--space-sm);
 }
 
 .preview-image {
   max-width: 100%;
   max-height: 300px;
   border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-md);
   transition: transform 0.3s ease;
   cursor: pointer;
 }
@@ -107,10 +117,10 @@
 
 .zoom-hint {
   font-size: 0.9em;
-  color: #6b7280;
+  color: var(--text-tertiary);
   margin-top: 10px;
 }
 
 .App.dark-mode .zoom-hint {
-  color: #9ca3af;
+  color: var(--text-muted);
 }

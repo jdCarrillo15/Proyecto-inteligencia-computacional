@@ -1,0 +1,463 @@
+/* ===============================
+   LEAF DAMAGE HEATMAP
+   =============================== */
+
+.leaf-damage-heatmap {
+  margin-top: var(--space-xl);
+  padding: var(--space-xl);
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.App.dark-mode .leaf-damage-heatmap {
+  background: var(--bg-tertiary);
+  border-color: var(--border-dark);
+}
+
+/* ===============================
+   HEATMAP HEADER
+   =============================== */
+.heatmap-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.heatmap-title {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Damage Stats */
+.damage-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-md);
+  background: var(--bg-tertiary);
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+}
+
+.App.dark-mode .damage-stats {
+  background: var(--bg-secondary);
+  border-color: var(--border-dark);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.stat-label {
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-value {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+.stat-badge {
+  display: inline-flex;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: 6px;
+  border: 1.5px solid;
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 40px;
+  background: var(--border-light);
+}
+
+.App.dark-mode .stat-divider {
+  background: var(--border-dark);
+}
+
+/* ===============================
+   HEATMAP VISUALIZATION
+   =============================== */
+.heatmap-visualization {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-lg);
+  background: var(--bg-primary);
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+}
+
+.App.dark-mode .heatmap-visualization {
+  background: var(--bg-secondary);
+  border-color: var(--border-dark);
+}
+
+/* Leaf SVG */
+.leaf-svg {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.15));
+  animation: leafFloat 3s ease-in-out infinite;
+}
+
+.App.dark-mode .leaf-svg {
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.4));
+}
+
+@keyframes leafFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+}
+
+/* Leaf Shape */
+.leaf-shape {
+  transition: all 0.3s ease;
+}
+
+.leaf-shape:hover {
+  filter: brightness(1.05);
+}
+
+/* Leaf Veins */
+.leaf-vein {
+  transition: opacity 0.3s ease;
+}
+
+.leaf-svg:hover .leaf-vein {
+  opacity: 0.8 !important;
+}
+
+/* Damage Spots */
+.damage-spot {
+  animation: pulseDamage 2s ease-in-out infinite;
+}
+
+@keyframes pulseDamage {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+}
+
+/* ===============================
+   HEATMAP LEGEND
+   =============================== */
+.heatmap-legend {
+  display: flex;
+  gap: var(--space-lg);
+  padding: var(--space-md);
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+}
+
+.App.dark-mode .heatmap-legend {
+  background: var(--bg-primary);
+  border-color: var(--border-dark);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: var(--shadow-sm);
+}
+
+.App.dark-mode .legend-color {
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+.legend-label {
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  color: var(--text-secondary);
+}
+
+/* ===============================
+   HEATMAP INFO
+   =============================== */
+.heatmap-info {
+  margin-top: var(--space-lg);
+}
+
+.info-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+}
+
+.App.dark-mode .info-card {
+  background: var(--bg-secondary);
+  border-color: var(--border-dark);
+}
+
+.info-icon {
+  font-size: 1.5em;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.info-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  flex: 1;
+}
+
+.info-label {
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-normal);
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.info-value {
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  color: var(--text-primary);
+}
+
+/* ===============================
+   HEATMAP NOTE
+   =============================== */
+.heatmap-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--bg-tertiary);
+  border-left: 3px solid var(--primary);
+  border-radius: 6px;
+  margin-top: var(--space-lg);
+}
+
+.App.dark-mode .heatmap-note {
+  background: var(--bg-secondary);
+}
+
+.note-icon {
+  font-size: 1.2em;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.note-text {
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-relaxed);
+  color: var(--text-secondary);
+}
+
+/* ===============================
+   RESPONSIVE
+   =============================== */
+@media (max-width: 768px) {
+  .leaf-damage-heatmap {
+    padding: var(--space-lg);
+  }
+
+  .heatmap-title {
+    font-size: var(--font-size-h4);
+  }
+
+  .damage-stats {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-md);
+  }
+
+  .stat-divider {
+    display: none;
+  }
+
+  .stat-value {
+    font-size: var(--font-size-h3);
+  }
+
+  .heatmap-visualization {
+    padding: var(--space-md);
+  }
+
+  .leaf-svg {
+    max-width: 250px;
+  }
+
+  .heatmap-legend {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .info-card {
+    padding: var(--space-sm);
+  }
+
+  .info-icon {
+    font-size: 1.3em;
+  }
+}
+
+@media (max-width: 480px) {
+  .leaf-damage-heatmap {
+    padding: var(--space-md);
+  }
+
+  .heatmap-header {
+    gap: var(--space-sm);
+  }
+
+  .heatmap-title {
+    font-size: var(--font-size-base);
+  }
+
+  .damage-stats {
+    padding: var(--space-sm);
+  }
+
+  .stat-label {
+    font-size: 11px;
+  }
+
+  .stat-value {
+    font-size: var(--font-size-h4);
+  }
+
+  .stat-badge {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+
+  .leaf-svg {
+    max-width: 200px;
+  }
+
+  .heatmap-legend {
+    padding: var(--space-sm);
+  }
+
+  .legend-color {
+    width: 16px;
+    height: 16px;
+  }
+
+  .legend-label {
+    font-size: 11px;
+  }
+
+  .info-label {
+    font-size: 11px;
+  }
+
+  .info-value {
+    font-size: var(--font-size-small);
+  }
+
+  .heatmap-note {
+    padding: var(--space-sm);
+  }
+
+  .note-text {
+    font-size: 11px;
+  }
+}
+
+/* ===============================
+   ANIMATION ENTRANCE
+   =============================== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===============================
+   ACCESSIBILITY
+   =============================== */
+.leaf-svg:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+/* Mejorar contraste en modo oscuro */
+.App.dark-mode .leaf-shape {
+  stroke: #059669;
+}
+
+.App.dark-mode .info-value {
+  color: var(--text-primary);
+}
+
+/* ===============================
+   PRINT STYLES
+   =============================== */
+@media print {
+  .leaf-damage-heatmap {
+    break-inside: avoid;
+    box-shadow: none;
+  }
+
+  .leaf-svg {
+    animation: none;
+  }
+
+  .damage-spot {
+    animation: none;
+  }
+}

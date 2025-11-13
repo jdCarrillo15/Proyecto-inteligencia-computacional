@@ -1,0 +1,190 @@
+/* ===============================
+   SISTEMA DE TIPOGRAFÍA MODERNA
+   Inter para UI/Body | Poppins para Headings
+   =============================== */
+
+/* ===== IMPORTACIÓN DE FUENTES ===== */
+/* Inter - UI y body text */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Poppins - Headings */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap');
+
+/* ===== VARIABLES TIPOGRÁFICAS ===== */
+:root {
+  /* ===== FAMILIAS DE FUENTES ===== */
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --font-heading: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --font-mono: 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+
+  /* ===== ESCALA TIPOGRÁFICA ===== */
+  /* Tamaños de fuente */
+  --font-size-display: 3.5rem;    /* 56px - Títulos principales */
+  --font-size-h1: 2.5rem;         /* 40px - Secciones importantes */
+  --font-size-h2: 2rem;           /* 32px - Cards principales */
+  --font-size-h3: 1.5rem;         /* 24px - Subsecciones */
+  --font-size-h4: 1.25rem;        /* 20px - Subtítulos */
+  --font-size-body: 1rem;         /* 16px - Texto base */
+  --font-size-small: 0.875rem;    /* 14px - Metadatos */
+  --font-size-xs: 0.75rem;        /* 12px - Footnotes */
+
+  /* ===== LINE HEIGHTS ===== */
+  --line-height-tight: 1.2;       /* Headings */
+  --line-height-normal: 1.5;      /* Body text */
+  --line-height-relaxed: 1.75;    /* Long form content */
+
+  /* ===== FONT WEIGHTS ===== */
+  --font-weight-normal: 400;      /* Regular text */
+  --font-weight-medium: 500;      /* Emphasis */
+  --font-weight-semibold: 600;    /* Strong emphasis */
+  --font-weight-bold: 700;        /* Headings */
+
+  /* ===== LETTER SPACING ===== */
+  --letter-spacing-tight: -0.02em;   /* Headings grandes */
+  --letter-spacing-normal: 0;         /* Body text */
+  --letter-spacing-wide: 0.05em;      /* Uppercase text */
+}
+
+/* ===== RESPONSIVE TYPOGRAPHY ===== */
+@media (max-width: 768px) {
+  :root {
+    --font-size-display: 2.5rem;    /* 40px en tablet */
+    --font-size-h1: 2rem;           /* 32px en tablet */
+    --font-size-h2: 1.75rem;        /* 28px en tablet */
+    --font-size-h3: 1.25rem;        /* 20px en tablet */
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --font-size-display: 2rem;      /* 32px en móvil */
+    --font-size-h1: 1.75rem;        /* 28px en móvil */
+    --font-size-h2: 1.5rem;         /* 24px en móvil */
+    --font-size-h3: 1.125rem;       /* 18px en móvil */
+  }
+}
+
+/* ===== CLASES BASE DE TIPOGRAFÍA ===== */
+body {
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-normal);
+  font-weight: var(--font-weight-normal);
+  letter-spacing: var(--letter-spacing-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ===== HEADINGS ===== */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: var(--font-heading);
+  line-height: var(--line-height-tight);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tight);
+  margin-top: 0;
+  margin-bottom: 0.5em;
+}
+
+h1, .h1 {
+  font-size: var(--font-size-h1);
+}
+
+h2, .h2 {
+  font-size: var(--font-size-h2);
+}
+
+h3, .h3 {
+  font-size: var(--font-size-h3);
+}
+
+h4, .h4 {
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ===== DISPLAY TEXT ===== */
+.display {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-display);
+  line-height: var(--line-height-tight);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+/* ===== BODY TEXT VARIANTS ===== */
+.text-body {
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-normal);
+}
+
+.text-small {
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-normal);
+}
+
+.text-xs {
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+}
+
+/* ===== FONT WEIGHT UTILITIES ===== */
+.font-normal {
+  font-weight: var(--font-weight-normal);
+}
+
+.font-medium {
+  font-weight: var(--font-weight-medium);
+}
+
+.font-semibold {
+  font-weight: var(--font-weight-semibold);
+}
+
+.font-bold {
+  font-weight: var(--font-weight-bold);
+}
+
+/* ===== LINE HEIGHT UTILITIES ===== */
+.leading-tight {
+  line-height: var(--line-height-tight);
+}
+
+.leading-normal {
+  line-height: var(--line-height-normal);
+}
+
+.leading-relaxed {
+  line-height: var(--line-height-relaxed);
+}
+
+/* ===== LETTER SPACING UTILITIES ===== */
+.tracking-tight {
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.tracking-normal {
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+.tracking-wide {
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+/* ===== TEXT TRANSFORM ===== */
+.uppercase {
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+/* ===== MONOSPACE ===== */
+code, kbd, pre, samp {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
