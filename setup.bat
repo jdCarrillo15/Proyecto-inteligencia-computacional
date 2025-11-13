@@ -89,11 +89,11 @@ echo.
 echo Siguiente paso: Entrenar el modelo
 echo.
 echo Opciones disponibles:
-echo   1. Entrenamiento rápido con PKL:
+echo   1. Entrenamiento con batch:
 echo      ^> train-fast.bat
 echo.
 echo   2. Manual con Python:
-echo      ^> python backend\scripts\quick_train.py
+echo      ^> python backend\scripts\train.py
 echo.
 echo Documentación:
 echo   - ENTRENAMIENTO_RAPIDO.md  ^(guía de uso^)

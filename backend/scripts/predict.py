@@ -91,23 +91,33 @@ def predict_image(model, class_names, image_path, show_all=False):
     predicted_class_idx = np.argmax(predictions[0])
     confidence = predictions[0][predicted_class_idx]
     
-    # Emojis
-    fruit_emojis = {
-        'manzana': '🍎',
-        'banano': '🍌',
-        'mango': '🥭',
-        'naranja': '🍊',
-        'pera': '🍐'
+    # Emojis por tipo de enfermedad (sincronizado con frontend)
+    disease_emojis = {
+        'Apple___Apple_scab': '🍎🟤',
+        'Apple___Black_rot': '🍎⚫',
+        'Apple___Cedar_apple_rust': '🍎🦠',
+        'Apple___healthy': '🍎🌿',
+        'Corn_(maize)___Common_rust_': '🌽🟤',
+        'Corn_(maize)___healthy': '🌽🌿',
+        'Corn_(maize)___Northern_Leaf_Blight': '🌽🍄',
+        'Potato___Early_blight': '🥔🟤',
+        'Potato___healthy': '🥔🌿',
+        'Potato___Late_blight': '🥔🍄',
+        'Tomato___Bacterial_spot': '🍅🦠',
+        'Tomato___Early_blight': '🍅🟤',
+        'Tomato___healthy': '🍅🌿',
+        'Tomato___Late_blight': '🍅🍄',
+        'Tomato___Leaf_Mold': '🍅🟢'
     }
     
     # Mostrar resultado principal
     predicted_class = class_names[predicted_class_idx]
-    emoji = fruit_emojis.get(predicted_class, '🍓')
+    emoji = disease_emojis.get(predicted_class, '🌿')
     
     print("\n" + "=" * 60)
     print("RESULTADO DE LA PREDICCIÓN")
     print("=" * 60)
-    print(f"\n{emoji}  Fruta detectada: {predicted_class.upper()}")
+    print(f"\n{emoji}  Enfermedad detectada: {predicted_class}")
     print(f"📊 Confianza: {confidence * 100:.2f}%")
     
     # Mostrar todas las predicciones si se solicita
@@ -123,11 +133,11 @@ def predict_image(model, class_names, image_path, show_all=False):
         
         all_preds.sort(key=lambda x: x[1], reverse=True)
         
-        for fruit, prob in all_preds:
-            emoji = fruit_emojis.get(fruit, '🍓')
+        for disease, prob in all_preds:
+            emoji = disease_emojis.get(disease, '🌿')
             bar_length = int(prob * 40)
             bar = '█' * bar_length + '░' * (40 - bar_length)
-            print(f"{emoji} {fruit:10s} {bar} {prob * 100:6.2f}%")
+            print(f"{emoji} {disease:45s} {bar} {prob * 100:6.2f}%")
     
     print("=" * 60 + "\n")
 
@@ -135,27 +145,27 @@ def predict_image(model, class_names, image_path, show_all=False):
 def main():
     """Función principal."""
     parser = argparse.ArgumentParser(
-        description='Clasificador de Frutas - Predicción desde línea de comandos',
+        description='Clasificador de Enfermedades de Plantas - Predicción desde línea de comandos',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Ejemplos de uso:
-  python predict.py imagen.jpg
-  python predict.py imagen.jpg --all
-  python predict.py imagen.jpg --model models/best_model.h5 --all
+  python backend/scripts/predict.py dataset/raw/test/AppleScab1.JPG
+  python backend/scripts/predict.py dataset/raw/test/TomatoHealthy1.JPG --all
+  python backend/scripts/predict.py imagen.jpg --model models/best_model.keras --all
         """
     )
     
     parser.add_argument(
         'image',
         type=str,
-        help='Ruta a la imagen de fruta a clasificar'
+        help='Ruta a la imagen de planta a clasificar'
     )
     
     parser.add_argument(
         '--model',
         type=str,
-        default='models/fruit_classifier.h5',
-        help='Ruta al modelo entrenado (default: models/fruit_classifier.h5)'
+        default='models/fruit_classifier.keras',
+        help='Ruta al modelo entrenado (default: models/fruit_classifier.keras)'
     )
     
     parser.add_argument(
@@ -171,7 +181,7 @@ Ejemplos de uso:
         print(f"❌ Error: No se encontró la imagen '{args.image}'")
         sys.exit(1)
     
-    print("\n🍎 CLASIFICADOR DE FRUTAS - CNN 🍌")
+    print("\n🌿 CLASIFICADOR DE ENFERMEDADES DE PLANTAS - CNN 🔬")
     print("=" * 60)
     print(f"📁 Imagen: {args.image}")
     print(f"🧠 Modelo: {args.model}")
