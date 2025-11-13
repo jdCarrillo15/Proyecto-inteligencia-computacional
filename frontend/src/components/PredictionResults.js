@@ -4,7 +4,6 @@ import {
   isHealthy, 
   getHealthStatus, 
   getSeverityLevel,
-  getConfidenceColor,
   getDiseaseInfo,
   getPlantType,
   getHealthyClassName,

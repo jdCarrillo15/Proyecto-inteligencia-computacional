@@ -10,6 +10,7 @@ import SystemInfoCard from './components/SystemInfoCard';
 import PredictionResults from './components/PredictionResults';
 import PredictionSkeleton from './components/SkeletonLoaders';
 import ProgressStepper from './components/ProgressStepper';
+import StatCards from './components/StatCards';
 
 // Utilidades
 import { predictDisease } from './utils/api';
