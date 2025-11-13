@@ -13,6 +13,7 @@ import {
 } from '../utils/diseaseHelpers';
 import ConfidenceRadialChart from './ConfidenceRadialChart';
 import TopPredictionsChart from './TopPredictionsChart';
+import SeverityTimeline from './SeverityTimeline';
 
 const PredictionResults = ({ prediction }) => {
   const [showComparison, setShowComparison] = useState(false);
@@ -112,6 +113,14 @@ const PredictionResults = ({ prediction }) => {
         predictions={prediction.all_predictions}
         maxPredictions={5}
       />
+
+      {/* Timeline de Severidad */}
+      {!isHealthy(prediction.predicted_class) && (
+        <SeverityTimeline 
+          severityLevel={getSeverityLevel(prediction.predicted_class, prediction.confidence).level}
+          confidence={prediction.confidence_percentage}
+        />
+      )}
 
       {/* Información de Enfermedad */}
       {!isHealthy(prediction.predicted_class) && diseaseData && (
