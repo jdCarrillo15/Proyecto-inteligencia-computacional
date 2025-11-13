@@ -117,12 +117,12 @@ function App() {
       <div className="container">
         <header className="header">
           <h1 className="title">
-            <span className="emoji">🍎</span>
-            Clasificador de Frutas
-            <span className="emoji">🍌</span>
+            <span className="emoji">🌱</span>
+            Detector de Enfermedades en Plantas
+            <span className="emoji">🔬</span>
           </h1>
           <p className="subtitle">
-            Inteligencia Artificial con CNN | Sube una imagen para identificar la fruta
+            Sistema de diagnóstico agrícola con CNN | Proyecto académico para fitopatología
           </p>
         </header>
 
@@ -181,7 +181,7 @@ function App() {
                         className="btn btn-primary"
                         disabled={loading}
                       >
-                        {loading ? '🔄 Analizando...' : '🔍 Clasificar Fruta'}
+                        {loading ? '🔄 Analizando...' : '🔍 Detectar Enfermedad'}
                       </button>
                       <button
                         type="button"
@@ -202,7 +202,7 @@ function App() {
               <h3>ℹ️ Información</h3>
               <ul className="info-list">
                 <li>Modelo CNN entrenado con TensorFlow</li>
-                <li>Clasifica 5 tipos de frutas</li>
+                <li>Detecta enfermedades en cultivos</li>
                 <li>Precisión del modelo: ~95%</li>
                 <li>Tiempo de predicción: &lt;1 segundo</li>
               </ul>
@@ -278,13 +278,12 @@ function App() {
                 <div className="placeholder-content">
                   <div className="placeholder-icon">🎯</div>
                   <h3>Esperando imagen...</h3>
-                  <p>Sube una foto de una fruta para comenzar la clasificación</p>
+                  <p>Sube una foto de una hoja de planta para comenzar el diagnóstico</p>
                   <div className="supported-fruits">
                     <div className="fruit-chip">🍎 Manzana</div>
-                    <div className="fruit-chip">🍌 Banano</div>
-                    <div className="fruit-chip">🥭 Mango</div>
-                    <div className="fruit-chip">🍊 Naranja</div>
-                    <div className="fruit-chip">🍐 Pera</div>
+                    <div className="fruit-chip">🌽 Maíz</div>
+                    <div className="fruit-chip">🥔 Papa</div>
+                    <div className="fruit-chip">🍅 Tomate</div>
                   </div>
                 </div>
               </div>
@@ -294,7 +293,7 @@ function App() {
 
         <footer className="footer">
           <p>🎓 Proyecto Inteligencia Computacional - UPTC</p>
-          <p>Desarrollado con React + TensorFlow</p>
+          <p>Sistema de diagnóstico agrícola y fitopatología | Desarrollado con React + TensorFlow</p>
         </footer>
       </div>
     </div>
