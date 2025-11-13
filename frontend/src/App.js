@@ -9,6 +9,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [dragActive, setDragActive] = useState(false);
+  const [showComparison, setShowComparison] = useState(false);
   const fileInputRef = useRef(null);
 
   const API_URL = 'http://localhost:5000';
@@ -251,6 +252,49 @@ function App() {
     };
 
     return diseaseData[diseaseName.toLowerCase()] || null;
+  };
+
+  const getPlantType = (diseaseName) => {
+    const disease = diseaseName.toLowerCase();
+    if (disease.includes('apple')) return 'Apple';
+    if (disease.includes('corn') || disease.includes('maize')) return 'Corn_(maize)';
+    if (disease.includes('potato')) return 'Potato';
+    if (disease.includes('tomato')) return 'Tomato';
+    return null;
+  };
+
+  const getHealthyClassName = (plantType) => {
+    const healthyMap = {
+      'Apple': 'Apple___healthy',
+      'Corn_(maize)': 'Corn_(maize)___healthy',
+      'Potato': 'Potato___healthy',
+      'Tomato': 'Tomato___healthy'
+    };
+    return healthyMap[plantType];
+  };
+
+  const getResourceLinks = (diseaseName) => {
+    const disease = diseaseName.toLowerCase();
+    const links = [];
+    
+    // Wikipedia links (educativos)
+    if (disease.includes('apple_scab')) {
+      links.push({ title: 'Wikipedia - Apple Scab', url: 'https://en.wikipedia.org/wiki/Apple_scab' });
+    } else if (disease.includes('black_rot')) {
+      links.push({ title: 'Wikipedia - Black Rot', url: 'https://en.wikipedia.org/wiki/Black_rot_(grape)' });
+    } else if (disease.includes('late_blight')) {
+      links.push({ title: 'Wikipedia - Late Blight', url: 'https://en.wikipedia.org/wiki/Phytophthora_infestans' });
+    } else if (disease.includes('early_blight')) {
+      links.push({ title: 'Wikipedia - Early Blight', url: 'https://en.wikipedia.org/wiki/Alternaria_solani' });
+    }
+    
+    // Plant Village (recurso general)
+    links.push({ title: 'PlantVillage - Base de conocimiento', url: 'https://plantvillage.psu.edu/' });
+    
+    // Kaggle dataset
+    links.push({ title: 'Dataset Kaggle - Plant Disease', url: 'https://www.kaggle.com/datasets/vipoooool/new-plant-diseases-dataset' });
+    
+    return links;
   };
 
   const getConfidenceColor = (confidence) => {
@@ -544,6 +588,114 @@ function App() {
                     <div className="disease-info-footer">
                       <p>⚠️ <strong>Nota:</strong> Esta información es orientativa. Consulte con un ingeniero agrónomo para diagnóstico y tratamiento profesional.</p>
                     </div>
+                  </div>
+                )}
+
+                {/* Comparación Visual y Recursos */}
+                {!isHealthy(prediction.predicted_class) && (
+                  <div className="comparison-section">
+                    <button 
+                      className="comparison-toggle-btn"
+                      onClick={() => setShowComparison(!showComparison)}
+                    >
+                      {showComparison ? '▼' : '▶'} Ver comparación visual y recursos
+                    </button>
+
+                    {showComparison && (
+                      <div className="comparison-content">
+                        {/* Comparación Sana vs Enferma */}
+                        <div className="comparison-card">
+                          <h4 className="comparison-title">🔄 Comparación: Sana vs Enferma</h4>
+                          <div className="comparison-grid">
+                            <div className="comparison-item healthy">
+                              <div className="comparison-label healthy-label">
+                                ✅ Planta Saludable
+                              </div>
+                              <div className="comparison-placeholder">
+                                <span className="plant-emoji-large">
+                                  {getDiseaseEmoji(getHealthyClassName(getPlantType(prediction.predicted_class)))}
+                                </span>
+                                <p className="comparison-description">
+                                  {getPlantType(prediction.predicted_class)?.replace('_', ' ')} sin síntomas de enfermedad
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="comparison-divider">vs</div>
+
+                            <div className="comparison-item diseased">
+                              <div className="comparison-label diseased-label">
+                                ⚠️ Planta Enferma
+                              </div>
+                              <div className="comparison-placeholder">
+                                <span className="plant-emoji-large">
+                                  {getDiseaseEmoji(prediction.predicted_class)}
+                                </span>
+                                <p className="comparison-description">
+                                  {prediction.predicted_class.replace(/_/g, ' ').split('___')[1]}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="comparison-note">
+                            💡 <strong>Tip:</strong> Compare los síntomas visibles en su cultivo con ejemplos documentados para confirmar el diagnóstico.
+                          </div>
+                        </div>
+
+                        {/* Galería de Ejemplos */}
+                        <div className="gallery-card">
+                          <h4 className="gallery-title">📸 Galería de Ejemplos</h4>
+                          <div className="gallery-grid">
+                            <div className="gallery-item">
+                              <div className="gallery-placeholder">
+                                <span className="gallery-icon">🌿</span>
+                                <p>Estadio inicial</p>
+                              </div>
+                            </div>
+                            <div className="gallery-item">
+                              <div className="gallery-placeholder">
+                                <span className="gallery-icon">⚠️</span>
+                                <p>Estadio medio</p>
+                              </div>
+                            </div>
+                            <div className="gallery-item">
+                              <div className="gallery-placeholder">
+                                <span className="gallery-icon">🔴</span>
+                                <p>Estadio avanzado</p>
+                              </div>
+                            </div>
+                          </div>
+                          <p className="gallery-note">
+                            📚 Las imágenes de ejemplo están disponibles en el dataset de entrenamiento (15,000+ imágenes)
+                          </p>
+                        </div>
+
+                        {/* Recursos Externos */}
+                        <div className="resources-card">
+                          <h4 className="resources-title">🔗 Recursos Adicionales</h4>
+                          <div className="resources-list">
+                            {getResourceLinks(prediction.predicted_class).map((link, idx) => (
+                              <a 
+                                key={idx}
+                                href={link.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="resource-link"
+                              >
+                                <span className="resource-icon">🔗</span>
+                                <span className="resource-title">{link.title}</span>
+                                <span className="resource-arrow">→</span>
+                              </a>
+                            ))}
+                          </div>
+                          <div className="learn-more">
+                            <button className="learn-more-btn">
+                              📖 Ver más sobre esta enfermedad
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
