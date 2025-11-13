@@ -35,9 +35,25 @@ TEMPLATES_DIR = BASE_DIR / 'templates'
 # CONFIGURACIÓN DE DATOS
 # ============================================================================
 
-# Clases de frutas
-CLASSES = ['manzana', 'banano', 'mango', 'naranja', 'pera']
-NUM_CLASSES = len(CLASSES)
+# Clases de enfermedades de plantas (15 clases específicas del dataset de Kaggle)
+CLASSES = [
+    'Apple___Apple_scab',
+    'Apple___Black_rot',
+    'Apple___Cedar_apple_rust',
+    'Apple___healthy',
+    'Corn_(maize)___Common_rust_',
+    'Corn_(maize)___healthy',
+    'Corn_(maize)___Northern_Leaf_Blight',
+    'Potato___Early_blight',
+    'Potato___healthy',
+    'Potato___Late_blight',
+    'Tomato___Bacterial_spot',
+    'Tomato___Early_blight',
+    'Tomato___healthy',
+    'Tomato___Late_blight',
+    'Tomato___Leaf_Mold'
+]
+NUM_CLASSES = len(CLASSES)  # 15 clases
 
 # Tamaño de las imágenes
 IMG_WIDTH = 100

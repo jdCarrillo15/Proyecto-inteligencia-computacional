@@ -71,9 +71,26 @@ def load_model_and_classes():
             class_mapping = json.load(f)
             class_names = class_mapping['class_names']
     else:
-        class_names = ['manzana', 'banano', 'mango', 'naranja', 'pera']
+        # Default: 15 clases específicas del dataset de Kaggle
+        class_names = [
+            'Apple___Apple_scab',
+            'Apple___Black_rot',
+            'Apple___Cedar_apple_rust',
+            'Apple___healthy',
+            'Corn_(maize)___Common_rust_',
+            'Corn_(maize)___healthy',
+            'Corn_(maize)___Northern_Leaf_Blight',
+            'Potato___Early_blight',
+            'Potato___healthy',
+            'Potato___Late_blight',
+            'Tomato___Bacterial_spot',
+            'Tomato___Early_blight',
+            'Tomato___healthy',
+            'Tomato___Late_blight',
+            'Tomato___Leaf_Mold'
+        ]
     
-    print(f"✅ Clases cargadas: {class_names}")
+    print(f"✅ Clases cargadas ({len(class_names)}): {class_names}")
     return True
 
 
@@ -117,6 +134,20 @@ def preprocess_image(image_file):
         return None, None, False, f"Error al procesar la imagen: {str(e)}"
 
 
+def format_class_name_for_frontend(class_name):
+    """
+    Convierte el nombre de clase del modelo al formato que espera el frontend.
+    Ejemplo: 'Apple___Apple_scab' -> 'apple___apple_scab'
+    
+    Args:
+        class_name: Nombre de clase del modelo
+        
+    Returns:
+        str: Nombre de clase en formato lowercase
+    """
+    return class_name.lower()
+
+
 def predict_fruit(image_file):
     """
     Realiza la predicción de la fruta.
@@ -147,11 +178,14 @@ def predict_fruit(image_file):
     predicted_class_idx = np.argmax(predictions[0])
     confidence = float(predictions[0][predicted_class_idx])
     
+    # Obtener nombre de clase en formato que espera el frontend
+    predicted_class_name = format_class_name_for_frontend(class_names[predicted_class_idx])
+    
     # Obtener todas las probabilidades
     all_predictions = []
     for idx, prob in enumerate(predictions[0]):
         all_predictions.append({
-            'class': class_names[idx],
+            'class': format_class_name_for_frontend(class_names[idx]),
             'probability': float(prob),
             'percentage': f"{float(prob) * 100:.2f}"
         })
@@ -166,7 +200,7 @@ def predict_fruit(image_file):
     
     return {
         'success': True,
-        'predicted_class': class_names[predicted_class_idx],
+        'predicted_class': predicted_class_name,
         'confidence': confidence,
         'confidence_percentage': f"{confidence * 100:.2f}",
         'all_predictions': all_predictions,
@@ -225,10 +259,12 @@ def predict():
 @app.route('/health')
 def health():
     """Endpoint de salud para verificar que la app está funcionando."""
+    formatted_classes = [format_class_name_for_frontend(cls) for cls in class_names] if class_names else []
     return jsonify({
         'status': 'ok',
         'model_loaded': model is not None,
-        'classes': class_names
+        'classes': formatted_classes,
+        'num_classes': len(formatted_classes)
     })
 
 

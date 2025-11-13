@@ -39,13 +39,13 @@ if physical_devices:
 class FastFruitClassifier:
     """Clasificador optimizado con cache PKL y mejoras de rendimiento."""
     
-    def __init__(self, img_size=(100, 100), num_classes=4, use_transfer_learning=True):
+    def __init__(self, img_size=(100, 100), num_classes=15, use_transfer_learning=True):
         """
         Inicializa el clasificador.
         
         Args:
             img_size: Tamaño de las imágenes
-            num_classes: Número de clases
+            num_classes: Número de clases (15 enfermedades específicas por defecto)
             use_transfer_learning: Usar MobileNetV2 pre-entrenado
         """
         self.img_size = img_size

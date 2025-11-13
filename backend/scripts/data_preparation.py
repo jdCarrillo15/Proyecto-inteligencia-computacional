@@ -27,7 +27,24 @@ class DatasetCleaner:
         self.dataset_path = Path(dataset_path)
         self.output_path = Path(output_path)
         self.img_size = img_size
-        self.classes = ['manzana', 'banano', 'mango', 'naranja', 'pera']
+        # 15 clases específicas del dataset de Kaggle
+        self.classes = [
+            'Apple___Apple_scab',
+            'Apple___Black_rot',
+            'Apple___Cedar_apple_rust',
+            'Apple___healthy',
+            'Corn_(maize)___Common_rust_',
+            'Corn_(maize)___healthy',
+            'Corn_(maize)___Northern_Leaf_Blight',
+            'Potato___Early_blight',
+            'Potato___healthy',
+            'Potato___Late_blight',
+            'Tomato___Bacterial_spot',
+            'Tomato___Early_blight',
+            'Tomato___healthy',
+            'Tomato___Late_blight',
+            'Tomato___Leaf_Mold'
+        ]
         self.stats = {
             'total_images': 0,
             'corrupted': 0,

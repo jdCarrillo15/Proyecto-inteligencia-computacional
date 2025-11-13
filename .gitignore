@@ -1,2 +1,4 @@
 dataset/
 .git/
+models/
+__pycache__/

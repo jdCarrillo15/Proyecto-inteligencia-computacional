@@ -30,7 +30,24 @@ def load_model_and_classes(model_path='models/fruit_classifier.h5'):
             class_mapping = json.load(f)
             class_names = class_mapping['class_names']
     else:
-        class_names = ['manzana', 'banano', 'mango', 'naranja', 'pera']
+        # Default: 15 clases específicas del dataset de Kaggle
+        class_names = [
+            'Apple___Apple_scab',
+            'Apple___Black_rot',
+            'Apple___Cedar_apple_rust',
+            'Apple___healthy',
+            'Corn_(maize)___Common_rust_',
+            'Corn_(maize)___healthy',
+            'Corn_(maize)___Northern_Leaf_Blight',
+            'Potato___Early_blight',
+            'Potato___healthy',
+            'Potato___Late_blight',
+            'Tomato___Bacterial_spot',
+            'Tomato___Early_blight',
+            'Tomato___healthy',
+            'Tomato___Late_blight',
+            'Tomato___Leaf_Mold'
+        ]
     
     return model, class_names
 

@@ -48,26 +48,33 @@ class FastDatasetProcessor:
         train_path = self.raw_dataset_path / "New Plant Diseases Dataset(Augmented)" / "train"
         
         if train_path.exists():
-            # Filtrar solo las clases de frutas que nos interesan
+            # Obtener todas las clases de enfermedades específicas
             all_classes = sorted([d.name for d in train_path.iterdir() if d.is_dir()])
             
-            # Mapeo de clases del dataset a nuestras categorías
-            class_mapping = {
-                'Apple': 'Apple',
-                'Corn_(maize)': 'Corn',
-                'Potato': 'Potato',
-                'Tomato': 'Tomato'
-            }
+            # Filtrar solo las clases específicas que queremos (15 enfermedades)
+            target_classes = [
+                'Apple___Apple_scab',
+                'Apple___Black_rot',
+                'Apple___Cedar_apple_rust',
+                'Apple___healthy',
+                'Corn_(maize)___Common_rust_',
+                'Corn_(maize)___healthy',
+                'Corn_(maize)___Northern_Leaf_Blight',
+                'Potato___Early_blight',
+                'Potato___healthy',
+                'Potato___Late_blight',
+                'Tomato___Bacterial_spot',
+                'Tomato___Early_blight',
+                'Tomato___healthy',
+                'Tomato___Late_blight',
+                'Tomato___Leaf_Mold'
+            ]
             
-            # Filtrar clases relevantes
-            filtered_classes = []
-            for cls in all_classes:
-                for key in class_mapping:
-                    if cls.startswith(key):
-                        if class_mapping[key] not in filtered_classes:
-                            filtered_classes.append(class_mapping[key])
+            # Filtrar solo las clases que existen en el dataset
+            filtered_classes = [cls for cls in target_classes if cls in all_classes]
             
-            return sorted(filtered_classes)
+            if filtered_classes:
+                return filtered_classes
         
         # Si no existe, buscar directamente en raw
         if self.raw_dataset_path.exists():
@@ -76,8 +83,24 @@ class FastDatasetProcessor:
             if classes:
                 return classes
         
-        # Default
-        return ['Apple', 'Corn', 'Potato', 'Tomato']
+        # Default - 15 clases específicas
+        return [
+            'Apple___Apple_scab',
+            'Apple___Black_rot',
+            'Apple___Cedar_apple_rust',
+            'Apple___healthy',
+            'Corn_(maize)___Common_rust_',
+            'Corn_(maize)___healthy',
+            'Corn_(maize)___Northern_Leaf_Blight',
+            'Potato___Early_blight',
+            'Potato___healthy',
+            'Potato___Late_blight',
+            'Tomato___Bacterial_spot',
+            'Tomato___Early_blight',
+            'Tomato___healthy',
+            'Tomato___Late_blight',
+            'Tomato___Leaf_Mold'
+        ]
     
     def prepare_optimized(self, use_cache=True, force_reprocess=False):
         """
@@ -234,18 +257,14 @@ class FastDatasetProcessor:
         # Obtener subdirectorios (clases)
         all_class_dirs = sorted([d for d in directory.iterdir() if d.is_dir()])
         
-        # Agrupar por categoría principal
+        # Usar las clases específicas tal como están en el dataset
         class_groups = {}
         for class_dir in all_class_dirs:
-            name = class_dir.name
+            dir_name = class_dir.name
             
-            # Extraer categoría principal
-            for target_class in self.classes:
-                if target_class.lower() in name.lower():
-                    if target_class not in class_groups:
-                        class_groups[target_class] = []
-                    class_groups[target_class].append(class_dir)
-                    break
+            # Buscar coincidencia exacta con las clases objetivo
+            if dir_name in self.classes:
+                class_groups[dir_name] = [class_dir]
         
         X_list = []
         y_list = []
