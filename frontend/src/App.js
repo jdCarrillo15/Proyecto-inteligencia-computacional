@@ -277,26 +277,118 @@ function App() {
 
   const getResourceLinks = (diseaseName) => {
     const disease = diseaseName.toLowerCase();
-    const links = [];
     
-    // Wikipedia links (educativos)
-    if (disease.includes('apple_scab')) {
-      links.push({ title: 'Wikipedia - Apple Scab', url: 'https://en.wikipedia.org/wiki/Apple_scab' });
-    } else if (disease.includes('black_rot')) {
-      links.push({ title: 'Wikipedia - Black Rot', url: 'https://en.wikipedia.org/wiki/Black_rot_(grape)' });
-    } else if (disease.includes('late_blight')) {
-      links.push({ title: 'Wikipedia - Late Blight', url: 'https://en.wikipedia.org/wiki/Phytophthora_infestans' });
-    } else if (disease.includes('early_blight')) {
-      links.push({ title: 'Wikipedia - Early Blight', url: 'https://en.wikipedia.org/wiki/Alternaria_solani' });
-    }
+    // Mapeo robusto de recursos específicos por enfermedad
+    const resourcesMap = {
+      // Manzana (Apple)
+      'apple___apple_scab': [
+        { title: 'Wikipedia - Sarna del Manzano', url: 'https://en.wikipedia.org/wiki/Apple_scab', type: 'encyclopedia' },
+        { title: 'PlantVillage - Apple Scab', url: 'https://plantvillage.psu.edu/topics/apple/infos', type: 'guide' },
+        { title: 'Extension - Manejo de Sarna', url: 'https://extension.umn.edu/plant-diseases/apple-scab', type: 'extension' },
+        { title: 'EPA - Fungicidas Aprobados', url: 'https://www.epa.gov/pesticides', type: 'official' }
+      ],
+      'apple___black_rot': [
+        { title: 'Wikipedia - Pudrición Negra', url: 'https://en.wikipedia.org/wiki/Black_rot_(apple)', type: 'encyclopedia' },
+        { title: 'PlantVillage - Black Rot', url: 'https://plantvillage.psu.edu/topics/apple/infos', type: 'guide' },
+        { title: 'Cornell - Black Rot Management', url: 'https://www.cornell.edu/', type: 'extension' }
+      ],
+      'apple___cedar_apple_rust': [
+        { title: 'Wikipedia - Roya del Cedro', url: 'https://en.wikipedia.org/wiki/Gymnosporangium_juniperi-virginianae', type: 'encyclopedia' },
+        { title: 'PlantVillage - Cedar Apple Rust', url: 'https://plantvillage.psu.edu/topics/apple/infos', type: 'guide' },
+        { title: 'Extension - Control de Roya', url: 'https://extension.umn.edu/plant-diseases/cedar-apple-rust', type: 'extension' }
+      ],
+      'apple___healthy': [
+        { title: 'Guía de Cultivo de Manzanas', url: 'https://extension.umn.edu/fruit/apples', type: 'guide' },
+        { title: 'Manejo Integrado de Plagas', url: 'https://www.epa.gov/safepestcontrol/integrated-pest-management-ipm-principles', type: 'official' }
+      ],
+      
+      // Maíz (Corn/Maize)
+      'corn_(maize)___common_rust_': [
+        { title: 'Wikipedia - Roya Común del Maíz', url: 'https://en.wikipedia.org/wiki/Puccinia_sorghi', type: 'encyclopedia' },
+        { title: 'PlantVillage - Common Rust', url: 'https://plantvillage.psu.edu/topics/corn-maize/infos', type: 'guide' },
+        { title: 'Extension - Corn Rust Management', url: 'https://extension.umn.edu/corn-pest-management/rust-corn', type: 'extension' },
+        { title: 'CIMMYT - Corn Diseases', url: 'https://www.cimmyt.org/', type: 'research' }
+      ],
+      'corn_(maize)___healthy': [
+        { title: 'Guía de Cultivo de Maíz', url: 'https://extension.umn.edu/crop-production/corn', type: 'guide' },
+        { title: 'USDA - Corn Production', url: 'https://www.usda.gov/', type: 'official' }
+      ],
+      'corn_(maize)___northern_leaf_blight': [
+        { title: 'Wikipedia - Tizón Foliar del Norte', url: 'https://en.wikipedia.org/wiki/Northern_corn_leaf_blight', type: 'encyclopedia' },
+        { title: 'PlantVillage - Northern Leaf Blight', url: 'https://plantvillage.psu.edu/topics/corn-maize/infos', type: 'guide' },
+        { title: 'Extension - Blight Control', url: 'https://extension.umn.edu/corn-pest-management/northern-corn-leaf-blight', type: 'extension' },
+        { title: 'IPM - Manejo Integrado', url: 'https://www.epa.gov/safepestcontrol/integrated-pest-management-ipm-principles', type: 'official' }
+      ],
+      
+      // Papa (Potato)
+      'potato___early_blight': [
+        { title: 'Wikipedia - Alternaria (Tizón Temprano)', url: 'https://en.wikipedia.org/wiki/Alternaria_solani', type: 'encyclopedia' },
+        { title: 'PlantVillage - Early Blight', url: 'https://plantvillage.psu.edu/topics/potato/infos', type: 'guide' },
+        { title: 'Extension - Early Blight Management', url: 'https://extension.umn.edu/diseases/early-blight-potato-and-tomato', type: 'extension' },
+        { title: 'CIP - International Potato Center', url: 'https://cipotato.org/', type: 'research' }
+      ],
+      'potato___healthy': [
+        { title: 'Guía de Cultivo de Papa', url: 'https://extension.umn.edu/vegetables/growing-potatoes', type: 'guide' },
+        { title: 'CIP - Potato Resources', url: 'https://cipotato.org/', type: 'research' }
+      ],
+      'potato___late_blight': [
+        { title: 'Wikipedia - Phytophthora infestans', url: 'https://en.wikipedia.org/wiki/Phytophthora_infestans', type: 'encyclopedia' },
+        { title: 'PlantVillage - Late Blight', url: 'https://plantvillage.psu.edu/topics/potato/infos', type: 'guide' },
+        { title: 'Extension - Late Blight Management', url: 'https://extension.umn.edu/diseases/late-blight', type: 'extension' },
+        { title: 'CIP - Late Blight Resources', url: 'https://cipotato.org/crops/potato/potato-diseases/late-blight/', type: 'research' },
+        { title: 'USAblight - Alerta Temprana', url: 'https://usablight.org/', type: 'tool' }
+      ],
+      
+      // Tomate (Tomato)
+      'tomato___bacterial_spot': [
+        { title: 'Wikipedia - Mancha Bacteriana', url: 'https://en.wikipedia.org/wiki/Bacterial_leaf_spot', type: 'encyclopedia' },
+        { title: 'PlantVillage - Bacterial Spot', url: 'https://plantvillage.psu.edu/topics/tomato/infos', type: 'guide' },
+        { title: 'Extension - Bacterial Disease Control', url: 'https://extension.umn.edu/diseases/bacterial-diseases-tomato', type: 'extension' }
+      ],
+      'tomato___early_blight': [
+        { title: 'Wikipedia - Alternaria (Tizón Temprano)', url: 'https://en.wikipedia.org/wiki/Alternaria_solani', type: 'encyclopedia' },
+        { title: 'PlantVillage - Early Blight', url: 'https://plantvillage.psu.edu/topics/tomato/infos', type: 'guide' },
+        { title: 'Extension - Early Blight in Tomatoes', url: 'https://extension.umn.edu/diseases/early-blight-potato-and-tomato', type: 'extension' }
+      ],
+      'tomato___healthy': [
+        { title: 'Guía de Cultivo de Tomates', url: 'https://extension.umn.edu/vegetables/growing-tomatoes', type: 'guide' },
+        { title: 'USDA - Tomato Production', url: 'https://www.usda.gov/', type: 'official' }
+      ],
+      'tomato___late_blight': [
+        { title: 'Wikipedia - Phytophthora infestans', url: 'https://en.wikipedia.org/wiki/Phytophthora_infestans', type: 'encyclopedia' },
+        { title: 'PlantVillage - Late Blight', url: 'https://plantvillage.psu.edu/topics/tomato/infos', type: 'guide' },
+        { title: 'Extension - Late Blight in Tomatoes', url: 'https://extension.umn.edu/diseases/late-blight', type: 'extension' },
+        { title: 'USAblight - Monitoring System', url: 'https://usablight.org/', type: 'tool' }
+      ],
+      'tomato___leaf_mold': [
+        { title: 'Wikipedia - Moho de la Hoja', url: 'https://en.wikipedia.org/wiki/Cladosporium_fulvum', type: 'encyclopedia' },
+        { title: 'PlantVillage - Leaf Mold', url: 'https://plantvillage.psu.edu/topics/tomato/infos', type: 'guide' },
+        { title: 'Extension - Leaf Mold Management', url: 'https://extension.umn.edu/diseases/leaf-mold-tomato', type: 'extension' }
+      ]
+    };
     
-    // Plant Village (recurso general)
-    links.push({ title: 'PlantVillage - Base de conocimiento', url: 'https://plantvillage.psu.edu/' });
+    // Recursos generales que siempre se incluyen
+    const generalResources = [
+      { title: 'PlantVillage - Base de Conocimiento', url: 'https://plantvillage.psu.edu/', type: 'general' },
+      { title: 'Dataset Kaggle - Plant Disease', url: 'https://www.kaggle.com/datasets/vipoooool/new-plant-diseases-dataset', type: 'data' }
+    ];
     
-    // Kaggle dataset
-    links.push({ title: 'Dataset Kaggle - Plant Disease', url: 'https://www.kaggle.com/datasets/vipoooool/new-plant-diseases-dataset' });
+    // Obtener recursos específicos de la enfermedad
+    const specificResources = resourcesMap[disease] || [];
     
-    return links;
+    // Combinar recursos específicos con generales
+    const allResources = [...specificResources, ...generalResources];
+    
+    // Validar y retornar solo URLs válidas
+    return allResources.filter(link => {
+      try {
+        new URL(link.url);
+        return true;
+      } catch (e) {
+        console.warn(`URL inválida detectada: ${link.url}`);
+        return false;
+      }
+    });
   };
 
   const getConfidenceColor = (confidence) => {
@@ -752,26 +844,51 @@ function App() {
                         {/* Recursos Externos */}
                         <div className="resources-card">
                           <h4 className="resources-title">🔗 Recursos Adicionales</h4>
+                          <p className="resources-subtitle">Fuentes confiables para profundizar en el diagnóstico y manejo</p>
                           <div className="resources-list">
-                            {getResourceLinks(prediction.predicted_class).map((link, idx) => (
-                              <a 
-                                key={idx}
-                                href={link.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="resource-link"
-                                aria-label={`${link.title} (abre en nueva pestaña)`}
-                              >
-                                <span className="resource-icon" aria-hidden="true">🔗</span>
-                                <span className="resource-title">{link.title}</span>
-                                <span className="resource-arrow" aria-hidden="true">→</span>
-                              </a>
-                            ))}
+                            {getResourceLinks(prediction.predicted_class).map((link, idx) => {
+                              // Seleccionar icono según tipo de recurso
+                              const getResourceIcon = (type) => {
+                                const iconMap = {
+                                  'encyclopedia': '📖',
+                                  'guide': '📘',
+                                  'extension': '🌾',
+                                  'official': '🏛️',
+                                  'research': '🔬',
+                                  'tool': '🛠️',
+                                  'general': '🌐',
+                                  'data': '📊'
+                                };
+                                return iconMap[type] || '🔗';
+                              };
+
+                              return (
+                                <a 
+                                  key={idx}
+                                  href={link.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={`resource-link resource-type-${link.type}`}
+                                  aria-label={`${link.title} (abre en nueva pestaña)`}
+                                >
+                                  <span className="resource-icon" aria-hidden="true">
+                                    {getResourceIcon(link.type)}
+                                  </span>
+                                  <span className="resource-title">{link.title}</span>
+                                  <span className="resource-arrow" aria-hidden="true">→</span>
+                                </a>
+                              );
+                            })}
                           </div>
-                          <div className="learn-more">
-                            <button className="learn-more-btn" aria-label="Ver más información detallada sobre esta enfermedad">
-                              <span aria-hidden="true">📖</span> Ver más sobre esta enfermedad
-                            </button>
+                          {getResourceLinks(prediction.predicted_class).length === 0 && (
+                            <div className="no-resources">
+                              <p>ℹ️ No hay recursos específicos disponibles para esta clasificación.</p>
+                            </div>
+                          )}
+                          <div className="resources-footer">
+                            <p className="resources-note">
+                              💡 <strong>Tip:</strong> Estos enlaces te llevan a fuentes académicas y oficiales para información detallada sobre diagnóstico, tratamiento y prevención.
+                            </p>
                           </div>
                         </div>
                       </div>

@@ -150,6 +150,20 @@
   color: white;
 }
 
+.App.dark-mode .resources-subtitle,
+.App.dark-mode .resources-note {
+  color: #9ca3af;
+}
+
+.App.dark-mode .no-resources {
+  background: #374151;
+  color: #9ca3af;
+}
+
+.App.dark-mode .resources-footer {
+  border-top-color: #4b5563;
+}
+
 .App.dark-mode .info-value,
 .App.dark-mode .symptoms-list,
 .App.dark-mode .symptoms-list li {
@@ -1026,6 +1040,66 @@
 .resource-arrow {
   font-size: 1.2em;
   font-weight: 700;
+}
+
+/* Estilos específicos por tipo de recurso */
+.resource-type-encyclopedia {
+  border-left: 4px solid #8b5cf6;
+}
+
+.resource-type-guide {
+  border-left: 4px solid #3b82f6;
+}
+
+.resource-type-extension {
+  border-left: 4px solid #10b981;
+}
+
+.resource-type-official {
+  border-left: 4px solid #f59e0b;
+}
+
+.resource-type-research {
+  border-left: 4px solid #ec4899;
+}
+
+.resource-type-tool {
+  border-left: 4px solid #06b6d4;
+}
+
+.resource-type-general {
+  border-left: 4px solid #6b7280;
+}
+
+.resource-type-data {
+  border-left: 4px solid #14b8a6;
+}
+
+.resources-subtitle {
+  color: #6b7280;
+  font-size: 0.9em;
+  margin-bottom: 15px;
+  font-style: italic;
+}
+
+.no-resources {
+  padding: 20px;
+  text-align: center;
+  background: #f3f4f6;
+  border-radius: 10px;
+  color: #6b7280;
+}
+
+.resources-footer {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.resources-note {
+  font-size: 0.85em;
+  color: #6b7280;
+  margin: 0;
 }
 
 .learn-more {
