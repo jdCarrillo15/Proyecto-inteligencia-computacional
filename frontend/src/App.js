@@ -384,7 +384,13 @@ function App() {
                         className="btn btn-primary"
                         disabled={loading}
                       >
-                        {loading ? '🔄 Analizando...' : '🔍 Detectar Enfermedad'}
+                        {loading ? (
+                          <span className="loading-content">
+                            <span className="scanning-icon">🔍</span>
+                            <span className="leaf-icon">🍃</span>
+                            Analizando...
+                          </span>
+                        ) : '🔍 Detectar Enfermedad'}
                       </button>
                       <button
                         type="button"
@@ -448,13 +454,13 @@ function App() {
                 
                 {/* Estado de Salud Prominente */}
                 <div 
-                  className="health-status-banner"
+                  className={`health-status-banner ${isHealthy(prediction.predicted_class) ? 'healthy-animation' : 'disease-animation'}`}
                   style={{ 
                     backgroundColor: getHealthStatus(prediction.predicted_class).bgColor,
                     borderLeft: `6px solid ${getHealthStatus(prediction.predicted_class).color}`
                   }}
                 >
-                  <span className="health-icon">
+                  <span className={`health-icon ${isHealthy(prediction.predicted_class) ? 'checkmark-animation' : 'alert-animation'}`}>
                     {getHealthStatus(prediction.predicted_class).icon}
                   </span>
                   <span 
