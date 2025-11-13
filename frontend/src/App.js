@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import './App_MODULAR.css';
+import './App.css';
 
 // Componentes
 import Header from './components/Header';
