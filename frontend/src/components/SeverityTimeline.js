@@ -9,6 +9,9 @@ import React from 'react';
  * @returns {JSX.Element} Timeline visual de severidad
  */
 const SeverityTimeline = ({ severityLevel = 'Severidad Media', confidence = 0 }) => {
+  // Convertir confidence a número (por si viene como string desde la API)
+  const confidenceValue = typeof confidence === 'number' ? confidence : parseFloat(confidence) || 0;
+  
   // Definir etapas del timeline
   const stages = [
     {
@@ -72,9 +75,9 @@ const SeverityTimeline = ({ severityLevel = 'Severidad Media', confidence = 0 })
     if (level.includes('alta')) return 2; // Avanzada
     
     // Por defecto, usar confianza para determinar
-    if (confidence <= 25) return 0;
-    if (confidence <= 50) return 1;
-    if (confidence <= 75) return 2;
+    if (confidenceValue <= 25) return 0;
+    if (confidenceValue <= 50) return 1;
+    if (confidenceValue <= 75) return 2;
     return 3;
   };
 

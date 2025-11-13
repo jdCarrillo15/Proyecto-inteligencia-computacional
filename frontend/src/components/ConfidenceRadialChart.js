@@ -10,6 +10,9 @@ import { RadialBarChart, RadialBar, PolarAngleAxis } from 'recharts';
  * @returns {JSX.Element} Gráfica radial de confianza
  */
 const ConfidenceRadialChart = ({ confidence = 0, size = 160 }) => {
+  // Convertir confidence a número (por si viene como string desde la API)
+  const confidenceValue = typeof confidence === 'number' ? confidence : parseFloat(confidence) || 0;
+  
   // Determinar el color basado en el nivel de confianza
   const getConfidenceColor = (value) => {
     if (value >= 80) {
@@ -33,13 +36,13 @@ const ConfidenceRadialChart = ({ confidence = 0, size = 160 }) => {
     }
   };
 
-  const colorConfig = getConfidenceColor(confidence);
+  const colorConfig = getConfidenceColor(confidenceValue);
   
   // Datos para el gráfico radial
   const data = [
     {
       name: 'Confianza',
-      value: confidence,
+      value: confidenceValue,
       fill: colorConfig.fill
     }
   ];
@@ -87,7 +90,7 @@ const ConfidenceRadialChart = ({ confidence = 0, size = 160 }) => {
             className="confidence-percentage"
             style={{ color: colorConfig.fill }}
           >
-            {confidence.toFixed(1)}%
+            {confidenceValue.toFixed(1)}%
           </div>
           <div className="confidence-label">
             Confianza

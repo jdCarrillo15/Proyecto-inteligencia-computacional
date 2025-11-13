@@ -9,10 +9,13 @@ import React from 'react';
  * @returns {JSX.Element} Heatmap visual de daño en hoja
  */
 const LeafDamageHeatmap = ({ diseaseName = '', confidence = 0 }) => {
+  // Convertir confidence a número (por si viene como string desde la API)
+  const confidenceValue = typeof confidence === 'number' ? confidence : parseFloat(confidence) || 0;
+  
   // Calcular porcentaje de área afectada según enfermedad
   const calculateAffectedArea = () => {
     const disease = diseaseName.toLowerCase();
-    const baseConfidence = confidence / 100;
+    const baseConfidence = confidenceValue / 100;
     
     // Late blight: alta propagación (60-80%)
     if (disease.includes('late_blight') || disease.includes('late blight')) {
