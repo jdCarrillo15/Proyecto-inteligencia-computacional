@@ -9,6 +9,7 @@ import TipsCard from './components/TipsCard';
 import SystemInfoCard from './components/SystemInfoCard';
 import PredictionResults from './components/PredictionResults';
 import PredictionSkeleton from './components/SkeletonLoaders';
+import ProgressStepper from './components/ProgressStepper';
 
 // Utilidades
 import { predictDisease } from './utils/api';
@@ -23,6 +24,8 @@ function App() {
   const [darkMode, setDarkMode] = useState(false);
   const [imageZoomed, setImageZoomed] = useState(false);
   const [showSkeleton, setShowSkeleton] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [progress, setProgress] = useState(0);
   const fileInputRef = useRef(null);
   const skeletonTimerRef = useRef(null);
 
@@ -98,9 +101,37 @@ function App() {
 
     setLoading(true);
     setError(null);
+    setCurrentStep(1);
+    setProgress(0);
 
     try {
+      // Etapa 1: Cargando imagen (300ms)
+      setCurrentStep(1);
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Etapa 2: Preprocesando (400ms)
+      setCurrentStep(2);
+      await new Promise(resolve => setTimeout(resolve, 400));
+
+      // Etapa 3: Analizando con CNN (simular progreso)
+      setCurrentStep(3);
+      const cnnDuration = 800; // 800ms para CNN
+      const progressSteps = 20;
+      const progressInterval = cnnDuration / progressSteps;
+
+      for (let i = 0; i <= progressSteps; i++) {
+        setProgress(Math.round((i / progressSteps) * 100));
+        if (i < progressSteps) {
+          await new Promise(resolve => setTimeout(resolve, progressInterval));
+        }
+      }
+
+      // Llamada real a la API durante la etapa de análisis
       const data = await predictDisease(selectedFile);
+
+      // Etapa 4: Generando reporte (300ms)
+      setCurrentStep(4);
+      await new Promise(resolve => setTimeout(resolve, 300));
 
       if (data.success) {
         setPrediction(data);
@@ -112,6 +143,8 @@ function App() {
       console.error('Error:', err);
     } finally {
       setLoading(false);
+      setCurrentStep(1);
+      setProgress(0);
     }
   };
 
@@ -192,6 +225,8 @@ function App() {
           </section>
 
           <section className="results-section" aria-label="Sección de resultados del diagnóstico">
+            {loading && <ProgressStepper currentStep={currentStep} progress={progress} />}
+            
             {showSkeleton ? (
               <PredictionSkeleton />
             ) : (
