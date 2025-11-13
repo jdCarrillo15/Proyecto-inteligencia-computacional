@@ -308,7 +308,7 @@ function App() {
   return (
     <div className={`App ${darkMode ? 'dark-mode' : ''}`}>
       <div className="container">
-        <header className="header">
+        <header className="header" role="banner">
           <div className="header-content">
             <div className="header-text">
               <h1 className="title">
@@ -323,19 +323,28 @@ function App() {
             <button 
               className="dark-mode-toggle"
               onClick={() => setDarkMode(!darkMode)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setDarkMode(!darkMode);
+                }
+              }}
+              aria-label={darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+              aria-pressed={darkMode}
               title={darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
             >
-              {darkMode ? '☀️' : '🌙'}
+              <span aria-hidden="true">{darkMode ? '☀️' : '🌙'}</span>
+              <span className="sr-only">{darkMode ? 'Modo claro' : 'Modo oscuro'}</span>
             </button>
           </div>
         </header>
 
-        <div className="main-content">
-          <div className="upload-section">
+        <main className="main-content" role="main">
+          <section className="upload-section" aria-label="Sección de carga de imagen">
             <div className="card">
-              <h2 className="card-title">📤 Subir Imagen</h2>
+              <h2 className="card-title" id="upload-section-title">📤 Subir Imagen</h2>
               
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} aria-labelledby="upload-section-title">
                 <div
                   className={`upload-area ${dragActive ? 'drag-active' : ''}`}
                   onDragEnter={handleDrag}
@@ -343,17 +352,36 @@ function App() {
                   onDragOver={handleDrag}
                   onDrop={handleDrop}
                   onClick={() => fileInputRef.current.click()}
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Área de carga de imagen. Haz clic para seleccionar o arrastra una imagen aquí"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      fileInputRef.current.click();
+                    }
+                  }}
                 >
                   {preview ? (
                     <div className="preview-container">
                       <img 
                         src={preview} 
-                        alt="Preview" 
+                        alt="Vista previa de la imagen de hoja de planta cargada" 
                         className={`preview-image ${imageZoomed ? 'zoomed' : ''}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           setImageZoomed(!imageZoomed);
                         }}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setImageZoomed(!imageZoomed);
+                          }
+                        }}
+                        tabIndex={0}
+                        role="button"
+                        aria-label={imageZoomed ? 'Imagen ampliada. Presiona para alejar' : 'Imagen de preview. Presiona para ampliar'}
                       />
                       <div className="zoom-hint">
                         {imageZoomed ? '👆 Toca para alejar' : '👆 Toca para ampliar'}
@@ -379,12 +407,14 @@ function App() {
                     accept="image/jpeg,image/jpg,image/png"
                     onChange={handleFileChange}
                     style={{ display: 'none' }}
+                    aria-label="Seleccionar imagen de hoja de planta"
+                    id="file-input"
                   />
                 </div>
 
                 {error && (
-                  <div className="alert alert-error">
-                    ⚠️ {error}
+                  <div className="alert alert-error" role="alert" aria-live="assertive">
+                    <span aria-hidden="true">⚠️</span> {error}
                   </div>
                 )}
 
@@ -395,22 +425,25 @@ function App() {
                         type="submit"
                         className="btn btn-primary"
                         disabled={loading}
+                        aria-label={loading ? 'Analizando imagen' : 'Detectar enfermedad en la planta'}
+                        aria-busy={loading}
                       >
                         {loading ? (
                           <span className="loading-content">
-                            <span className="scanning-icon">🔍</span>
-                            <span className="leaf-icon">🍃</span>
+                            <span className="scanning-icon" aria-hidden="true">🔍</span>
+                            <span className="leaf-icon" aria-hidden="true">🍃</span>
                             Analizando...
                           </span>
-                        ) : '🔍 Detectar Enfermedad'}
+                        ) : <><span aria-hidden="true">🔍</span> Detectar Enfermedad</>}
                       </button>
                       <button
                         type="button"
                         className="btn btn-secondary"
                         onClick={handleReset}
                         disabled={loading}
+                        aria-label="Limpiar y subir nueva imagen"
                       >
-                        🔄 Nueva Imagen
+                        <span aria-hidden="true">🔄</span> Nueva Imagen
                       </button>
                     </>
                   )}
@@ -419,34 +452,34 @@ function App() {
             </div>
 
             {/* Guía de Usuario */}
-            <div className="info-card tips-card">
-              <h3>💡 Guía para Mejores Resultados</h3>
+            <aside className="info-card tips-card" aria-label="Guía de mejores prácticas">
+              <h3><span aria-hidden="true">💡</span> Guía para Mejores Resultados</h3>
               <ul className="tips-list">
                 <li className="tip-item">
-                  <span className="tip-icon">📸</span>
+                  <span className="tip-icon" aria-hidden="true">📸</span>
                   <span className="tip-text">Sube fotos claras de hojas afectadas</span>
                 </li>
                 <li className="tip-item">
-                  <span className="tip-icon">👁️</span>
+                  <span className="tip-icon" aria-hidden="true">👁️</span>
                   <span className="tip-text">Asegúrate de que los síntomas sean visibles</span>
                 </li>
                 <li className="tip-item">
-                  <span className="tip-icon">☀️</span>
+                  <span className="tip-icon" aria-hidden="true">☀️</span>
                   <span className="tip-text">Mejor con luz natural (evita flash)</span>
                 </li>
                 <li className="tip-item">
-                  <span className="tip-icon">🎯</span>
+                  <span className="tip-icon" aria-hidden="true">🎯</span>
                   <span className="tip-text">Evita fondos complejos o distracciones</span>
                 </li>
                 <li className="tip-item">
-                  <span className="tip-icon">🔍</span>
+                  <span className="tip-icon" aria-hidden="true">🔍</span>
                   <span className="tip-text">Enfoca la hoja completa en el encuadre</span>
                 </li>
               </ul>
-            </div>
+            </aside>
 
             {/* Información */}
-            <div className="info-card">
+            <aside className="info-card" aria-label="Información del sistema">
               <h3>ℹ️ Información del Sistema</h3>
               <ul className="info-list">
                 <li>Detecta 15 enfermedades en 4 cultivos</li>
@@ -457,11 +490,11 @@ function App() {
                 <li>Tiempo de predicción: &lt;1 segundo</li>
               </ul>
             </div>
-          </div>
+          </section>
 
-          <div className="results-section">
+          <section className="results-section" aria-label="Sección de resultados del diagnóstico">
             {prediction && prediction.success ? (
-              <div className="card results-card">
+              <article className="card results-card" role="region" aria-live="polite">
                 <h2 className="card-title">✨ Resultado del Diagnóstico</h2>
                 
                 {/* Estado de Salud Prominente */}
@@ -471,8 +504,10 @@ function App() {
                     backgroundColor: getHealthStatus(prediction.predicted_class).bgColor,
                     borderLeft: `6px solid ${getHealthStatus(prediction.predicted_class).color}`
                   }}
+                  role="status"
+                  aria-label={`Estado de salud: ${getHealthStatus(prediction.predicted_class).status}`}
                 >
-                  <span className={`health-icon ${isHealthy(prediction.predicted_class) ? 'checkmark-animation' : 'alert-animation'}`}>
+                  <span className={`health-icon ${isHealthy(prediction.predicted_class) ? 'checkmark-animation' : 'alert-animation'}`} aria-hidden="true">
                     {getHealthStatus(prediction.predicted_class).icon}
                   </span>
                   <span 
@@ -532,19 +567,24 @@ function App() {
                   </div>
                 </div>
 
-                <div className="all-predictions">
-                  <h4 className="predictions-title">📊 Todas las Predicciones</h4>
+                <div className="all-predictions" role="list" aria-label="Lista completa de predicciones ordenadas por confianza">
+                  <h4 className="predictions-title"><span aria-hidden="true">📊</span> Todas las Predicciones</h4>
                   {prediction.all_predictions.map((pred, index) => (
-                    <div key={index} className="prediction-item">
+                    <div 
+                      key={index} 
+                      className="prediction-item"
+                      role="listitem"
+                      aria-label={`${pred.class.charAt(0).toUpperCase() + pred.class.slice(1)}: ${pred.percentage}% de confianza`}
+                    >
                       <div className="prediction-label">
-                        <span className="prediction-emoji">
+                        <span className="prediction-emoji" aria-hidden="true">
                           {getDiseaseEmoji(pred.class)}
                         </span>
                         <span className="prediction-class">
                           {pred.class.charAt(0).toUpperCase() + pred.class.slice(1)}
                         </span>
                       </div>
-                      <div className="prediction-bar-container">
+                      <div className="prediction-bar-container" role="progressbar" aria-valuenow={pred.probability * 100} aria-valuemin="0" aria-valuemax="100">
                         <div 
                           className="prediction-bar"
                           style={{ 
@@ -563,7 +603,7 @@ function App() {
                 {/* Tarjeta de Información de Enfermedad */}
                 {!isHealthy(prediction.predicted_class) && getDiseaseInfo(prediction.predicted_class) && (
                   <div className="disease-info-card">
-                    <h4 className="disease-info-title">📋 Información de la Enfermedad</h4>
+                    <h4 className="disease-info-title"><span aria-hidden="true">📋</span> Información de la Enfermedad</h4>
                     
                     <div className="disease-info-section">
                       <div className="info-label">🔬 Nombre Científico</div>
@@ -623,16 +663,25 @@ function App() {
 
                 {/* Comparación Visual y Recursos */}
                 {!isHealthy(prediction.predicted_class) && (
-                  <div className="comparison-section">
+                  <section className="comparison-section" aria-label="Comparación visual y recursos adicionales">
                     <button 
                       className="comparison-toggle-btn"
                       onClick={() => setShowComparison(!showComparison)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setShowComparison(!showComparison);
+                        }
+                      }}
+                      aria-expanded={showComparison}
+                      aria-controls="comparison-content"
+                      aria-label={showComparison ? 'Ocultar comparación visual y recursos' : 'Ver comparación visual y recursos'}
                     >
-                      {showComparison ? '▼' : '▶'} Ver comparación visual y recursos
+                      <span aria-hidden="true">{showComparison ? '▼' : '▶'}</span> Ver comparación visual y recursos
                     </button>
 
                     {showComparison && (
-                      <div className="comparison-content">
+                      <div className="comparison-content" id="comparison-content">
                         {/* Comparación Sana vs Enferma */}
                         <div className="comparison-card">
                           <h4 className="comparison-title">🔄 Comparación: Sana vs Enferma</h4>
@@ -674,23 +723,23 @@ function App() {
 
                         {/* Galería de Ejemplos */}
                         <div className="gallery-card">
-                          <h4 className="gallery-title">📸 Galería de Ejemplos</h4>
+                          <h4 className="gallery-title"><span aria-hidden="true">📸</span> Galería de Ejemplos</h4>
                           <div className="gallery-grid">
-                            <div className="gallery-item">
+                            <div className="gallery-item" role="img" aria-label="Ejemplo de enfermedad en estadio inicial">
                               <div className="gallery-placeholder">
-                                <span className="gallery-icon">🌿</span>
+                                <span className="gallery-icon" aria-hidden="true">🌿</span>
                                 <p>Estadio inicial</p>
                               </div>
                             </div>
-                            <div className="gallery-item">
+                            <div className="gallery-item" role="img" aria-label="Ejemplo de enfermedad en estadio medio">
                               <div className="gallery-placeholder">
-                                <span className="gallery-icon">⚠️</span>
+                                <span className="gallery-icon" aria-hidden="true">⚠️</span>
                                 <p>Estadio medio</p>
                               </div>
                             </div>
-                            <div className="gallery-item">
+                            <div className="gallery-item" role="img" aria-label="Ejemplo de enfermedad en estadio avanzado">
                               <div className="gallery-placeholder">
-                                <span className="gallery-icon">🔴</span>
+                                <span className="gallery-icon" aria-hidden="true">🔴</span>
                                 <p>Estadio avanzado</p>
                               </div>
                             </div>
@@ -711,55 +760,56 @@ function App() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="resource-link"
+                                aria-label={`${link.title} (abre en nueva pestaña)`}
                               >
-                                <span className="resource-icon">🔗</span>
+                                <span className="resource-icon" aria-hidden="true">🔗</span>
                                 <span className="resource-title">{link.title}</span>
-                                <span className="resource-arrow">→</span>
+                                <span className="resource-arrow" aria-hidden="true">→</span>
                               </a>
                             ))}
                           </div>
                           <div className="learn-more">
-                            <button className="learn-more-btn">
-                              📖 Ver más sobre esta enfermedad
+                            <button className="learn-more-btn" aria-label="Ver más información detallada sobre esta enfermedad">
+                              <span aria-hidden="true">📖</span> Ver más sobre esta enfermedad
                             </button>
                           </div>
                         </div>
                       </div>
                     )}
-                  </div>
+                  </section>
                 )}
-              </div>
+              </article>
             ) : (
-              <div className="card placeholder-card">
+              <div className="card placeholder-card" role="status" aria-label="Esperando imagen para diagnóstico">
                 <div className="placeholder-content">
-                  <div className="placeholder-icon">🎯</div>
+                  <div className="placeholder-icon" aria-hidden="true">🎯</div>
                   <h3>Esperando imagen...</h3>
                   <p>Sube una foto de una hoja de planta para comenzar el diagnóstico</p>
                   <div className="supported-plants-title">
-                    <h4>🌱 Cultivos Soportados</h4>
+                    <h4><span aria-hidden="true">🌱</span> Cultivos Soportados</h4>
                   </div>
                   <div className="supported-fruits">
-                    <div className="fruit-chip" title="Mancha negra, Sarna, Roya del cedro, Saludable">
-                      🍎 Manzana <span className="chip-count">(4 clases)</span>
+                    <div className="fruit-chip" title="Mancha negra, Sarna, Roya del cedro, Saludable" aria-label="Manzana: 4 clases de enfermedades soportadas">
+                      <span aria-hidden="true">🍎</span> Manzana <span className="chip-count">(4 clases)</span>
                     </div>
-                    <div className="fruit-chip" title="Roya común, Tizón del norte, Saludable">
-                      🌽 Maíz <span className="chip-count">(3 clases)</span>
+                    <div className="fruit-chip" title="Roya común, Tizón del norte, Saludable" aria-label="Maíz: 3 clases de enfermedades soportadas">
+                      <span aria-hidden="true">🌽</span> Maíz <span className="chip-count">(3 clases)</span>
                     </div>
-                    <div className="fruit-chip" title="Tizón temprano, Tizón tardío, Saludable">
-                      🥔 Papa <span className="chip-count">(3 clases)</span>
+                    <div className="fruit-chip" title="Tizón temprano, Tizón tardío, Saludable" aria-label="Papa: 3 clases de enfermedades soportadas">
+                      <span aria-hidden="true">🥔</span> Papa <span className="chip-count">(3 clases)</span>
                     </div>
-                    <div className="fruit-chip" title="Mancha bacteriana, Tizón temprano, Tizón tardío, Moho de hoja, Saludable">
-                      🍅 Tomate <span className="chip-count">(5 clases)</span>
+                    <div className="fruit-chip" title="Mancha bacteriana, Tizón temprano, Tizón tardío, Moho de hoja, Saludable" aria-label="Tomate: 5 clases de enfermedades soportadas">
+                      <span aria-hidden="true">🍅</span> Tomate <span className="chip-count">(5 clases)</span>
                     </div>
                   </div>
                 </div>
               </div>
             )}
-          </div>
-        </div>
+          </section>
+        </main>
 
-        <footer className="footer">
-          <p>🎓 Proyecto Inteligencia Computacional - UPTC</p>
+        <footer className="footer" role="contentinfo">
+          <p><span aria-hidden="true">🎓</span> Proyecto Inteligencia Computacional - UPTC</p>
           <p>Sistema de diagnóstico agrícola y fitopatología | Desarrollado con React + TensorFlow</p>
         </footer>
       </div>
