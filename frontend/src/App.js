@@ -123,6 +123,52 @@ function App() {
     return emojis[diseaseName.toLowerCase()] || '🌱❓';
   };
 
+  const isHealthy = (diseaseName) => {
+    return diseaseName.toLowerCase().includes('healthy');
+  };
+
+  const getHealthStatus = (diseaseName) => {
+    return isHealthy(diseaseName) ? {
+      status: 'Planta Sana',
+      icon: '✅',
+      color: '#10b981',
+      bgColor: '#d1fae5'
+    } : {
+      status: 'Planta Enferma',
+      icon: '⚠️',
+      color: '#dc2626',
+      bgColor: '#fee2e2'
+    };
+  };
+
+  const getSeverityLevel = (diseaseName, confidence) => {
+    if (isHealthy(diseaseName)) {
+      return { level: 'Saludable', color: '#10b981', urgency: 'low' };
+    }
+    
+    // Clasificar severidad basada en tipo de enfermedad y confianza
+    const disease = diseaseName.toLowerCase();
+    
+    // Enfermedades más severas (hongos tardíos, pudrición)
+    if (disease.includes('late_blight') || disease.includes('black_rot')) {
+      return { level: 'Severidad Alta', color: '#dc2626', urgency: 'high' };
+    }
+    
+    // Enfermedades moderadas (hongos tempranos, bacterias)
+    if (disease.includes('early_blight') || disease.includes('bacterial') || 
+        disease.includes('northern_leaf_blight')) {
+      return { level: 'Severidad Media', color: '#f59e0b', urgency: 'medium' };
+    }
+    
+    // Enfermedades leves (moho, manchas, roya)
+    if (disease.includes('leaf_mold') || disease.includes('scab') || 
+        disease.includes('rust') || disease.includes('common_rust')) {
+      return { level: 'Severidad Baja', color: '#f97316', urgency: 'low-medium' };
+    }
+    
+    return { level: 'Severidad Media', color: '#f59e0b', urgency: 'medium' };
+  };
+
   const getConfidenceColor = (confidence) => {
     if (confidence >= 0.8) return '#10b981';
     if (confidence >= 0.6) return '#f59e0b';
@@ -231,8 +277,27 @@ function App() {
           <div className="results-section">
             {prediction && prediction.success ? (
               <div className="card results-card">
-                <h2 className="card-title">✨ Resultado</h2>
+                <h2 className="card-title">✨ Resultado del Diagnóstico</h2>
                 
+                {/* Estado de Salud Prominente */}
+                <div 
+                  className="health-status-banner"
+                  style={{ 
+                    backgroundColor: getHealthStatus(prediction.predicted_class).bgColor,
+                    borderLeft: `6px solid ${getHealthStatus(prediction.predicted_class).color}`
+                  }}
+                >
+                  <span className="health-icon">
+                    {getHealthStatus(prediction.predicted_class).icon}
+                  </span>
+                  <span 
+                    className="health-text"
+                    style={{ color: getHealthStatus(prediction.predicted_class).color }}
+                  >
+                    {getHealthStatus(prediction.predicted_class).status}
+                  </span>
+                </div>
+
                 <div className="prediction-result">
                   <div className="fruit-result">
                     <span className="fruit-emoji-large">
@@ -240,12 +305,30 @@ function App() {
                     </span>
                     <h3 className="fruit-name">
                       {prediction.predicted_class.charAt(0).toUpperCase() + 
-                       prediction.predicted_class.slice(1)}
+                       prediction.predicted_class.slice(1).replace(/_/g, ' ')}
                     </h3>
+                    
+                    {/* Indicador de Severidad */}
+                    {!isHealthy(prediction.predicted_class) && (
+                      <div 
+                        className="severity-badge"
+                        style={{ 
+                          backgroundColor: getSeverityLevel(prediction.predicted_class, prediction.confidence).color + '20',
+                          color: getSeverityLevel(prediction.predicted_class, prediction.confidence).color,
+                          border: `2px solid ${getSeverityLevel(prediction.predicted_class, prediction.confidence).color}`
+                        }}
+                      >
+                        <span className="severity-icon">
+                          {getSeverityLevel(prediction.predicted_class, prediction.confidence).urgency === 'high' ? '🔴' : 
+                           getSeverityLevel(prediction.predicted_class, prediction.confidence).urgency === 'medium' ? '🟡' : '🟠'}
+                        </span>
+                        {getSeverityLevel(prediction.predicted_class, prediction.confidence).level}
+                      </div>
+                    )}
                   </div>
 
                   <div className="confidence-container">
-                    <div className="confidence-label">Confianza</div>
+                    <div className="confidence-label">Confianza del Modelo</div>
                     <div 
                       className="confidence-value"
                       style={{ color: getConfidenceColor(prediction.confidence) }}
