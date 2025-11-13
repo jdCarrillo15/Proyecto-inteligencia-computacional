@@ -50,10 +50,12 @@
 }
 
 .upload-text {
-  font-size: 1.3em;
+  font-family: var(--font-body);
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
   color: var(--primary-600);
   margin-bottom: 8px;
-  font-weight: 600;
 }
 
 .App.dark-mode .upload-text {
@@ -61,8 +63,11 @@
 }
 
 .upload-subtext {
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
   color: var(--text-secondary);
-  font-size: 1em;
   margin-bottom: 10px;
 }
 
@@ -71,8 +76,9 @@
 }
 
 .upload-formats {
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-normal);
   color: var(--text-tertiary);
-  font-size: 0.85em;
   margin-top: 10px;
 }
 

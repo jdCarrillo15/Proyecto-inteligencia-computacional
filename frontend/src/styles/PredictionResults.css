@@ -16,8 +16,10 @@
   padding: 20px;
   margin-bottom: 25px;
   border-radius: 12px;
-  font-size: 1.4em;
-  font-weight: 700;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
   animation: slideDown 0.5s ease-out;
 }
 
@@ -51,9 +53,11 @@
 }
 
 .fruit-name {
-  font-size: 2.5em;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
   color: var(--text-primary);
-  font-weight: 700;
   margin: 0;
 }
 
@@ -66,12 +70,14 @@
   gap: 8px;
   padding: 10px 20px;
   border-radius: 25px;
-  font-size: 0.9em;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
   margin-top: 15px;
   animation: fadeIn 0.6s ease-in;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--letter-spacing-wide);
 }
 
 .severity-icon {
@@ -92,15 +98,19 @@
 }
 
 .confidence-label {
-  font-size: 1em;
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
   color: var(--text-tertiary);
   margin-bottom: 8px;
-  font-weight: 500;
 }
 
 .confidence-value {
-  font-size: 3em;
-  font-weight: 700;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
   margin-bottom: 15px;
 }
 
@@ -129,10 +139,12 @@
 }
 
 .predictions-title {
-  font-size: 1.3em;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
   margin-bottom: 20px;
   color: var(--text-primary);
-  font-weight: 600;
 }
 
 .prediction-item {
@@ -159,7 +171,9 @@
 }
 
 .prediction-class {
-  font-weight: 600;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-normal);
   color: var(--text-secondary);
 }
 
@@ -197,10 +211,12 @@
 }
 
 .disease-info-title {
-  font-size: 1.4em;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
   color: var(--warning-text);
   margin-bottom: 20px;
-  font-weight: 700;
   border-bottom: 2px solid var(--warning);
   padding-bottom: 10px;
 }
@@ -210,17 +226,21 @@
 }
 
 .info-label {
-  font-size: 0.95em;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-normal);
   color: var(--warning-dark);
   margin-bottom: 6px;
   display: block;
 }
 
 .info-value {
-  font-size: 0.95em;
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-relaxed);
   color: var(--warning-text);
-  line-height: 1.6;
   background: hsl(0, 0%, 100%, 0.5);
   padding: 10px 12px;
   border-radius: 8px;
@@ -296,8 +316,10 @@
   color: var(--text-on-primary);
   border: none;
   border-radius: 12px;
-  font-size: 1.1em;
-  font-weight: 600;
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-normal);
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
@@ -327,10 +349,12 @@
 }
 
 .comparison-title {
-  font-size: 1.3em;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
   color: var(--text-primary);
   margin-bottom: 20px;
-  font-weight: 700;
 }
 
 .comparison-grid {
@@ -346,8 +370,10 @@
 }
 
 .comparison-label {
-  font-weight: 700;
-  font-size: 1.1em;
+  font-family: var(--font-body);
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
   padding: 10px;
   border-radius: 10px;
   margin-bottom: 15px;
@@ -382,8 +408,11 @@
 }
 
 .comparison-description {
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
   color: var(--text-tertiary);
-  font-weight: 500;
   margin: 0;
   text-transform: capitalize;
 }
@@ -536,10 +565,12 @@
 }
 
 .dataset-title {
-  font-size: 1.3em;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
   margin-bottom: 20px;
   color: var(--text-on-primary);
-  font-weight: 700;
 }
 
 .dataset-stats {
@@ -682,8 +713,11 @@
 }
 
 .resources-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
   color: var(--text-tertiary);
-  font-size: 0.9em;
   margin-bottom: 15px;
   font-style: italic;
 }
@@ -721,8 +755,10 @@
   color: var(--text-on-primary);
   border: none;
   border-radius: 25px;
-  font-size: 1em;
-  font-weight: 600;
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-normal);
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px hsl(160, 84%, 39%, 0.3);
@@ -758,10 +794,12 @@
 }
 
 .supported-plants-title {
-  font-size: 1.3em;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
   color: var(--text-primary);
   margin: 30px 0 20px;
-  font-weight: 700;
 }
 
 .supported-fruits {
@@ -779,7 +817,10 @@
   padding: 12px 20px;
   background: var(--gray-100);
   border-radius: 20px;
-  font-weight: 600;
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-normal);
   color: var(--text-secondary);
   transition: all 0.3s ease;
   border: 2px solid transparent;

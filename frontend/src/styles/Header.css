@@ -18,10 +18,13 @@
 }
 
 .title {
-  font-size: 3em;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
   margin-bottom: 10px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-  font-weight: 700;
 }
 
 .emoji {
@@ -31,9 +34,11 @@
 }
 
 .subtitle {
-  font-size: 1.2em;
+  font-family: var(--font-body);
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
   opacity: 0.95;
-  font-weight: 300;
 }
 
 /* Dark Mode Toggle */

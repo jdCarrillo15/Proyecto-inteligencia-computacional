@@ -14,9 +14,11 @@
 }
 
 .info-card h3 {
-  font-size: 1.3em;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
   margin-bottom: 15px;
-  font-weight: 600;
 }
 
 .App.dark-mode .info-card h3 {
@@ -31,7 +33,9 @@
 .info-list li {
   padding: 8px 0;
   border-bottom: 1px solid hsl(0, 0%, 100%, 0.2);
-  font-size: 0.95em;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
 }
 
 .info-list li:last-child {
@@ -75,7 +79,9 @@
 }
 
 .tip-text {
-  font-size: 0.95em;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
   flex: 1;
 }
 
