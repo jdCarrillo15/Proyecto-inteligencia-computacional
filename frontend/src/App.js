@@ -260,6 +260,33 @@ function App() {
               </form>
             </div>
 
+            {/* Guía de Usuario */}
+            <div className="info-card tips-card">
+              <h3>💡 Guía para Mejores Resultados</h3>
+              <ul className="tips-list">
+                <li className="tip-item">
+                  <span className="tip-icon">📸</span>
+                  <span className="tip-text">Sube fotos claras de hojas afectadas</span>
+                </li>
+                <li className="tip-item">
+                  <span className="tip-icon">👁️</span>
+                  <span className="tip-text">Asegúrate de que los síntomas sean visibles</span>
+                </li>
+                <li className="tip-item">
+                  <span className="tip-icon">☀️</span>
+                  <span className="tip-text">Mejor con luz natural (evita flash)</span>
+                </li>
+                <li className="tip-item">
+                  <span className="tip-icon">🎯</span>
+                  <span className="tip-text">Evita fondos complejos o distracciones</span>
+                </li>
+                <li className="tip-item">
+                  <span className="tip-icon">🔍</span>
+                  <span className="tip-text">Enfoca la hoja completa en el encuadre</span>
+                </li>
+              </ul>
+            </div>
+
             {/* Información */}
             <div className="info-card">
               <h3>ℹ️ Información del Sistema</h3>

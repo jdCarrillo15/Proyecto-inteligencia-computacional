@@ -247,6 +247,48 @@
   margin-right: 8px;
 }
 
+/* Tips Card */
+.tips-card {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-left: 5px solid #f59e0b;
+}
+
+.tips-card h3 {
+  color: #92400e;
+  font-weight: 700;
+}
+
+.tips-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tip-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  color: #78350f;
+  border-bottom: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.tip-item:last-child {
+  border-bottom: none;
+}
+
+.tip-icon {
+  font-size: 1.3em;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.tip-text {
+  font-weight: 500;
+  line-height: 1.5;
+  color: #92400e;
+}
+
 /* Results Section */
 .results-card {
   animation: fadeIn 0.6s ease-in;
