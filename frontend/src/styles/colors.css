@@ -48,24 +48,28 @@
   --success: hsl(160, 84%, 39%);        /* #10b981 */
   --success-dark: hsl(160, 85%, 28%);   /* #047857 */
   --success-text: hsl(160, 69%, 19%);   /* #064e3b */
+  --success-border: hsl(160, 84%, 39%);
   
   /* Warning - Para severidad media */
   --warning-light: hsl(48, 96%, 95%);   /* #fefce8 */
   --warning: hsl(45, 93%, 47%);         /* #eab308 */
   --warning-dark: hsl(38, 92%, 50%);    /* #f59e0b */
   --warning-text: hsl(32, 95%, 44%);    /* #ea580c */
+  --warning-border: hsl(45, 93%, 47%);
   
   /* Danger - Para enfermedades críticas */
   --danger-light: hsl(0, 86%, 97%);     /* #fef2f2 */
   --danger: hsl(0, 84%, 60%);           /* #ef4444 */
   --danger-dark: hsl(0, 72%, 51%);      /* #dc2626 */
   --danger-text: hsl(0, 74%, 42%);      /* #b91c1c */
+  --danger-border: hsl(0, 84%, 60%);
   
   /* Info - Para información neutra */
   --info-light: hsl(199, 89%, 96%);     /* #f0f9ff */
   --info: hsl(199, 89%, 48%);           /* #0ea5e9 */
   --info-dark: hsl(199, 89%, 38%);      /* #0284c7 */
   --info-text: hsl(200, 98%, 39%);      /* #0c4a6e */
+  --info-border: hsl(199, 89%, 48%);
   
   /* ===== COLORES DE ESTADO ===== */
   /* Healthy - Plantas saludables */

@@ -199,16 +199,27 @@
 }
 
 /* ===============================
-   DISEASE INFO CARD
+   DISEASE INFO CARD - Usando card-info variant
    =============================== */
 .disease-info-card {
   margin-top: 30px;
-  padding: 25px;
-  background: linear-gradient(135deg, var(--warning-light) 0%, var(--warning-light) 100%);
-  border-radius: 15px;
-  border-left: 6px solid var(--warning);
-  box-shadow: var(--shadow-md);
+  padding: var(--padding-card);
+  background: var(--warning-light);
+  border-radius: 16px;
+  border: 2px solid var(--warning-border);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
   animation: fadeIn 0.6s ease-in;
+}
+
+.disease-info-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.App.dark-mode .disease-info-card {
+  background: var(--warning-dark);
+  border-color: var(--warning-border);
 }
 
 .disease-info-title {
@@ -341,12 +352,24 @@
 }
 
 .comparison-card {
+  /* Card-primary variant */
   background: var(--bg-secondary);
-  border-radius: 15px;
-  padding: 25px;
+  border-radius: 16px;
+  padding: var(--padding-card-lg);
   margin-bottom: 20px;
   box-shadow: var(--shadow-md);
-  border: 2px solid var(--border-light);
+  border: 1px solid var(--border-light);
+  transition: all 0.3s ease;
+}
+
+.comparison-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.App.dark-mode .comparison-card {
+  background: var(--bg-secondary);
+  border-color: var(--border-medium);
 }
 
 .comparison-title {
@@ -557,12 +580,28 @@
    DATASET INFO CARD
    =============================== */
 .dataset-info-card {
-  background: var(--gradient-secondary);
-  border-radius: 15px;
-  padding: 25px;
+  /* Card-glass variant con tema secundario */
+  background: rgba(99, 102, 241, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: var(--padding-card-lg);
   margin-bottom: 20px;
-  box-shadow: var(--shadow-md);
-  color: var(--text-on-primary);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.dataset-info-card:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-2px);
+}
+
+.App.dark-mode .dataset-info-card {
+  background: rgba(99, 102, 241, 0.05);
+  border-color: rgba(99, 102, 241, 0.2);
+  color: var(--text-primary);
 }
 
 .dataset-title {
@@ -571,7 +610,7 @@
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
   margin-bottom: 20px;
-  color: var(--text-on-primary);
+  color: var(--text-primary);
 }
 
 .dataset-stats {
@@ -624,11 +663,23 @@
    RESOURCES CARD
    =============================== */
 .resources-card {
+  /* Card-primary variant */
   background: var(--bg-secondary);
-  border-radius: 15px;
-  padding: 25px;
+  border-radius: 16px;
+  padding: var(--padding-card-lg);
   box-shadow: var(--shadow-md);
-  border: 2px solid var(--border-light);
+  border: 1px solid var(--border-light);
+  transition: all 0.3s ease;
+}
+
+.resources-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.App.dark-mode .resources-card {
+  background: var(--bg-secondary);
+  border-color: var(--border-medium);
 }
 
 .resources-title {
@@ -775,12 +826,24 @@
    PLACEHOLDER CARD
    =============================== */
 .placeholder-card {
+  /* Card-elevated variant para destacar */
   background: var(--bg-secondary);
-  border-radius: 15px;
-  padding: 40px 25px;
-  box-shadow: var(--shadow-md);
-  border: 2px solid var(--border-light);
+  border-radius: 16px;
+  padding: var(--space-3xl) var(--padding-card-lg);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-light);
   text-align: center;
+  transition: all 0.3s ease;
+}
+
+.placeholder-card:hover {
+  box-shadow: var(--shadow-2xl);
+  transform: translateY(-4px);
+}
+
+.App.dark-mode .placeholder-card {
+  background: var(--bg-secondary);
+  border-color: var(--border-medium);
 }
 
 .placeholder-content {
