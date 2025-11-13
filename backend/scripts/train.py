@@ -1,6 +1,16 @@
 """
-Script de entrenamiento ULTRA-OPTIMIZADO con cache PKL.
-Reduce el tiempo de entrenamiento aprovechando datos pre-procesados.
+Script de entrenamiento del modelo de clasificación de enfermedades.
+
+Este script:
+1. Prepara los datos automáticamente (con cache PKL)
+2. Entrena el modelo con Transfer Learning
+3. Evalúa y guarda resultados
+
+Uso:
+    python backend/scripts/train.py
+    
+El sistema detecta automáticamente si necesita preparar datos o puede
+usar el cache existente.
 """
 
 import os
@@ -36,8 +46,8 @@ if physical_devices:
     print("✅ GPU detectada y configurada")
 
 
-class FastFruitClassifier:
-    """Clasificador optimizado con cache PKL y mejoras de rendimiento."""
+class PlantDiseaseClassifier:
+    """Clasificador de enfermedades de plantas con Transfer Learning."""
     
     def __init__(self, img_size=(100, 100), num_classes=15, use_transfer_learning=True):
         """
@@ -147,7 +157,7 @@ class FastFruitClassifier:
             History object
         """
         print("\n" + "=" * 60)
-        print("🎯 INICIANDO ENTRENAMIENTO RÁPIDO")
+        print("🎯 INICIANDO ENTRENAMIENTO")
         print("=" * 60)
         print(f"  - Muestras train: {len(X_train):,}")
         print(f"  - Muestras test: {len(X_test):,}")
@@ -382,23 +392,29 @@ class FastFruitClassifier:
 
 def main():
     """
-    Función principal de entrenamiento rápido.
+    Función principal de entrenamiento.
     
-    IMPORTANTE: Si actualizaste las clases del modelo, debes limpiar el cache anterior:
+    IMPORTANTE: Si actualizas las clases del modelo, limpia el cache:
         python backend/utils/manage_cache.py
         Opción [2] - Limpiar cache
     """
-    print("\n🚀 ENTRENAMIENTO ULTRA-RÁPIDO CON CACHE PKL")
-    print("=" * 60)
+    print("\n" + "=" * 70)
+    print("🚀 ENTRENAMIENTO DE CLASIFICADOR DE ENFERMEDADES")
+    print("=" * 70)
     
-    # Configuración
+    # ================================================================
+    # CONFIGURACIÓN
+    # ================================================================
     RAW_DATASET = "dataset/raw"
+    PROCESSED_DATASET = "dataset/processed"
     IMG_SIZE = (100, 100)
-    EPOCHS_PHASE1 = 15  # Entrenamiento inicial
-    EPOCHS_PHASE2 = 10  # Fine-tuning
-    BATCH_SIZE = 64     # Aumentado para rapidez
+    
+    # Parámetros de entrenamiento optimizados
+    EPOCHS_PHASE1 = 20      # Entrenamiento inicial
+    EPOCHS_PHASE2 = 8       # Fine-tuning
+    BATCH_SIZE = 32         # Batch size para regularización
     USE_TRANSFER_LEARNING = True
-    DO_FINE_TUNING = True
+    DO_FINE_TUNING = False  # Desactivado por defecto (causa overfitting)
     
     print("\n⚙️  CONFIGURACIÓN:")
     print(f"  - Transfer Learning: {'✅ MobileNetV2' if USE_TRANSFER_LEARNING else '❌'}")
@@ -438,9 +454,27 @@ def main():
     test_data = cache.load(RAW_DATASET, config, 'test')
     
     if not train_data or not test_data:
-        print("\n❌ Cache no encontrado. Ejecuta primero:")
-        print("   python scripts/data_preparation_fast.py")
-        return
+        print("\n⚠️  Cache no encontrado. Preparando datos automáticamente...")
+        print("=" * 70)
+        
+        # Importar y ejecutar preparación de datos
+        from prepare_dataset import DatasetProcessor
+        
+        processor = DatasetProcessor(RAW_DATASET, PROCESSED_DATASET, IMG_SIZE)
+        result = processor.prepare_optimized(use_cache=True, force_reprocess=False)
+        
+        if not result:
+            print("\n❌ Error preparando datos. Verifica que el dataset exista en:")
+            print(f"   {RAW_DATASET}/New Plant Diseases Dataset(Augmented)/train/")
+            return
+        
+        # Cargar datos recién preparados
+        train_data = cache.load(RAW_DATASET, config, 'train')
+        test_data = cache.load(RAW_DATASET, config, 'test')
+        
+        if not train_data or not test_data:
+            print("\n❌ Error cargando datos preparados")
+            return
     
     X_train, y_train, class_names = train_data
     X_test, y_test, _ = test_data
@@ -453,7 +487,7 @@ def main():
     print(f"  - Clases: {class_names}")
     
     # Crear y construir modelo
-    classifier = FastFruitClassifier(
+    classifier = PlantDiseaseClassifier(
         img_size=IMG_SIZE,
         num_classes=num_classes,
         use_transfer_learning=USE_TRANSFER_LEARNING
@@ -506,11 +540,17 @@ def main():
     print("  - models/class_mapping.json")
     print("  - models/visualizations/")
     
-    print("\n💡 VENTAJAS DEL SISTEMA OPTIMIZADO:")
-    print("  ✅ Cache PKL: Datos procesados se guardan para reuso")
-    print("  ✅ Transfer Learning: Entrenamiento 3-5x más rápido")
-    print("  ✅ Batch size optimizado: Mayor throughput")
-    print("  ✅ Siguientes entrenamientos serán instantáneos")
+    print("\n💡 CARACTERÍSTICAS:")
+    print("  ✅ Preparación automática: Detecta y prepara datos si es necesario")
+    print("  ✅ Cache PKL: Datos se guardan para reuso")
+    print("  ✅ Transfer Learning: Usa MobileNetV2 pre-entrenado")
+    print("  ✅ Data Augmentation: Previene overfitting")
+    print("  ✅ Optimizado: Hiperparámetros balanceados")
+    
+    print("\n🎯 PRÓXIMOS PASOS:")
+    print("  1. Probar predicciones: python backend/scripts/predict.py <imagen>")
+    print("  2. Iniciar API: python backend/app.py")
+    print("  3. Re-entrenar: python backend/scripts/train.py")
 
 
 if __name__ == "__main__":

@@ -32,8 +32,8 @@ echo.
 echo [2/3] Iniciando entrenamiento optimizado...
 echo.
 
-REM Ejecutar el script de entrenamiento rapido
-python backend\scripts\quick_train.py
+REM Ejecutar el script de entrenamiento unificado
+python backend\scripts\train.py
 
 if errorlevel 1 (
     echo.

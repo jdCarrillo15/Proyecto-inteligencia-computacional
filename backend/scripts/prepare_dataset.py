@@ -1,6 +1,6 @@
 """
-Script OPTIMIZADO de preparación de datos con soporte de CACHE PKL.
-Procesa el dataset una sola vez y lo guarda para entrenamientos futuros.
+Script de preparación de datos con sistema de cache.
+Procesa el dataset y lo guarda para entrenamientos futuros.
 """
 
 import os
@@ -19,8 +19,8 @@ sys.path.insert(0, str(backend_dir))
 from utils.data_cache import DataCache, create_data_arrays_from_directory
 
 
-class FastDatasetProcessor:
-    """Procesador optimizado de dataset con soporte de cache PKL."""
+class DatasetProcessor:
+    """Procesador de dataset con sistema de cache PKL."""
     
     def __init__(self, raw_dataset_path, processed_path, img_size=(100, 100)):
         """
@@ -149,7 +149,7 @@ class FastDatasetProcessor:
         
         # Procesar dataset desde cero
         print("\n" + "=" * 60)
-        print("🔄 PROCESAMIENTO RÁPIDO DE DATASET")
+        print("🔄 PROCESAMIENTO DE DATASET")
         print("=" * 60)
         
         # Buscar directorios de train y test
@@ -172,7 +172,7 @@ class FastDatasetProcessor:
         
         # Cargar y procesar imágenes
         print("\n⏳ Procesando imágenes...")
-        X_train, y_train, class_names = self._load_images_fast(train_dir)
+        X_train, y_train, class_names = self._load_images(train_dir)
         
         if len(X_train) == 0:
             print("❌ Error: No se cargaron imágenes del directorio de entrenamiento")
@@ -180,7 +180,7 @@ class FastDatasetProcessor:
         
         # Cargar test o dividir train
         if test_dir:
-            X_test, y_test, _ = self._load_images_fast(test_dir)
+            X_test, y_test, _ = self._load_images(test_dir)
             # Si test está vacío, dividir train
             if len(X_test) == 0:
                 print("\n⚠️  Test vacío, dividiendo datos de train (80/20)...")
@@ -242,7 +242,7 @@ class FastDatasetProcessor:
         
         return None
     
-    def _load_images_fast(self, directory):
+    def _load_images(self, directory):
         """
         Carga imágenes de forma rápida y eficiente.
         
@@ -289,7 +289,7 @@ class FastDatasetProcessor:
                 for ext in ['*.jpg', '*.jpeg', '*.png', '*.JPG', '*.JPEG', '*.PNG']:
                     image_files.extend(list(class_dir.glob(ext)))
                 
-                # Limitar cantidad por clase para entrenamiento rápido
+                # Limitar cantidad por clase si es necesario
                 max_per_class = 1000  # Ajusta según necesidad
                 image_files = image_files[:max_per_class]
                 
@@ -340,7 +340,7 @@ class FastDatasetProcessor:
 
 def main():
     """Función principal para preparar el dataset."""
-    print("\n🚀 PREPARACIÓN RÁPIDA DE DATASET CON CACHE PKL")
+    print("\n🚀 PREPARACIÓN DE DATASET")
     print("=" * 60)
     
     # Configuración
@@ -349,11 +349,11 @@ def main():
     IMG_SIZE = (100, 100)
     
     # Crear procesador
-    processor = FastDatasetProcessor(RAW_DATASET, PROCESSED_DATASET, IMG_SIZE)
+    processor = DatasetProcessor(RAW_DATASET, PROCESSED_DATASET, IMG_SIZE)
     
     # Opciones
     print("\n⚙️  Opciones:")
-    print("  1. Usar cache (rápido)")
+    print("  1. Usar cache")
     print("  2. Forzar reprocesamiento")
     print("  3. Ver información del cache")
     print("  4. Limpiar cache")
@@ -391,7 +391,7 @@ def main():
         print(f"  - Clases: {class_names}")
         
         print("\n💡 Siguiente paso:")
-        print("   Ejecuta 'python scripts/train_model_fast.py' para entrenar")
+        print("   Ejecuta 'python backend/scripts/train.py' para entrenar")
 
 
 if __name__ == "__main__":

@@ -1,170 +1,156 @@
-# Backend - API de Diagnóstico
+# Backend - Clasificador de Enfermedades de Plantas
 
-Servidor Flask que expone el modelo CNN para detectar enfermedades en plantas.
+Sistema de clasificación de enfermedades en plantas usando Deep Learning con Transfer Learning (MobileNetV2).
 
-## Qué hace
-
-Recibe imágenes de hojas, las procesa y devuelve la predicción del modelo junto con las probabilidades de cada clase. También provee endpoints para verificar el estado del servicio.
-
-## Características
-
-- API REST sin HTML (solo JSON)
-- CORS configurado para React
-- Carga el modelo TensorFlow al iniciar
-- Procesa imágenes con Pillow
-- Devuelve todas las predicciones ordenadas por confianza
-- Manejo de errores robusto
-
-## Requisitos
-
-- Python 3.10 o superior
-- pip
-- Modelo entrenado (`models/fruit_classifier.keras`)
-
-## Instalación
-
-Crear entorno virtual (recomendado):
-
-```bash
-python -m venv venv
-```
-
-Activarlo:
-
-```bash
-# Windows
-venv\Scripts\activate
-
-# Linux/Mac
-source venv/bin/activate
-```
-
-Instalar dependencias:
-
-```bash
-pip install -r requirements.txt
-```
-
-## Uso
-
-Si no tienes el modelo entrenado:
-
-```bash
-python scripts/train_model.py
-```
-
-Iniciar servidor:
-
-```bash
-python app.py
-```
-
-Corre en http://localhost:5000
-
-## Endpoints
-
-**GET /**
-
-Info básica de la API (nombre, versión, endpoints disponibles).
-
-**GET /health**
-
-Verifica que el modelo esté cargado:
-
-```json
-{
-  "status": "ok",
-  "model_loaded": true,
-  "classes": ["apple___apple_scab", "corn_(maize)___healthy", ...]
-}
-```
-
-**POST /predict**
-
-Enviar imagen para clasificar.
-
-Request:
-- Content-Type: `multipart/form-data`
-- Field: `file` (JPG, JPEG o PNG)
-
-Response:
-```json
-{
-  "success": true,
-  "predicted_class": "tomato___late_blight",
-  "confidence": 0.9532,
-  "confidence_percentage": "95.32",
-  "all_predictions": [
-    {"class": "tomato___late_blight", "probability": 0.9532, "percentage": "95.32"},
-    {"class": "tomato___early_blight", "probability": 0.0312, "percentage": "3.12"},
-    ...
-  ],
-  "image_data": "base64..."
-}
-```
-
-**GET /dataset-info**
-
-Devuelve info sobre visualizaciones del dataset (si existen).
-
-## Stack
-
-- Flask 3.0
-- Flask-CORS (para conectar con React)
-- TensorFlow 2.18 y Keras 3.6
-- Pillow (procesamiento de imágenes)
-- NumPy
-
-## Estructura
+## 📁 Estructura
 
 ```
 backend/
-├── app.py                    # Servidor Flask
-├── config.py                 # Configuración
-├── requirements.txt          # Dependencias
-├── models/                   # Modelos entrenados
-│   ├── fruit_classifier.keras
-│   └── class_mapping.json
-├── scripts/                  # Entrenamiento
-│   ├── train_model.py
-│   └── predict.py
-└── utils/                    # Herramientas
-    ├── diagnose_model.py
-    └── quick_test.py
+├── app.py                      # API REST Flask
+├── config.py                   # Configuración centralizada
+├── requirements.txt            # Dependencias
+├── scripts/
+│   ├── train.py               # Entrenamiento del modelo
+│   ├── prepare_dataset.py     # Preparación de datos
+│   └── predict.py             # Predicciones desde terminal
+├── utils/
+│   ├── data_cache.py          # Sistema de cache
+│   └── manage_cache.py        # Gestión del cache
+└── cache/                     # Cache (generado automáticamente)
 ```
 
-## Seguridad
+## 🚀 Uso
 
-- Límite de 16MB por archivo
-- Solo acepta JPG, JPEG y PNG
-- Valida dimensiones mínimas
-- Manejo de excepciones en todo el flujo
-
-## Problemas Comunes
-
-**Modelo no encontrado:**
+### 1. Instalar dependencias
 ```bash
-python scripts/train_model.py
+pip install -r backend/requirements.txt
 ```
 
-**CORS no funciona:**
+### 2. Entrenar el modelo
 ```bash
-pip install flask-cors
+python backend/scripts/train.py
 ```
 
-**Puerto ocupado:**
+El script hace automáticamente:
+- ✅ Detecta si necesita preparar datos
+- ✅ Usa cache si existe
+- ✅ Entrena con Transfer Learning
+- ✅ Evalúa y guarda el modelo
+- ✅ Genera visualizaciones
 
-Cambia el puerto en `app.py`:
-```python
-app.run(debug=True, host='0.0.0.0', port=OTRO_PUERTO)
+**Tiempo estimado:**
+- Primera vez: 15-30 min (prepara datos + entrena)
+- Con cache: 10-20 min (solo entrena)
+- Re-entrenamiento: 10-15 min (cache + train)
+
+### 3. Probar predicciones
+```bash
+python backend/scripts/predict.py dataset/raw/test/AppleScab1.JPG
+python backend/scripts/predict.py dataset/raw/test/TomatoHealthy1.JPG --all
 ```
 
-## Sobre el Modelo
+### 4. Iniciar API
+```bash
+python backend/app.py
+```
+API disponible en: http://localhost:5000
 
-El modelo es una CNN entrenada con transfer learning. Procesa imágenes de 100x100 píxeles en RGB y clasifica entre 15 tipos de enfermedades en 4 cultivos diferentes.
+## 📊 Scripts Disponibles
 
-La precisión depende de la calidad de la imagen y las condiciones de captura, pero generalmente supera el 90% en fotos claras.
+### `train.py` ⭐
+Script principal de entrenamiento:
+```bash
+python backend/scripts/train.py
+```
 
-## Proyecto Académico
+**Características:**
+- Detecta automáticamente si hay cache
+- Prepara datos si es necesario
+- Entrena y evalúa el modelo
+- Guarda todo automáticamente
 
-Desarrollado para Inteligencia Computacional - UPTC
+### `prepare_dataset.py`
+Preparación manual de datos (opcional):
+```bash
+python backend/scripts/prepare_dataset.py
+```
+Nota: `train.py` ya prepara datos automáticamente si es necesario.
+
+### `predict.py`
+Predicciones desde terminal:
+```bash
+python backend/scripts/predict.py <imagen> [--all] [--model <ruta>]
+```
+
+## 🎯 15 Enfermedades Clasificadas
+
+1. Apple___Apple_scab
+2. Apple___Black_rot
+3. Apple___Cedar_apple_rust
+4. Apple___healthy
+5. Corn_(maize)___Common_rust_
+6. Corn_(maize)___healthy
+7. Corn_(maize)___Northern_Leaf_Blight
+8. Potato___Early_blight
+9. Potato___healthy
+10. Potato___Late_blight
+11. Tomato___Bacterial_spot
+12. Tomato___Early_blight
+13. Tomato___healthy
+14. Tomato___Late_blight
+15. Tomato___Leaf_Mold
+
+## 🧠 Arquitectura del Modelo
+
+- **Base:** MobileNetV2 pre-entrenado (ImageNet)
+- **Data Augmentation:** RandomFlip, RandomRotation, RandomZoom, RandomContrast
+- **Regularización:** Dropout 0.3, Batch size 32
+- **Optimizador:** Adam (lr=0.001)
+
+## 📈 Resultados Esperados
+
+- **Precisión objetivo:** 60-80%
+- **Tiempo de entrenamiento:** 15-30 min (primera vez)
+- **15 clases:** Apple, Corn, Potato, Tomato (sanas y enfermas)
+
+## 📚 API REST
+
+### POST /predict
+Clasificar imagen:
+```bash
+curl -X POST -F "file=@imagen.jpg" http://localhost:5000/predict
+```
+
+### GET /health
+Estado del servicio
+
+### GET /
+Info de la API
+
+## 🔧 Solución de Problemas
+
+**"Cache no encontrado"**
+```bash
+python backend/scripts/train.py  # Regenera automáticamente
+```
+
+**"Modelo no encontrado"**
+```bash
+python backend/scripts/train.py
+```
+
+**"Baja precisión"**
+- Asegúrate de que fine-tuning esté desactivado
+- Verifica que data augmentation esté activo
+- Limpia cache y re-entrena
+
+## 📝 Notas
+
+- **train.py:** Script principal, hace todo automáticamente
+- **Cache:** Acelera entrenamientos reutilizando datos procesados
+- **Transfer Learning:** Usa MobileNetV2 pre-entrenado
+- **Data Augmentation:** Previene overfitting
+
+---
+
+**Stack:** TensorFlow 2.18, Keras 3.6, Flask 3.0, OpenCV 4.8
