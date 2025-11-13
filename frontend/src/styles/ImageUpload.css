@@ -2,8 +2,8 @@
 .upload-area {
   border: 3px dashed var(--primary-500);
   border-radius: 15px;
-  padding: 40px 20px;
-  margin: 20px 0;
+  padding: var(--space-2xl) var(--space-lg);
+  margin: var(--space-lg) 0;
   cursor: pointer;
   transition: all 0.3s ease;
   background: var(--primary-50);
@@ -81,7 +81,7 @@
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-normal);
   color: var(--text-tertiary);
-  margin-top: 10px;
+  margin-top: var(--space-sm);
 }
 
 .App.dark-mode .upload-formats {
@@ -95,7 +95,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: var(--space-sm);
 }
 
 .preview-image {

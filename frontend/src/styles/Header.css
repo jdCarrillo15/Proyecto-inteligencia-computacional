@@ -1,7 +1,7 @@
 /* Header Styles */
 .header {
   color: white;
-  margin-bottom: 40px;
+  margin-bottom: var(--margin-section);
   animation: fadeIn 0.6s ease-in;
 }
 
@@ -9,7 +9,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 20px;
+  gap: var(--space-lg);
 }
 
 .header-text {
@@ -23,12 +23,12 @@
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
   letter-spacing: var(--letter-spacing-tight);
-  margin-bottom: 10px;
+  margin-bottom: var(--space-sm);
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .emoji {
-  margin: 0 15px;
+  margin: 0 var(--space-md);
   display: inline-block;
   animation: bounce 2s infinite;
 }

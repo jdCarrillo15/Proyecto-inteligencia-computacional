@@ -82,20 +82,23 @@
 }
 
 .container {
-  max-width: 1400px;
+  max-width: var(--container-max-width);
   margin: 0 auto;
+  padding-left: var(--container-padding);
+  padding-right: var(--container-padding);
 }
 
 .main-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  margin-bottom: 30px;
+  gap: var(--gap-lg);
+  margin-bottom: var(--margin-section-lg);
 }
 
 @media (max-width: 1024px) {
   .main-content {
     grid-template-columns: 1fr;
+    gap: var(--gap-md);
   }
 }
 
@@ -103,7 +106,7 @@
 .card {
   background: var(--bg-secondary);
   border-radius: 20px;
-  padding: 30px;
+  padding: var(--padding-card-lg);
   box-shadow: var(--shadow-sm);
   transition: box-shadow 0.3s ease, transform 0.3s ease;
   animation: slideUp 0.5s ease-out;
@@ -136,7 +139,7 @@
 .upload-section {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--gap-md);
 }
 
 .results-section {
@@ -166,8 +169,8 @@
 /* Buttons */
 .button-group {
   display: flex;
-  gap: 15px;
-  margin-top: 20px;
+  gap: var(--gap-sm);
+  margin-top: var(--space-lg);
   flex-wrap: wrap;
 }
 
