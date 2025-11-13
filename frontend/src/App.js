@@ -95,15 +95,32 @@ function App() {
     }
   };
 
-  const getFruitEmoji = (fruitName) => {
+  const getDiseaseEmoji = (diseaseName) => {
     const emojis = {
-      'manzana': '🍎',
-      'banano': '🍌',
-      'mango': '🥭',
-      'naranja': '🍊',
-      'pera': '🍐',
+      // Manzana (Apple)
+      'apple___apple_scab': '🍎🟤',
+      'apple___black_rot': '🍎⚫',
+      'apple___cedar_apple_rust': '🍎🦠',
+      'apple___healthy': '🍎🌿',
+      
+      // Maíz (Corn/Maize)
+      'corn_(maize)___common_rust_': '🌽🟤',
+      'corn_(maize)___healthy': '🌽🌿',
+      'corn_(maize)___northern_leaf_blight': '🌽🍄',
+      
+      // Papa (Potato)
+      'potato___early_blight': '🥔🟤',
+      'potato___healthy': '🥔🌿',
+      'potato___late_blight': '🥔🍄',
+      
+      // Tomate (Tomato)
+      'tomato___bacterial_spot': '🍅🦠',
+      'tomato___early_blight': '🍅🟤',
+      'tomato___healthy': '🍅🌿',
+      'tomato___late_blight': '🍅🍄',
+      'tomato___leaf_mold': '🍅🟢',
     };
-    return emojis[fruitName.toLowerCase()] || '🍇';
+    return emojis[diseaseName.toLowerCase()] || '🌱❓';
   };
 
   const getConfidenceColor = (confidence) => {
@@ -217,7 +234,7 @@ function App() {
                 <div className="prediction-result">
                   <div className="fruit-result">
                     <span className="fruit-emoji-large">
-                      {getFruitEmoji(prediction.predicted_class)}
+                      {getDiseaseEmoji(prediction.predicted_class)}
                     </span>
                     <h3 className="fruit-name">
                       {prediction.predicted_class.charAt(0).toUpperCase() + 
@@ -251,7 +268,7 @@ function App() {
                     <div key={index} className="prediction-item">
                       <div className="prediction-label">
                         <span className="prediction-emoji">
-                          {getFruitEmoji(pred.class)}
+                          {getDiseaseEmoji(pred.class)}
                         </span>
                         <span className="prediction-class">
                           {pred.class.charAt(0).toUpperCase() + pred.class.slice(1)}
