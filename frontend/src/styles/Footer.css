@@ -1,0 +1,13 @@
+/* Footer Styles */
+.footer {
+  text-align: center;
+  color: white;
+  padding: 20px;
+  font-size: 0.95em;
+  opacity: 0.9;
+  animation: fadeIn 0.8s ease-in;
+}
+
+.footer p {
+  margin: 5px 0;
+}

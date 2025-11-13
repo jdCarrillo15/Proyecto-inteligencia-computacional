@@ -23,13 +23,13 @@ tf.random.set_seed(42)
 
 
 class FruitClassifierCNN:
-    def __init__(self, img_size=(100, 100), num_classes=5, use_transfer_learning=True):
+    def __init__(self, img_size=(100, 100), num_classes=15, use_transfer_learning=True):
         """
         Inicializa el clasificador CNN.
         
         Args:
             img_size: Tamaño de las imágenes de entrada (ancho, alto)
-            num_classes: Número de clases a clasificar
+            num_classes: Número de clases a clasificar (15 enfermedades específicas por defecto)
             use_transfer_learning: Si True, usa MobileNetV2 pre-entrenado
         """
         self.img_size = img_size
@@ -38,7 +38,24 @@ class FruitClassifierCNN:
         self.model = None
         self.base_model = None
         self.history = None
-        self.class_names = ['manzana', 'banano', 'mango', 'naranja', 'pera']
+        # 15 clases específicas del dataset de Kaggle
+        self.class_names = [
+            'Apple___Apple_scab',
+            'Apple___Black_rot',
+            'Apple___Cedar_apple_rust',
+            'Apple___healthy',
+            'Corn_(maize)___Common_rust_',
+            'Corn_(maize)___healthy',
+            'Corn_(maize)___Northern_Leaf_Blight',
+            'Potato___Early_blight',
+            'Potato___healthy',
+            'Potato___Late_blight',
+            'Tomato___Bacterial_spot',
+            'Tomato___Early_blight',
+            'Tomato___healthy',
+            'Tomato___Late_blight',
+            'Tomato___Leaf_Mold'
+        ]
         
     def build_model(self):
         """Construye la arquitectura de la CNN con o sin transfer learning."""
@@ -535,7 +552,7 @@ def main():
     # Crear instancia del clasificador
     classifier = FruitClassifierCNN(
         img_size=IMG_SIZE, 
-        num_classes=5,
+        num_classes=15,
         use_transfer_learning=USE_TRANSFER_LEARNING
     )
     
