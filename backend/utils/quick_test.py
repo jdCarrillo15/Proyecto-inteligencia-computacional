@@ -184,7 +184,7 @@ def test_config():
     print_header("⚙️  TEST 6: Verificando Configuración")
     
     try:
-        import config
+        import backend.config as config
         
         print(f"  ✅ Clases: {config.CLASSES}")
         print(f"  ✅ Tamaño de imagen: {config.IMG_SIZE}")

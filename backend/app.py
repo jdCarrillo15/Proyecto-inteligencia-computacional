@@ -1,9 +1,10 @@
 """
-Aplicación web Flask para clasificación de frutas usando el modelo CNN entrenado.
-Permite subir imágenes y obtener predicciones en tiempo real.
+API Flask para clasificación de frutas usando el modelo CNN entrenado.
+Proporciona endpoints REST para predicciones de imágenes.
 """
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import os
 import numpy as np
 from PIL import Image
@@ -15,11 +16,8 @@ import io
 import base64
 
 app = Flask(__name__)
+CORS(app)  # Habilitar CORS para el frontend React
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
-
-# Crear carpeta de uploads si no existe
-Path(app.config['UPLOAD_FOLDER']).mkdir(parents=True, exist_ok=True)
 
 # Variables globales para el modelo
 model = None
@@ -178,8 +176,17 @@ def predict_fruit(image_file):
 
 @app.route('/')
 def index():
-    """Página principal."""
-    return render_template('index.html')
+    """Endpoint raíz - información de la API."""
+    return jsonify({
+        'name': 'Fruit Classifier API',
+        'version': '1.0.0',
+        'description': 'API para clasificación de frutas usando CNN',
+        'endpoints': {
+            '/health': 'Estado del servicio',
+            '/predict': 'Realizar predicción (POST)',
+            '/dataset-info': 'Información del dataset'
+        }
+    })
 
 
 @app.route('/predict', methods=['POST'])
@@ -243,13 +250,14 @@ def dataset_info():
 
 
 if __name__ == '__main__':
-    print("\n🍎 APLICACIÓN WEB - CLASIFICADOR DE FRUTAS 🍌")
+    print("\n🍎 API REST - CLASIFICADOR DE FRUTAS 🍌")
     print("=" * 60)
     
     # Cargar modelo
     if load_model_and_classes():
-        print("\n🚀 Iniciando servidor Flask...")
-        print("📱 Accede a la aplicación en: http://localhost:5000")
+        print("\n🚀 Iniciando servidor Flask API...")
+        print("� API disponible en: http://localhost:5000")
+        print("🌐 Frontend React: http://localhost:3000")
         print("=" * 60)
         
         app.run(debug=True, host='0.0.0.0', port=5000)
