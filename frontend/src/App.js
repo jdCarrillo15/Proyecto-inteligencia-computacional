@@ -581,7 +581,7 @@ function App() {
                 <li>Precisión del modelo: ~95%</li>
                 <li>Tiempo de predicción: &lt;1 segundo</li>
               </ul>
-            </div>
+            </aside>
           </section>
 
           <section className="results-section" aria-label="Sección de resultados del diagnóstico">
@@ -777,6 +777,15 @@ function App() {
                         {/* Comparación Sana vs Enferma */}
                         <div className="comparison-card">
                           <h4 className="comparison-title">🔄 Comparación: Sana vs Enferma</h4>
+                          
+                          <div className="feature-status-banner development">
+                            <span className="status-icon">🚧</span>
+                            <div className="status-content">
+                              <strong>Funcionalidad en desarrollo</strong>
+                              <p>La galería visual comparativa está en implementación. Mientras tanto, puedes consultar ejemplos visuales en los recursos externos.</p>
+                            </div>
+                          </div>
+
                           <div className="comparison-grid">
                             <div className="comparison-item healthy">
                               <div className="comparison-label healthy-label">
@@ -789,6 +798,15 @@ function App() {
                                 <p className="comparison-description">
                                   {getPlantType(prediction.predicted_class)?.replace('_', ' ')} sin síntomas de enfermedad
                                 </p>
+                                <div className="placeholder-info">
+                                  <p><strong>Características saludables:</strong></p>
+                                  <ul>
+                                    <li>Hojas verdes uniformes</li>
+                                    <li>Sin manchas o decoloraciones</li>
+                                    <li>Crecimiento vigoroso</li>
+                                    <li>Sin signos de marchitamiento</li>
+                                  </ul>
+                                </div>
                               </div>
                             </div>
 
@@ -805,40 +823,87 @@ function App() {
                                 <p className="comparison-description">
                                   {prediction.predicted_class.replace(/_/g, ' ').split('___')[1]}
                                 </p>
+                                {getDiseaseInfo(prediction.predicted_class) && (
+                                  <div className="placeholder-info">
+                                    <p><strong>Síntomas principales:</strong></p>
+                                    <ul>
+                                      {getDiseaseInfo(prediction.predicted_class).symptoms.slice(0, 4).map((symptom, idx) => (
+                                        <li key={idx}>{symptom}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
+                          
+                          <div className="comparison-alternatives">
+                            <h5>🔍 Mientras tanto, puedes ver ejemplos visuales en:</h5>
+                            <div className="alternative-links">
+                              <a 
+                                href="https://plantvillage.psu.edu/" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="alternative-link"
+                              >
+                                <span>📘</span> PlantVillage - Atlas de Enfermedades
+                              </a>
+                              <a 
+                                href="https://www.kaggle.com/datasets/vipoooool/new-plant-diseases-dataset" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="alternative-link"
+                              >
+                                <span>📊</span> Dataset Kaggle - Imágenes de Entrenamiento
+                              </a>
+                            </div>
+                          </div>
+
                           <div className="comparison-note">
-                            💡 <strong>Tip:</strong> Compare los síntomas visibles en su cultivo con ejemplos documentados para confirmar el diagnóstico.
+                            💡 <strong>Tip:</strong> Compare los síntomas visibles en su cultivo con ejemplos documentados en los recursos externos para confirmar el diagnóstico.
                           </div>
                         </div>
 
-                        {/* Galería de Ejemplos */}
-                        <div className="gallery-card">
-                          <h4 className="gallery-title"><span aria-hidden="true">📸</span> Galería de Ejemplos</h4>
-                          <div className="gallery-grid">
-                            <div className="gallery-item" role="img" aria-label="Ejemplo de enfermedad en estadio inicial">
-                              <div className="gallery-placeholder">
-                                <span className="gallery-icon" aria-hidden="true">🌿</span>
-                                <p>Estadio inicial</p>
+                        {/* Información de Dataset */}
+                        <div className="dataset-info-card">
+                          <h4 className="dataset-title">📊 Información del Dataset de Entrenamiento</h4>
+                          <div className="dataset-stats">
+                            <div className="stat-item">
+                              <span className="stat-icon">🖼️</span>
+                              <div className="stat-content">
+                                <strong>15,000+</strong>
+                                <p>Imágenes totales</p>
                               </div>
                             </div>
-                            <div className="gallery-item" role="img" aria-label="Ejemplo de enfermedad en estadio medio">
-                              <div className="gallery-placeholder">
-                                <span className="gallery-icon" aria-hidden="true">⚠️</span>
-                                <p>Estadio medio</p>
+                            <div className="stat-item">
+                              <span className="stat-icon">🌿</span>
+                              <div className="stat-content">
+                                <strong>15</strong>
+                                <p>Clases de enfermedades</p>
                               </div>
                             </div>
-                            <div className="gallery-item" role="img" aria-label="Ejemplo de enfermedad en estadio avanzado">
-                              <div className="gallery-placeholder">
-                                <span className="gallery-icon" aria-hidden="true">🔴</span>
-                                <p>Estadio avanzado</p>
+                            <div className="stat-item">
+                              <span className="stat-icon">🔬</span>
+                              <div className="stat-content">
+                                <strong>4</strong>
+                                <p>Tipos de cultivos</p>
+                              </div>
+                            </div>
+                            <div className="stat-item">
+                              <span className="stat-icon">✅</span>
+                              <div className="stat-content">
+                                <strong>95%+</strong>
+                                <p>Precisión del modelo</p>
                               </div>
                             </div>
                           </div>
-                          <p className="gallery-note">
-                            📚 Las imágenes de ejemplo están disponibles en el dataset de entrenamiento (15,000+ imágenes)
-                          </p>
+                          <div className="dataset-note">
+                            <p>
+                              <strong>Fuente:</strong> New Plant Diseases Dataset (Augmented) de Kaggle
+                              <br />
+                              Las imágenes fueron recolectadas en condiciones controladas y validadas por expertos en fitopatología.
+                            </p>
+                          </div>
                         </div>
 
                         {/* Recursos Externos */}
