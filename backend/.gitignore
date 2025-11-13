@@ -43,6 +43,9 @@ env/
 dataset/raw/
 dataset/processed/
 
+# Cache files (large pickle files)
+cache/*.pkl
+
 # Models
 # models/*.h5
 # models/*.keras

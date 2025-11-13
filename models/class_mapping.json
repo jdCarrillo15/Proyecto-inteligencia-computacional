@@ -1,0 +1,13 @@
+{
+    "class_names": [
+        "Apple",
+        "Corn",
+        "Potato",
+        "Tomato"
+    ],
+    "num_classes": 4,
+    "img_size": [
+        100,
+        100
+    ]
+}
