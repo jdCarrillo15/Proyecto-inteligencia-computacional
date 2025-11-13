@@ -11,6 +11,7 @@ import {
   getResourceLinks,
   getResourceIcon
 } from '../utils/diseaseHelpers';
+import ConfidenceRadialChart from './ConfidenceRadialChart';
 
 const PredictionResults = ({ prediction }) => {
   const [showComparison, setShowComparison] = useState(false);
@@ -98,24 +99,11 @@ const PredictionResults = ({ prediction }) => {
           )}
         </div>
 
-        <div className="confidence-container">
-          <div className="confidence-label">Confianza del Modelo</div>
-          <div 
-            className="confidence-value"
-            style={{ color: getConfidenceColor(prediction.confidence) }}
-          >
-            {prediction.confidence_percentage}%
-          </div>
-          <div className="confidence-bar">
-            <div 
-              className="confidence-fill"
-              style={{ 
-                width: `${prediction.confidence * 100}%`,
-                backgroundColor: getConfidenceColor(prediction.confidence)
-              }}
-            />
-          </div>
-        </div>
+        {/* Gráfica Radial de Confianza */}
+        <ConfidenceRadialChart 
+          confidence={prediction.confidence_percentage}
+          size={180}
+        />
       </div>
 
       {/* Todas las Predicciones */}
