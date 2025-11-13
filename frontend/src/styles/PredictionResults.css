@@ -133,8 +133,10 @@
 */
 
 /* ===============================
-   ALL PREDICTIONS LIST
+   ALL PREDICTIONS LIST - Migrado a TopPredictionsChart.css
    =============================== */
+/* Estilos antiguos comentados - Ahora se usa TopPredictionsChart con BarChart horizontal */
+/*
 .all-predictions {
   margin-top: var(--space-xl);
   padding-top: var(--space-xl);
@@ -200,6 +202,7 @@
   color: var(--text-secondary);
   min-width: 60px;
 }
+*/
 
 /* ===============================
    DISEASE INFO CARD - Usando card-info variant

@@ -13,7 +13,6 @@ const Header = ({ darkMode, onToggleDarkMode }) => {
         <div className="header-text">
           <h1 className="title">
             Detector de Enfermedades en Plantas
-            <span className="emoji">🔬</span>
           </h1>
           <p className="subtitle">
             Sistema de diagnóstico agrícola con CNN
@@ -22,12 +21,6 @@ const Header = ({ darkMode, onToggleDarkMode }) => {
 
         {/* Stats Inline */}
         <div className="header-stats">
-          <div className="stat-item">
-            <span className="stat-icon" aria-hidden="true">🎯</span>
-            <span className="stat-value">95%</span>
-            <span>precisión</span>
-          </div>
-          <div className="stat-divider" aria-hidden="true"></div>
           <div className="stat-item">
             <span className="stat-icon" aria-hidden="true">🦠</span>
             <span className="stat-value">15</span>

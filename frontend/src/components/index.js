@@ -6,3 +6,4 @@ export { default as TipsCard } from './TipsCard';
 export { default as SystemInfoCard } from './SystemInfoCard';
 export { default as PredictionResults } from './PredictionResults';
 export { default as ConfidenceRadialChart } from './ConfidenceRadialChart';
+export { default as TopPredictionsChart } from './TopPredictionsChart';

@@ -12,6 +12,7 @@ import {
   getResourceIcon
 } from '../utils/diseaseHelpers';
 import ConfidenceRadialChart from './ConfidenceRadialChart';
+import TopPredictionsChart from './TopPredictionsChart';
 
 const PredictionResults = ({ prediction }) => {
   const [showComparison, setShowComparison] = useState(false);
@@ -106,30 +107,11 @@ const PredictionResults = ({ prediction }) => {
         />
       </div>
 
-      {/* Todas las Predicciones */}
-      <div className="all-predictions">
-        <h4 className="predictions-title">📊 Todas las Predicciones</h4>
-        {prediction.all_predictions.map((pred, index) => (
-          <div key={index} className="prediction-item">
-            <div className="prediction-label">
-              <span className="prediction-emoji">{getDiseaseEmoji(pred.class)}</span>
-              <span className="prediction-class">
-                {pred.class.charAt(0).toUpperCase() + pred.class.slice(1)}
-              </span>
-            </div>
-            <div className="prediction-bar-container">
-              <div 
-                className="prediction-bar"
-                style={{ 
-                  width: `${pred.probability * 100}%`,
-                  backgroundColor: index === 0 ? getConfidenceColor(pred.probability) : '#e5e7eb'
-                }}
-              />
-            </div>
-            <div className="prediction-percentage">{pred.percentage}%</div>
-          </div>
-        ))}
-      </div>
+      {/* Top 5 Predicciones - Bar Chart Horizontal */}
+      <TopPredictionsChart 
+        predictions={prediction.all_predictions}
+        maxPredictions={5}
+      />
 
       {/* Información de Enfermedad */}
       {!isHealthy(prediction.predicted_class) && diseaseData && (
