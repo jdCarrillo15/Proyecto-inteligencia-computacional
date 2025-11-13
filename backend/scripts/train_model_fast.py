@@ -61,6 +61,14 @@ class FastFruitClassifier:
         if self.use_transfer_learning:
             print("\n🚀 Construyendo modelo con MobileNetV2 (Transfer Learning)")
             
+            # Data augmentation
+            data_augmentation = keras.Sequential([
+                layers.RandomFlip("horizontal"),
+                layers.RandomRotation(0.15),
+                layers.RandomZoom(0.15),
+                layers.RandomContrast(0.1),
+            ], name="data_augmentation")
+            
             # Modelo base pre-entrenado
             base_model = keras.applications.MobileNetV2(
                 input_shape=(self.img_size[0], self.img_size[1], 3),
@@ -71,18 +79,20 @@ class FastFruitClassifier:
             # Congelar base model
             base_model.trainable = False
             
-            # Construir modelo
+            # Construir modelo con augmentation
             inputs = keras.Input(shape=(self.img_size[0], self.img_size[1], 3))
-            x = keras.applications.mobilenet_v2.preprocess_input(inputs)
+            x = data_augmentation(inputs)
+            x = keras.applications.mobilenet_v2.preprocess_input(x)
             x = base_model(x, training=False)
             x = layers.GlobalAveragePooling2D()(x)
-            x = layers.Dropout(0.2)(x)
-            x = layers.Dense(128, activation='relu')(x)
-            x = layers.Dropout(0.2)(x)
+            x = layers.Dropout(0.3)(x)
+            x = layers.Dense(256, activation='relu')(x)
+            x = layers.Dropout(0.3)(x)
             outputs = layers.Dense(self.num_classes, activation='softmax')(x)
             
             model = keras.Model(inputs, outputs)
             self.base_model = base_model
+            self.data_augmentation = data_augmentation
             
         else:
             print("\n🔨 Construyendo CNN desde cero")
@@ -107,9 +117,10 @@ class FastFruitClassifier:
                 layers.Dense(self.num_classes, activation='softmax')
             ])
         
-        # Compilar
+        # Compilar con learning rate ajustado
+        initial_lr = 0.001 if self.use_transfer_learning else 0.0005
         model.compile(
-            optimizer=keras.optimizers.Adam(learning_rate=0.001),
+            optimizer=keras.optimizers.Adam(learning_rate=initial_lr),
             loss='categorical_crossentropy',
             metrics=['accuracy']
         )
@@ -151,7 +162,7 @@ class FastFruitClassifier:
         callbacks = [
             EarlyStopping(
                 monitor='val_accuracy',
-                patience=5,
+                patience=7,
                 restore_best_weights=True,
                 verbose=1
             ),
@@ -164,7 +175,7 @@ class FastFruitClassifier:
             ReduceLROnPlateau(
                 monitor='val_loss',
                 factor=0.5,
-                patience=3,
+                patience=4,
                 min_lr=1e-7,
                 verbose=1
             )
@@ -192,6 +203,7 @@ class FastFruitClassifier:
                   epochs=10, batch_size=64):
         """
         Fine-tuning del modelo (solo si usa transfer learning).
+        NOTA: Desactivado por defecto debido a overfitting.
         
         Args:
             X_train, y_train: Datos de entrenamiento
@@ -210,16 +222,16 @@ class FastFruitClassifier:
         # Descongelar últimas capas
         self.base_model.trainable = True
         
-        # Congelar todas excepto las últimas 20 capas
-        fine_tune_at = len(self.base_model.layers) - 20
+        # Congelar todas excepto las últimas 10 capas (reducido de 20)
+        fine_tune_at = len(self.base_model.layers) - 10
         for layer in self.base_model.layers[:fine_tune_at]:
             layer.trainable = False
         
         print(f"  - Capas descongeladas: {len(self.base_model.layers) - fine_tune_at}")
         
-        # Recompilar con LR menor
+        # Recompilar con LR menor (aumentado de 0.0001 a 0.00005)
         self.model.compile(
-            optimizer=keras.optimizers.Adam(learning_rate=0.0001),
+            optimizer=keras.optimizers.Adam(learning_rate=0.00005),
             loss='categorical_crossentropy',
             metrics=['accuracy']
         )

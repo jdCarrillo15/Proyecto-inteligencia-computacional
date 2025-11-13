@@ -17,6 +17,9 @@ import base64
 
 app = Flask(__name__)
 
+# Directorio base del proyecto
+BASE_DIR = Path(__file__).parent.parent
+
 # Configuración de CORS segura
 # Para desarrollo: permite localhost:3000
 # Para producción: configura ALLOWED_ORIGINS en variable de entorno
@@ -46,14 +49,14 @@ def load_model_and_classes():
     global model, class_names
     
     # Intentar cargar formato .keras primero, luego .h5
-    model_path_keras = 'models/fruit_classifier.keras'
-    model_path_h5 = 'models/fruit_classifier.h5'
-    mapping_path = 'models/class_mapping.json'
+    model_path_keras = BASE_DIR / 'models' / 'fruit_classifier.keras'
+    model_path_h5 = BASE_DIR / 'models' / 'fruit_classifier.h5'
+    mapping_path = BASE_DIR / 'models' / 'class_mapping.json'
     
     model_path = None
-    if Path(model_path_keras).exists():
+    if model_path_keras.exists():
         model_path = model_path_keras
-    elif Path(model_path_h5).exists():
+    elif model_path_h5.exists():
         model_path = model_path_h5
     
     if not model_path:
@@ -82,7 +85,7 @@ def load_model_and_classes():
         return False
     
     # Cargar mapeo de clases
-    if Path(mapping_path).exists():
+    if mapping_path.exists():
         with open(mapping_path, 'r') as f:
             class_mapping = json.load(f)
             class_names = class_mapping['class_names']
@@ -287,7 +290,7 @@ def health():
 @app.route('/dataset-info')
 def dataset_info():
     """Endpoint para obtener información del dataset."""
-    viz_path = Path('dataset/processed/visualizations')
+    viz_path = BASE_DIR / 'dataset' / 'processed' / 'visualizations'
     
     info = {
         'visualizations_available': viz_path.exists()

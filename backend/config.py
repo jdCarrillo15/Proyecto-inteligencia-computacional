@@ -21,8 +21,8 @@ DATASET_VIZ_DIR = DATASET_PROCESSED_DIR / 'visualizations'
 
 # Rutas de modelos
 MODELS_DIR = BASE_DIR / 'models'
-MODEL_PATH = MODELS_DIR / 'fruit_classifier.h5'
-BEST_MODEL_PATH = MODELS_DIR / 'best_model.h5'
+MODEL_PATH = MODELS_DIR / 'fruit_classifier.keras'
+BEST_MODEL_PATH = MODELS_DIR / 'best_model.keras'
 CLASS_MAPPING_PATH = MODELS_DIR / 'class_mapping.json'
 MODEL_VIZ_DIR = MODELS_DIR / 'visualizations'
 
@@ -79,9 +79,9 @@ DROPOUT_RATE = 0.5
 CONV_DROPOUT_RATE = 0.25
 
 # Hiperparámetros de entrenamiento
-BATCH_SIZE = 32
+BATCH_SIZE = 32  # Batch size óptimo para regularización
 EPOCHS = 50
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.001  # LR inicial para transfer learning
 
 # Optimizador
 OPTIMIZER = 'adam'

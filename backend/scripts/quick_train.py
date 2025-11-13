@@ -37,11 +37,11 @@ def main():
     IMG_SIZE = (100, 100)
     
     # Parámetros de entrenamiento
-    EPOCHS_PHASE1 = 15      # Entrenamiento inicial
-    EPOCHS_PHASE2 = 10      # Fine-tuning
-    BATCH_SIZE = 64         # Batch grande para rapidez
+    EPOCHS_PHASE1 = 20      # Entrenamiento inicial (aumentado)
+    EPOCHS_PHASE2 = 8       # Fine-tuning (reducido)
+    BATCH_SIZE = 32         # Batch reducido para mejor regularización
     USE_TRANSFER_LEARNING = True
-    DO_FINE_TUNING = True
+    DO_FINE_TUNING = False   # Desactivado por defecto (causa overfitting)
     FORCE_REPROCESS = False  # True para ignorar cache y reprocesar
     
     print("\n⚙️  CONFIGURACIÓN DEL PIPELINE:")
