@@ -227,12 +227,29 @@ DO_FINE_TUNING = True   # Desactivar si hay overfitting
 
 ## 🔐 Configuración
 
-### Cambiar Puerto del Backend
-En `backend/app.py`:
-```python
-app.run(debug=True, host='0.0.0.0', port=5000)
+### Variables de Entorno
+
+**Backend** (`backend/.env`):
+```env
+FLASK_ENV=development
+DEBUG=True
+ALLOWED_ORIGINS=http://localhost:3000
 ```
-=======
+
+**Frontend** (`frontend/.env`):
+```env
+REACT_APP_API_URL=http://localhost:5000
+REACT_APP_ENV=development
+```
+
+> **Nota:** Los archivos `.env` no se incluyen en Git. Copia `.env.example` a `.env` y ajusta los valores.
+
+### Cambiar Puerto del Backend
+En `backend/app.py` o en `backend/.env`:
+```python
+PORT=5000
+```
+
 **Dataset:**
 - New Plant Diseases Dataset (Kaggle)
 - Más de 15,000 imágenes aumentadas

@@ -14,7 +14,7 @@ function App() {
   const [imageZoomed, setImageZoomed] = useState(false);
   const fileInputRef = useRef(null);
 
-  const API_URL = 'http://localhost:5000';
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
   const handleFileSelect = (file) => {
     if (file) {
