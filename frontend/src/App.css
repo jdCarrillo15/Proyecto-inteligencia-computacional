@@ -11,6 +11,121 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
+  transition: background 0.3s ease;
+}
+
+/* Dark Mode */
+.App.dark-mode {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+}
+
+.App.dark-mode .card,
+.App.dark-mode .info-card,
+.App.dark-mode .placeholder-card,
+.App.dark-mode .results-card,
+.App.dark-mode .comparison-card,
+.App.dark-mode .gallery-card,
+.App.dark-mode .resources-card {
+  background: #1f2937;
+  color: #e5e7eb;
+}
+
+.App.dark-mode .card-title,
+.App.dark-mode .info-card h3,
+.App.dark-mode .fruit-name,
+.App.dark-mode .predictions-title,
+.App.dark-mode .comparison-title,
+.App.dark-mode .gallery-title,
+.App.dark-mode .resources-title,
+.App.dark-mode .disease-info-title,
+.App.dark-mode .placeholder-content h3 {
+  color: #f9fafb;
+}
+
+.App.dark-mode .info-list li,
+.App.dark-mode .tip-text,
+.App.dark-mode .prediction-class,
+.App.dark-mode .prediction-percentage,
+.App.dark-mode .placeholder-content p {
+  color: #d1d5db;
+}
+
+.App.dark-mode .upload-area {
+  background: #374151;
+  border-color: #10b981;
+}
+
+.App.dark-mode .upload-area:hover {
+  background: #4b5563;
+}
+
+.App.dark-mode .upload-area.drag-active {
+  background: #6b7280;
+}
+
+.App.dark-mode .upload-text {
+  color: #10b981;
+}
+
+.App.dark-mode .upload-subtext,
+.App.dark-mode .upload-formats {
+  color: #9ca3af;
+}
+
+.App.dark-mode .btn-secondary {
+  background: #374151;
+  color: #e5e7eb;
+}
+
+.App.dark-mode .btn-secondary:hover:not(:disabled) {
+  background: #4b5563;
+}
+
+.App.dark-mode .comparison-placeholder,
+.App.dark-mode .gallery-placeholder {
+  background: #374151;
+  border-color: #4b5563;
+}
+
+.App.dark-mode .gallery-placeholder:hover {
+  background: #4b5563;
+}
+
+.App.dark-mode .comparison-description,
+.App.dark-mode .gallery-placeholder p {
+  color: #9ca3af;
+}
+
+.App.dark-mode .resource-link {
+  background: #374151;
+  color: #e5e7eb;
+  border-color: #4b5563;
+}
+
+.App.dark-mode .resource-link:hover {
+  background: #3b82f6;
+  color: white;
+}
+
+.App.dark-mode .info-value,
+.App.dark-mode .symptoms-list,
+.App.dark-mode .symptoms-list li {
+  background: rgba(55, 65, 81, 0.5);
+  color: #d1d5db;
+}
+
+.App.dark-mode .disease-info-card {
+  background: linear-gradient(135deg, #92400e 0%, #78350f 100%);
+}
+
+.App.dark-mode .tips-card {
+  background: linear-gradient(135deg, #92400e 0%, #78350f 100%);
+}
+
+.App.dark-mode .alert-error {
+  background: #7f1d1d;
+  color: #fecaca;
+  border-color: #991b1b;
 }
 
 .container {
@@ -20,10 +135,21 @@
 
 /* Header */
 .header {
-  text-align: center;
   color: white;
   margin-bottom: 40px;
   animation: fadeIn 0.6s ease-in;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-text {
+  flex: 1;
+  text-align: center;
 }
 
 .title {
@@ -43,6 +169,48 @@
   font-size: 1.2em;
   opacity: 0.95;
   font-weight: 300;
+}
+
+/* Dark Mode Toggle */
+.dark-mode-toggle {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  font-size: 1.8em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  flex-shrink: 0;
+}
+
+.dark-mode-toggle:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1) rotate(20deg);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode-toggle:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+  }
+  
+  .dark-mode-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5em;
+  }
 }
 
 /* Main Content */

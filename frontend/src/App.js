@@ -10,6 +10,7 @@ function App() {
   const [error, setError] = useState(null);
   const [dragActive, setDragActive] = useState(false);
   const [showComparison, setShowComparison] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
   const fileInputRef = useRef(null);
 
   const API_URL = 'http://localhost:5000';
@@ -304,17 +305,28 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <div className={`App ${darkMode ? 'dark-mode' : ''}`}>
       <div className="container">
         <header className="header">
-          <h1 className="title">
-            <span className="emoji">🌱</span>
-            Detector de Enfermedades en Plantas
-            <span className="emoji">🔬</span>
-          </h1>
-          <p className="subtitle">
-            Sistema de diagnóstico agrícola con CNN | Proyecto académico para fitopatología
-          </p>
+          <div className="header-content">
+            <div className="header-text">
+              <h1 className="title">
+                <span className="emoji">🌱</span>
+                Detector de Enfermedades en Plantas
+                <span className="emoji">🔬</span>
+              </h1>
+              <p className="subtitle">
+                Sistema de diagnóstico agrícola con CNN | Proyecto académico para fitopatología
+              </p>
+            </div>
+            <button 
+              className="dark-mode-toggle"
+              onClick={() => setDarkMode(!darkMode)}
+              title={darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+            >
+              {darkMode ? '☀️' : '🌙'}
+            </button>
+          </div>
         </header>
 
         <div className="main-content">
