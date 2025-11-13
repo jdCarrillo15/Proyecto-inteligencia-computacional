@@ -169,6 +169,90 @@ function App() {
     return { level: 'Severidad Media', color: '#f59e0b', urgency: 'medium' };
   };
 
+  const getDiseaseInfo = (diseaseName) => {
+    const diseaseData = {
+      'apple___apple_scab': {
+        scientificName: 'Venturia inaequalis',
+        description: 'Manchas verde-oliva a marrón en hojas y frutos. Causa defoliación prematura y afecta la calidad de la fruta.',
+        symptoms: ['Manchas circulares oscuras', 'Deformación de hojas', 'Lesiones en frutos'],
+        treatment: 'Aplicar fungicidas preventivos (captan, mancozeb). Eliminar hojas caídas. Podar para mejorar circulación de aire.',
+        prevention: 'Variedades resistentes, manejo sanitario, espaciamiento adecuado'
+      },
+      'apple___black_rot': {
+        scientificName: 'Botryosphaeria obtusa',
+        description: 'Pudrición negra que causa manchas foliares, cancros en ramas y pudrición de frutos. Altamente destructiva.',
+        symptoms: ['Manchas púrpuras con bordes definidos', 'Frutos momificados', 'Cancros en ramas'],
+        treatment: 'Fungicidas sistémicos (myclobutanil, difenoconazole). Podar y destruir tejido infectado. Aplicar en floración.',
+        prevention: 'Higiene del huerto, poda sanitaria, eliminar frutos momificados'
+      },
+      'apple___cedar_apple_rust': {
+        scientificName: 'Gymnosporangium juniperi-virginianae',
+        description: 'Roya que requiere dos hospederos (manzano y enebro). Causa manchas amarillas-naranjas en hojas.',
+        symptoms: ['Manchas amarillas brillantes', 'Pústulas naranjas', 'Defoliación temprana'],
+        treatment: 'Fungicidas protectores (mancozeb, ziram). Aplicar desde botón rosa hasta 4 semanas después. Eliminar enebros cercanos.',
+        prevention: 'Plantar variedades resistentes, alejar de enebros'
+      },
+      'corn_(maize)___common_rust_': {
+        scientificName: 'Puccinia sorghi',
+        description: 'Roya común que forma pústulas café-rojizas en hojas. Reduce fotosíntesis y rendimiento del cultivo.',
+        symptoms: ['Pústulas ovales café-rojizas', 'Dispersión en ambas caras de hojas', 'Amarillamiento prematuro'],
+        treatment: 'Fungicidas foliares (triazoles, estrobilurinas). Aplicar al detectar primeros síntomas. Rotación de cultivos.',
+        prevention: 'Híbridos resistentes, siembra temprana, nutrición balanceada'
+      },
+      'corn_(maize)___northern_leaf_blight': {
+        scientificName: 'Setosphaeria turcica',
+        description: 'Tizón foliar que causa lesiones elípticas grises-verdosas. Puede reducir rendimiento hasta 50% en condiciones favorables.',
+        symptoms: ['Lesiones alargadas elípticas', 'Color gris-verde a marrón', 'Coalescencia de lesiones'],
+        treatment: 'Fungicidas (azoxistrobina, propiconazol). Aplicar preventivamente en zonas endémicas. Manejo de residuos.',
+        prevention: 'Variedades resistentes, rotación de cultivos, enterrar residuos'
+      },
+      'potato___early_blight': {
+        scientificName: 'Alternaria solani',
+        description: 'Tizón temprano que causa manchas concéntricas en hojas. Común en condiciones cálidas y húmedas.',
+        symptoms: ['Manchas circulares con anillos concéntricos', 'Amarillamiento alrededor de manchas', 'Afecta hojas inferiores primero'],
+        treatment: 'Fungicidas (clorotalonil, mancozeb, azoxistrobina). Aplicar cada 7-10 días. Fertilización balanceada.',
+        prevention: 'Rotación de cultivos, semilla certificada, riego por goteo'
+      },
+      'potato___late_blight': {
+        scientificName: 'Phytophthora infestans',
+        description: 'Tizón tardío devastador. Causó la hambruna irlandesa. Puede destruir cultivos en días bajo condiciones favorables.',
+        symptoms: ['Lesiones húmedas gris-verdosas', 'Marchitez rápida', 'Pudrición de tubérculos'],
+        treatment: 'Fungicidas sistémicos (metalaxil, mandipropamid). Aplicación preventiva obligatoria. Destruir plantas infectadas.',
+        prevention: 'Monitoreo constante, variedades resistentes, evitar riego por aspersión nocturno'
+      },
+      'tomato___bacterial_spot': {
+        scientificName: 'Xanthomonas spp.',
+        description: 'Mancha bacteriana que afecta hojas, tallos y frutos. Se propaga por agua y herramientas contaminadas.',
+        symptoms: ['Manchas pequeñas oscuras con halo amarillo', 'Lesiones en frutos', 'Defoliación severa'],
+        treatment: 'Aplicar cobre fijo o bactericidas. Eliminar plantas severamente afectadas. Desinfectar herramientas.',
+        prevention: 'Semilla tratada, rotación 3 años, evitar trabajo con plantas mojadas'
+      },
+      'tomato___early_blight': {
+        scientificName: 'Alternaria solani',
+        description: 'Tizón temprano con manchas concéntricas características. Afecta hojas maduras primero.',
+        symptoms: ['Manchas con anillos concéntricos ("ojo de buey")', 'Hojas inferiores afectadas primero', 'Caída prematura de hojas'],
+        treatment: 'Fungicidas (mancozeb, clorotalonil, azoxistrobina). Aplicar preventivamente. Remover hojas basales.',
+        prevention: 'Mulching, riego por goteo, espaciamiento adecuado, nutrición balanceada'
+      },
+      'tomato___late_blight': {
+        scientificName: 'Phytophthora infestans',
+        description: 'Tizón tardío altamente destructivo. Puede aniquilar plantaciones enteras en 7-10 días.',
+        symptoms: ['Lesiones grandes irregulares gris-verdosas', 'Moho blanco en envés', 'Pudrición de frutos'],
+        treatment: 'Fungicidas sistémicos urgentes (cymoxanil, metalaxil). Destruir plantas infectadas. Aplicación preventiva crítica.',
+        prevention: 'Monitoreo diario, variedades resistentes, plásticos protectores, ventilación'
+      },
+      'tomato___leaf_mold': {
+        scientificName: 'Passalora fulva',
+        description: 'Moho de la hoja común en invernaderos. Prospera en alta humedad (>85%) y poca ventilación.',
+        symptoms: ['Manchas amarillas en haz', 'Moho verde-oliva en envés', 'Enrollamiento de hojas'],
+        treatment: 'Fungicidas (clorotalonil, mancozeb). Mejorar ventilación. Reducir humedad. Eliminar hojas afectadas.',
+        prevention: 'Variedades resistentes, ventilación adecuada, control de humedad, espaciamiento'
+      }
+    };
+
+    return diseaseData[diseaseName.toLowerCase()] || null;
+  };
+
   const getConfidenceColor = (confidence) => {
     if (confidence >= 0.8) return '#10b981';
     if (confidence >= 0.6) return '#f59e0b';
@@ -401,6 +485,67 @@ function App() {
                     </div>
                   ))}
                 </div>
+
+                {/* Tarjeta de Información de Enfermedad */}
+                {!isHealthy(prediction.predicted_class) && getDiseaseInfo(prediction.predicted_class) && (
+                  <div className="disease-info-card">
+                    <h4 className="disease-info-title">📋 Información de la Enfermedad</h4>
+                    
+                    <div className="disease-info-section">
+                      <div className="info-label">🔬 Nombre Científico</div>
+                      <div className="info-value scientific-name">
+                        {getDiseaseInfo(prediction.predicted_class).scientificName}
+                      </div>
+                    </div>
+
+                    <div className="disease-info-section">
+                      <div className="info-label">📝 Descripción</div>
+                      <div className="info-value">
+                        {getDiseaseInfo(prediction.predicted_class).description}
+                      </div>
+                    </div>
+
+                    <div className="disease-info-section">
+                      <div className="info-label">🔍 Síntomas Principales</div>
+                      <ul className="symptoms-list">
+                        {getDiseaseInfo(prediction.predicted_class).symptoms.map((symptom, idx) => (
+                          <li key={idx}>{symptom}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="disease-info-section">
+                      <div className="info-label">⚠️ Nivel de Severidad</div>
+                      <div 
+                        className="info-value severity-level"
+                        style={{ 
+                          color: getSeverityLevel(prediction.predicted_class, prediction.confidence).color,
+                          fontWeight: '700'
+                        }}
+                      >
+                        {getSeverityLevel(prediction.predicted_class, prediction.confidence).level}
+                      </div>
+                    </div>
+
+                    <div className="disease-info-section treatment-section">
+                      <div className="info-label">💊 Tratamiento Recomendado</div>
+                      <div className="info-value">
+                        {getDiseaseInfo(prediction.predicted_class).treatment}
+                      </div>
+                    </div>
+
+                    <div className="disease-info-section">
+                      <div className="info-label">🛡️ Prevención</div>
+                      <div className="info-value">
+                        {getDiseaseInfo(prediction.predicted_class).prevention}
+                      </div>
+                    </div>
+
+                    <div className="disease-info-footer">
+                      <p>⚠️ <strong>Nota:</strong> Esta información es orientativa. Consulte con un ingeniero agrónomo para diagnóstico y tratamiento profesional.</p>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="card placeholder-card">

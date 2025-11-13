@@ -455,6 +455,108 @@
   min-width: 60px;
 }
 
+/* Disease Info Card */
+.disease-info-card {
+  margin-top: 30px;
+  padding: 25px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 15px;
+  border-left: 6px solid #f59e0b;
+  animation: fadeIn 0.6s ease-in;
+}
+
+.disease-info-title {
+  font-size: 1.4em;
+  color: #92400e;
+  margin-bottom: 20px;
+  font-weight: 700;
+  border-bottom: 2px solid #fbbf24;
+  padding-bottom: 10px;
+}
+
+.disease-info-section {
+  margin-bottom: 18px;
+}
+
+.info-label {
+  font-size: 0.95em;
+  font-weight: 700;
+  color: #78350f;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.info-value {
+  font-size: 0.95em;
+  color: #92400e;
+  line-height: 1.6;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.scientific-name {
+  font-style: italic;
+  font-weight: 600;
+}
+
+.symptoms-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.symptoms-list li {
+  padding: 6px 0;
+  color: #92400e;
+  border-bottom: 1px solid rgba(251, 191, 36, 0.3);
+  padding-left: 20px;
+  position: relative;
+}
+
+.symptoms-list li:last-child {
+  border-bottom: none;
+}
+
+.symptoms-list li:before {
+  content: "•";
+  position: absolute;
+  left: 5px;
+  color: #f59e0b;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.severity-level {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 1.1em;
+}
+
+.treatment-section .info-value {
+  background: rgba(254, 202, 202, 0.3);
+  border-left: 3px solid #dc2626;
+  font-weight: 500;
+}
+
+.disease-info-footer {
+  margin-top: 20px;
+  padding: 15px;
+  background: rgba(220, 38, 38, 0.1);
+  border-radius: 8px;
+  border-left: 4px solid #dc2626;
+}
+
+.disease-info-footer p {
+  margin: 0;
+  color: #7f1d1d;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
 /* Placeholder */
 .placeholder-card {
   display: flex;
