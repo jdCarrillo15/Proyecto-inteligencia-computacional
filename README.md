@@ -1,206 +1,182 @@
-# 🍎🍌 Clasificador de Frutas con CNN
+# Detector de Enfermedades en Plantas
 
-Sistema completo de clasificación de frutas usando Inteligencia Artificial con Redes Neuronales Convolucionales (CNN).
+Sistema de diagnóstico agrícola usando redes neuronales convolucionales para identificar enfermedades en cultivos de manzana, maíz, papa y tomate.
 
-## 📝 Descripción
+## Descripción
 
-Aplicación web full-stack que permite subir imágenes de frutas y clasificarlas automáticamente usando un modelo de Deep Learning entrenado con TensorFlow. El sistema identifica 5 tipos de frutas diferentes con alta precisión.
+Este proyecto es una aplicación web que ayuda a detectar enfermedades en plantas mediante el análisis de imágenes de hojas. Usa un modelo CNN entrenado con TensorFlow para clasificar 15 tipos diferentes de enfermedades en 4 cultivos comunes.
 
-## 🎯 Características Principales
+El sistema está pensado como herramienta educativa y de apoyo inicial para agricultores, aunque siempre se recomienda consultar con un agrónomo profesional para tratamientos definitivos.
 
-- 🤖 **Modelo CNN** entrenado con TensorFlow/Keras
-- 🌐 **Backend API REST** con Flask
-- ⚛️ **Frontend moderno** con React
-- 📤 **Interfaz drag & drop** para subir imágenes
-- 📊 **Visualización de confianza** y probabilidades
-- 📱 **Diseño responsive** para todos los dispositivos
-- ✨ **Animaciones y efectos** visuales atractivos
+## Características
 
-## 🍇 Frutas Soportadas
+- Detección de 15 enfermedades diferentes en 4 cultivos
+- Interfaz web sencilla con arrastrar y soltar
+- Información detallada sobre cada enfermedad (síntomas, causas, tratamientos)
+- Modo oscuro
+- Comparación visual entre hojas sanas y enfermas
+- Diseño responsive que funciona en móviles
+- Accesible (cumple WCAG 2.1 AA)
 
-- 🍎 **Manzana**
-- 🍌 **Banano**
-- 🥭 **Mango**
-- 🍊 **Naranja**
-- 🍐 **Pera**
+## Cultivos y Enfermedades Soportadas
 
-## 🏗️ Arquitectura
+**Manzana (4 clases)**
+- Sarna del manzano
+- Pudrición negra
+- Roya del cedro
+- Hojas sanas
+
+**Maíz (3 clases)**
+- Roya común
+- Tizón del norte
+- Hojas sanas
+
+**Papa (3 clases)**
+- Tizón temprano
+- Tizón tardío
+- Hojas sanas
+
+**Tomate (5 clases)**
+- Mancha bacteriana
+- Tizón temprano
+- Tizón tardío
+- Moho de la hoja
+- Hojas sanas
+
+## Estructura del Proyecto
 
 ```
 Proyecto-inteligencia-computacional/
+├── backend/              # API REST en Flask
+│   ├── app.py           # Servidor principal
+│   ├── requirements.txt # Librerías Python
+│   ├── models/          # Modelos entrenados (.keras)
+│   ├── scripts/         # Entrenamiento y predicción
+│   └── utils/           # Diagnóstico y pruebas
 │
-├── backend/              # API REST con Flask
-│   ├── app.py           # Aplicación principal
-│   ├── requirements.txt # Dependencias Python
-│   ├── models/          # Modelos entrenados
-│   ├── scripts/         # Scripts de entrenamiento
-│   └── utils/           # Utilidades y herramientas
+├── frontend/            # Interfaz en React
+│   ├── src/
+│   │   ├── App.js      # Lógica principal
+│   │   └── App.css     # Estilos
+│   └── package.json    # Dependencias Node
 │
-└── frontend/            # Aplicación React
-    ├── src/
-    │   ├── App.js       # Componente principal
-    │   └── App.css      # Estilos
-    ├── public/          # Archivos públicos
-    └── package.json     # Dependencias Node
+└── dataset/            # Imágenes de entrenamiento
+    └── raw/
+        └── New Plant Diseases Dataset(Augmented)/
 ```
 
-## 🚀 Inicio Rápido
+## Cómo Empezar
 
-### Prerequisitos
+Necesitas Python 3.10+ y Node.js 14+ instalados.
 
-- **Python 3.10+** con pip
-- **Node.js 14+** con npm
-- **Git** (opcional)
+### Backend
 
-### 1️⃣ Backend (Terminal 1)
+Abre una terminal:
 
 ```bash
-# Navega al backend
 cd backend
-
-# Instala dependencias
 pip install -r requirements.txt
-
-# Entrena el modelo (si es necesario)
-python scripts/train_model.py
-
-# Inicia el servidor
 python app.py
 ```
 
-Backend corriendo en: **http://localhost:5000**
+El servidor arranca en http://localhost:5000
 
-### 2️⃣ Frontend (Terminal 2)
+### Frontend
+
+Abre otra terminal:
 
 ```bash
-# Navega al frontend
 cd frontend
-
-# Instala dependencias
 npm install
-
-# Inicia la aplicación
 npm start
 ```
 
-Frontend corriendo en: **http://localhost:3000**
+La interfaz se abre automáticamente en http://localhost:3000
 
-### 3️⃣ ¡Listo! 🎉
+**Nota:** Si es la primera vez, puede que tengas que entrenar el modelo primero con `python scripts/train_model.py` desde la carpeta backend. Esto puede tardar un rato dependiendo de tu máquina.
 
-Abre tu navegador en `http://localhost:3000` y comienza a clasificar frutas.
+## Tecnologías Usadas
 
-## 🔧 Tecnologías
+**Backend:**
+- Flask 3.0 (servidor web)
+- TensorFlow 2.18 y Keras 3.6 (modelo de IA)
+- Pillow (procesamiento de imágenes)
+- Flask-CORS (para conectar con el frontend)
 
-### Backend
-- **Flask 3.0+** - Framework web Python
-- **TensorFlow 2.18+** - Machine Learning
-- **Keras 3.6+** - API de Deep Learning
-- **Flask-CORS** - Manejo de CORS
-- **Pillow** - Procesamiento de imágenes
-- **NumPy** - Operaciones numéricas
+**Frontend:**
+- React 19 (interfaz de usuario)
+- Axios (llamadas HTTP)
+- CSS3 (estilos y animaciones)
 
-### Frontend
-- **React 19** - Framework de JavaScript
-- **Axios** - Cliente HTTP
-- **CSS3** - Estilos modernos con animaciones
+**Dataset:**
+- New Plant Diseases Dataset (Kaggle)
+- Más de 15,000 imágenes aumentadas
+- 15 clases distribuidas en 4 cultivos
 
-### Machine Learning
-- **CNN** - Red Neuronal Convolucional
-- **MobileNetV2** - Arquitectura base
-- **Transfer Learning** - Técnica de entrenamiento
+## Sobre el Modelo
 
-## 📊 Rendimiento del Modelo
+El modelo es una CNN entrenada con transfer learning usando arquitecturas preentrenadas. Procesa imágenes de 100x100 píxeles en RGB y da resultados en menos de un segundo.
 
-- **Precisión:** ~95%
-- **Tamaño de entrada:** 100x100 píxeles RGB
-- **Tiempo de predicción:** <1 segundo
-- **Dataset:** Imágenes de 5 clases de frutas
+La precisión varía según la calidad de la foto y las condiciones de iluminación, pero generalmente está por encima del 90% en imágenes claras de hojas individuales.
 
-## 🎨 Capturas de Pantalla
+## Características de la Interfaz
 
-### Interfaz Principal
-- Diseño moderno con gradientes violeta-púrpura
-- Área de carga con drag & drop
-- Previsualización de imágenes
+- Paleta de colores verdes (tema agrícola)
+- Modo claro y oscuro
+- Arrastrar y soltar imágenes
+- Vista previa con zoom en móviles
+- Indicadores de salud (sana vs enferma) con colores
+- Niveles de gravedad para enfermedades
+- Información científica de cada enfermedad
+- Comparación visual entre hojas sanas y enfermas
+- Guía con tips para tomar buenas fotos
+- Enlaces a recursos externos (artículos, estudios)
 
-### Resultados
-- Emoji grande de la fruta identificada
-- Porcentaje de confianza con colores dinámicos
-- Gráfico de todas las predicciones
-- Animaciones suaves
+## API
 
-## 📡 API Endpoints
+El backend expone estos endpoints:
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/` | Información de la API |
-| GET | `/health` | Estado del servicio |
-| POST | `/predict` | Clasificar imagen |
-| GET | `/dataset-info` | Info del dataset |
+- `GET /` - Info de la API
+- `GET /health` - Verificar que el modelo está cargado
+- `POST /predict` - Enviar imagen y recibir predicción
+- `GET /dataset-info` - Estadísticas del dataset
 
-## 🔐 Configuración
+Para cambiar puertos o URLs, edita `app.py` en backend y `App.js` en frontend.
 
-### Cambiar Puerto del Backend
-En `backend/app.py`:
-```python
-app.run(debug=True, host='0.0.0.0', port=5000)
-```
+## Problemas Comunes
 
-### Cambiar URL del Backend en Frontend
-En `frontend/src/App.js`:
-```javascript
-const API_URL = 'http://localhost:5000';
-```
-
-## 📦 Dependencias Principales
-
-### Backend
-```
-tensorflow>=2.18.0
-keras>=3.6.0
-Flask>=3.0.0
-flask-cors>=4.0.0
-Pillow>=10.0.0
-numpy>=1.26.0
-```
-
-### Frontend
-```
-react: ^19.2.0
-axios: ^1.13.2
-react-scripts: ^5.0.1
-```
-
-## 🐛 Solución de Problemas
-
-### Error: Modelo no encontrado
+**El modelo no se encuentra:**
 ```bash
 cd backend
 python scripts/train_model.py
 ```
+Esto va a tomar un rato la primera vez.
 
-### Error: CORS
-Verifica que `flask-cors` esté instalado en el backend.
+**Error de CORS:**
+Asegúrate de tener `flask-cors` instalado. Si no: `pip install flask-cors`
 
-### Error: Puerto en uso
-Cambia el puerto en la configuración correspondiente.
+**Puerto ocupado:**
+Cambia el puerto en `app.py` (backend) o en `package.json` (frontend).
 
-### Error: react-scripts no encontrado
-```bash
-cd frontend
-npm install react-scripts --save
-```
+**Dependencias faltantes:**
+Borra las carpetas `node_modules` y `venv`, luego reinstala todo desde cero.
 
-## 🎓 Proyecto Académico
+## Dataset
 
-**Universidad:** Universidad Pedagógica y Tecnológica de Colombia (UPTC)  
-**Curso:** Inteligencia Computacional  
-**Año:** 2024
+Usamos el "New Plant Diseases Dataset" de Kaggle con imágenes aumentadas. Incluye miles de fotos de hojas con diferentes enfermedades y condiciones de iluminación.
 
-## 📄 Licencia
+Si quieres usar tu propio dataset, necesitas reorganizar las imágenes en carpetas por clase dentro de `dataset/raw/` y ajustar el script de entrenamiento.
 
-Este proyecto es parte de un trabajo académico.
+## Accesibilidad
 
----
+La interfaz cumple con WCAG 2.1 nivel AA:
+- Navegación completa por teclado
+- Compatible con lectores de pantalla
+- Contraste de colores adecuado
+- Etiquetas ARIA en todos los elementos
 
-**¡Desarrollado para la UPTC!**
+## Contexto Académico
+
+Proyecto desarrollado para la clase de Inteligencia Computacional en la Universidad Pedagógica y Tecnológica de Colombia (UPTC).
+
+El objetivo es aplicar conceptos de CNN y transfer learning en un problema real del sector agrícola, combinando machine learning con desarrollo web full-stack.

@@ -1,102 +1,111 @@
-# 🍎 Frontend - Clasificador de Frutas
+# Frontend - Detector de Enfermedades en Plantas
 
-Frontend moderno desarrollado con React para el clasificador de frutas con Inteligencia Artificial.
+Interfaz web en React para el sistema de diagnóstico agrícola.
 
-## 🚀 Características
+## Qué hace
 
-- ✨ Interfaz moderna y atractiva con gradientes y animaciones
-- 📤 Carga de imágenes mediante drag & drop o selector
-- 🔍 Predicción en tiempo real con el modelo CNN
-- 📊 Visualización de confianza y todas las predicciones
-- 📱 Diseño responsive para móviles y tablets
-- 🎨 Emojis de frutas para mejor UX
+Esta es la parte visual del proyecto. Aquí los usuarios pueden subir fotos de hojas, ver los resultados del análisis y consultar información sobre las enfermedades detectadas.
 
-## 📋 Prerequisitos
+## Características principales
 
-- Node.js (versión 14 o superior)
-- npm o yarn
-- Backend corriendo en `http://localhost:5000`
+- Arrastrar y soltar imágenes
+- Vista previa con zoom (útil en móviles)
+- Modo oscuro
+- Indicadores visuales de salud de la planta
+- Información detallada de enfermedades (síntomas, causas, tratamientos)
+- Comparación entre hojas sanas y enfermas
+- Tips para tomar mejores fotos
+- Diseño responsive
+- Accesible con teclado y lectores de pantalla
 
-## 🔧 Instalación
+## Requisitos
 
-1. Instala las dependencias:
+- Node.js 14 o más reciente
+- El backend corriendo en puerto 5000
+
+## Instalación
+
 ```bash
 npm install
 ```
 
-## 🎯 Uso
+## Uso
 
-1. Asegúrate de que el backend esté corriendo en el puerto 5000
+Primero asegúrate de que el backend esté corriendo, luego:
 
-2. Inicia el servidor de desarrollo:
 ```bash
 npm start
 ```
 
-3. Abre tu navegador en [http://localhost:3000](http://localhost:3000)
+Se abre automáticamente en http://localhost:3000
 
-## 📦 Scripts Disponibles
+## Comandos
 
-- `npm start` - Ejecuta la aplicación en modo desarrollo
-- `npm run build` - Crea una versión optimizada para producción
-- `npm test` - Ejecuta las pruebas
-- `npm run eject` - Expulsa la configuración (irreversible)
+- `npm start` - Modo desarrollo
+- `npm run build` - Versión de producción
+- `npm test` - Correr tests
+- `npm run eject` - Sacar configuración (no hay vuelta atrás)
 
-## 🌐 Integración con Backend
+## Conexión con el Backend
 
-El frontend se conecta al backend mediante:
-- URL base: `http://localhost:5000`
-- Endpoint de predicción: `POST /predict`
-- CORS habilitado en el backend
+La app se conecta a `http://localhost:5000` por defecto. Si el backend está en otro puerto, cambia `API_URL` en `src/App.js`.
 
-## 🎨 Tecnologías Utilizadas
+## Stack
 
-- **React 19** - Framework de JavaScript
-- **Axios** - Cliente HTTP
-- **CSS3** - Estilos con gradientes y animaciones
-- **Create React App** - Configuración inicial
+- React 19
+- Axios (para llamadas HTTP)
+- CSS puro (sin frameworks)
+- Create React App
 
-## 📱 Funcionalidades
+## Funcionalidades
 
-### Subida de Imágenes
-- Arrastra y suelta imágenes
-- Click para seleccionar archivo
-- Previsualización antes de clasificar
-- Validación de formato (JPG, JPEG, PNG)
+**Carga de imágenes:**
+- Arrastrar y soltar
+- Click para explorar archivos
+- Vista previa
+- Solo acepta JPG, JPEG y PNG
 
-### Resultados
-- Fruta identificada con emoji
-- Porcentaje de confianza con color dinámico
-- Barra de progreso visual
-- Lista completa de predicciones con probabilidades
+**Resultados:**
+- Clase predicha con emoji
+- Porcentaje de confianza con código de color
+- Lista completa de todas las predicciones
+- Nivel de gravedad de la enfermedad
 
-## 🔧 Configuración
+**Información adicional:**
+- Nombre científico de la enfermedad
+- Síntomas principales
+- Causas comunes
+- Tratamiento recomendado
+- Enlaces a recursos externos
 
-Si el backend corre en un puerto diferente, modifica `API_URL` en `src/App.js`:
+## Estructura
+
+```
+frontend/
+├── public/          # Archivos estáticos
+├── src/
+│   ├── App.js      # Todo el código React
+│   ├── App.css     # Todos los estilos
+│   └── index.js    # Entry point
+└── package.json
+```
+
+## Configuración
+
+Para cambiar el puerto del backend, edita `API_URL` en `App.js`:
 
 ```javascript
 const API_URL = 'http://localhost:PUERTO';
 ```
 
-## 🏗️ Estructura del Proyecto
+## Accesibilidad
 
-```
-frontend/
-├── public/
-│   ├── index.html
-│   └── manifest.json
-├── src/
-│   ├── App.js          # Componente principal
-│   ├── App.css         # Estilos
-│   ├── index.js        # Punto de entrada
-│   └── index.css       # Estilos globales
-└── package.json
-```
+Implementado siguiendo WCAG 2.1 AA:
+- Navegación por teclado completa
+- Etiquetas ARIA
+- Contraste de colores apropiado
+- Compatible con lectores de pantalla
 
-## 🎓 Proyecto Académico
+## Proyecto Académico
 
-Desarrollado para el curso de Inteligencia Computacional - UPTC
-
-## 📄 Licencia
-
-Este proyecto es parte de un trabajo académico.
+Parte del curso de Inteligencia Computacional - UPTC
