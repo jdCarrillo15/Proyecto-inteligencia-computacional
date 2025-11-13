@@ -11,6 +11,7 @@ function App() {
   const [dragActive, setDragActive] = useState(false);
   const [showComparison, setShowComparison] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [imageZoomed, setImageZoomed] = useState(false);
   const fileInputRef = useRef(null);
 
   const API_URL = 'http://localhost:5000';
@@ -345,7 +346,18 @@ function App() {
                 >
                   {preview ? (
                     <div className="preview-container">
-                      <img src={preview} alt="Preview" className="preview-image" />
+                      <img 
+                        src={preview} 
+                        alt="Preview" 
+                        className={`preview-image ${imageZoomed ? 'zoomed' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setImageZoomed(!imageZoomed);
+                        }}
+                      />
+                      <div className="zoom-hint">
+                        {imageZoomed ? '👆 Toca para alejar' : '👆 Toca para ampliar'}
+                      </div>
                     </div>
                   ) : (
                     <>
