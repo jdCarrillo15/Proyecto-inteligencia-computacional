@@ -1,82 +1,82 @@
-# Frontend - Detector de Enfermedades en Plantas
+# Frontend - Sistema de Diagnóstico Fitopatológico
 
-Interfaz web en React para el sistema de diagnóstico agrícola.
+Interfaz web desarrollada en React para el sistema de clasificación de enfermedades en plantas.
 
-## Qué hace
+## Descripción
 
-Esta es la parte visual del proyecto. Aquí los usuarios pueden subir fotos de hojas, ver los resultados del análisis y consultar información sobre las enfermedades detectadas.
+Componente de presentación del sistema que permite a los usuarios cargar imágenes de tejido foliar, visualizar resultados de análisis y acceder a información técnica sobre patologías identificadas.
 
-## Características principales
+## Funcionalidades principales
 
-- Arrastrar y soltar imágenes
-- Vista previa con zoom (útil en móviles)
-- Modo oscuro
-- Indicadores visuales de salud de la planta
-- Información detallada de enfermedades (síntomas, causas, tratamientos)
-- Comparación entre hojas sanas y enfermas
-- Tips para tomar mejores fotos
-- Diseño responsive
-- Accesible con teclado y lectores de pantalla
+- Sistema de carga mediante arrastrar y soltar
+- Previsualización con capacidad de zoom (optimizado para dispositivos móviles)
+- Alternancia entre modo claro y oscuro
+- Indicadores visuales de estado fitosanitario
+- Fichas técnicas completas (sintomatología, etiología, tratamientos)
+- Módulo comparativo de tejido sano vs afectado
+- Guía de buenas prácticas para captura fotográfica
+- Diseño adaptable a múltiples dispositivos
+- Navegación accesible mediante teclado y tecnologías de asistencia
 
-## Requisitos
+## Requisitos del sistema
 
-- Node.js 14 o más reciente
-- El backend corriendo en puerto 5000
+- Node.js versión 14 o superior
+- Servicio backend activo en puerto 5000
 
-## Instalación
+## Proceso de instalación
 
 ```bash
 npm install
 ```
 
-## Uso
+## Ejecución
 
-Primero asegúrate de que el backend esté corriendo, luego:
+Verificar que el servidor backend esté en ejecución, posteriormente:
 
 ```bash
 npm start
 ```
 
-Se abre automáticamente en http://localhost:3000
+La aplicación iniciará automáticamente en http://localhost:3000
 
-## Comandos
+## Comandos disponibles
 
-- `npm start` - Modo desarrollo
-- `npm run build` - Versión de producción
-- `npm test` - Correr tests
-- `npm run eject` - Sacar configuración (no hay vuelta atrás)
+- `npm start` - Entorno de desarrollo
+- `npm run build` - Compilación para producción
+- `npm test` - Ejecución de pruebas
+- `npm run eject` - Exposición de configuración (proceso irreversible)
 
-## Conexión con el Backend
+## Configuración de comunicación con backend
 
-La app se conecta a `http://localhost:5000` por defecto. Si el backend está en otro puerto, cambia `API_URL` en `src/App.js`.
+Por defecto, la aplicación establece conexión con `http://localhost:5000`. Para modificar la configuración de puerto, ajustar el parámetro `API_URL` en `src/App.js`.
 
-## Stack
+## Stack tecnológico
 
-- React 19
-- Axios (para llamadas HTTP)
-- CSS puro (sin frameworks)
-- Create React App
+- React 19 - Biblioteca principal
+- Axios - Cliente HTTP para peticiones asíncronas
+- CSS3 - Hojas de estilo sin dependencias de frameworks
+- Create React App - Configuración base del proyecto
 
-## Funcionalidades
+## Módulos funcionales
 
-**Carga de imágenes:**
-- Arrastrar y soltar
-- Click para explorar archivos
-- Vista previa
-- Solo acepta JPG, JPEG y PNG
+**Sistema de carga:**
+- Función arrastrar y soltar
+- Exploración mediante selección de archivos
+- Previsualización de imagen
+- Formatos soportados: JPG, JPEG, PNG
 
-**Resultados:**
-- Clase predicha con emoji
-- Porcentaje de confianza con código de color
-- Lista completa de todas las predicciones
-- Nivel de gravedad de la enfermedad
+**Panel de resultados:**
+- Visualización de clase predicha con iconografía
+- Nivel de confianza con codificación cromática
+- Distribución completa de probabilidades
+- Clasificación por severidad patológica
 
-**Información adicional:**
-- Nombre científico de la enfermedad
-- Síntomas principales
-- Causas comunes
-- Tratamiento recomendado
-- Enlaces a recursos externos
+**Información técnica:**
+- Nomenclatura científica de la patología
+- Sintomatología característica
+- Etiología común
+- Protocolos de tratamiento
+- Referencias bibliográficas externas
 
 ## Estructura
 

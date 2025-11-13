@@ -1,35 +1,35 @@
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
 ║         DETECTOR DE ENFERMEDADES EN PLANTAS                  ║
-║         Sistema de Diagnóstico Agrícola con CNN              ║
+║         Sistema de Diagnóstico Agrícola CNN                  ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
 
 
-RESUMEN
+DESCRIPCIÓN GENERAL
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✓ API REST con Flask
-✓ Frontend React con modo oscuro
-✓ 15 enfermedades en 4 cultivos
-✓ Sistema de cache optimizado
-✓ Accesibilidad WCAG 2.1 AA
+• API REST desarrollada con Flask
+• Interfaz React con alternancia de tema claro/oscuro
+• Clasificación de 15 patologías en 4 especies vegetales
+• Sistema de caché optimizado para entrenamiento
+• Cumplimiento de estándares WCAG 2.1 AA
 
 
-INICIO RÁPIDO
+GUÍA DE INICIO RÁPIDO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-1. INSTALAR (primera vez)
-   ► Doble click en: setup.bat
-   ⏱ Tiempo: ~5-10 minutos
+1. CONFIGURACIÓN INICIAL (ejecutar una sola vez)
+   ► Ejecutar: setup.bat
+   Tiempo estimado: 5-10 minutos
 
-2. BACKEND
-   ► Doble click en: start-backend.bat
-   ✓ Servidor en http://localhost:5000
+2. INICIAR BACKEND
+   ► Ejecutar: start-backend.bat
+   Servidor disponible en http://localhost:5000
 
-3. FRONTEND
-   ► Doble click en: start-frontend.bat
-   ✓ Interfaz en http://localhost:3000
+3. INICIAR FRONTEND
+   ► Ejecutar: start-frontend.bat
+   Aplicación disponible en http://localhost:3000
 
 
 ENTRENAMIENTO OPTIMIZADO
@@ -65,28 +65,28 @@ BENCHMARK
    ► python backend/utils/benchmark.py
 
 
-CARACTERÍSTICAS
+FUNCIONALIDADES PRINCIPALES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Interfaz:
-  • Modo claro/oscuro
-  • Arrastrar y soltar imágenes
-  • Vista previa con zoom
-  • Indicadores de salud
-  • Niveles de gravedad
-  • Información científica de enfermedades
-  • Comparación visual (sana vs enferma)
-  • Tips para fotografía
-  • Responsive (móviles y tablets)
-  • Accesible (WCAG 2.1 AA)
+Interfaz de usuario:
+  • Alternancia entre modo claro y oscuro
+  • Carga de imágenes mediante arrastrar y soltar
+  • Sistema de previsualización con zoom
+  • Indicadores visuales de estado fitosanitario
+  • Clasificación por niveles de severidad
+  • Fichas técnicas de enfermedades
+  • Módulo comparativo de tejido sano vs afectado
+  • Guía de buenas prácticas fotográficas
+  • Diseño adaptable a móviles y tablets
+  • Cumplimiento de estándares WCAG 2.1 AA
 
-Sistema:
-  • Cache PKL para datos
-  • Transfer learning (MobileNetV2)
-  • Pipeline automatizado
-  • Batch size optimizado
-  • Early stopping
-  • Data augmentation
+Arquitectura del sistema:
+  • Sistema de caché PKL para datos procesados
+  • Transfer learning basado en MobileNetV2
+  • Pipeline de procesamiento automatizado
+  • Optimización de batch size
+  • Detección temprana de sobreajuste (early stopping)
+  • Aumentación de datos integrada
 
 
 CULTIVOS Y ENFERMEDADES
@@ -116,28 +116,28 @@ Tomate (5 clases):
   • Saludable
 
 
-TECNOLOGÍAS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STACK TECNOLÓGICO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Backend:
   Python 3.10+, Flask 3.0, TensorFlow 2.18, Keras 3.6
-  Pillow, Flask-CORS, NumPy
+  Pillow, Flask-CORS, NumPy, scikit-learn
 
 Frontend:
   React 19, Axios, CSS3
 
-Dataset:
+Conjunto de datos:
   New Plant Diseases Dataset (Kaggle)
-  15,000+ imágenes aumentadas
+  Colección de 15,000+ imágenes con aumentación
 
 
-RENDIMIENTO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MÉTRICAS DE RENDIMIENTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Predicción: < 1 segundo
-Precisión: ~90-95%
-Tamaño máx: 16MB
-Entrada: 100x100 RGB
+Latencia de inferencia: < 1 segundo
+Precisión del modelo: ~90-95%
+Tamaño máximo de archivo: 16MB
+Dimensiones de entrada: 100x100 píxeles RGB
 
 
 ESTRUCTURA

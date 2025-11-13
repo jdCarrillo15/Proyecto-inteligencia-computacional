@@ -1,6 +1,6 @@
-# Estructura del Frontend
+# Arquitectura del Frontend
 
-## 📁 Organización de Carpetas
+## Estructura de directorios
 
 ```
 src/
@@ -34,70 +34,70 @@ src/
 └── index.css           # Estilos base
 ```
 
-## 🧩 Componentes
+## Catálogo de componentes
 
 ### `Header.js`
-- Encabezado de la aplicación
-- Toggle de modo oscuro
-- Título y subtítulo
+- Componente de cabecera de la aplicación
+- Control de alternancia de tema (claro/oscuro)
+- Presentación de título y descripción
 
 ### `Footer.js`
-- Pie de página con información del proyecto
+- Componente de pie de página con metadata del proyecto
 
 ### `ImageUpload.js`
-- Área de drag & drop para imágenes
-- Preview de imagen con zoom
-- Input de archivo
+- Área interactiva con funcionalidad drag & drop
+- Sistema de previsualización con zoom
+- Selector de archivos
 
 ### `TipsCard.js`
-- Tarjeta con consejos para mejores resultados
+- Tarjeta informativa con recomendaciones de uso
 
 ### `SystemInfoCard.js`
-- Información sobre el sistema de detección
+- Panel informativo sobre capacidades del sistema
 
 ### `PredictionResults.js`
-- Muestra resultados de predicción
-- Información de enfermedades
-- Comparación visual
-- Recursos externos
+- Visualización de resultados de clasificación
+- Fichas técnicas de patologías
+- Módulo comparativo visual
+- Enlaces a recursos bibliográficos
 
-## 📊 Datos
+## Módulos de datos
 
 ### `config.js`
-Configuración de la aplicación:
-- `API_URL`: URL del backend
-- `MAX_FILE_SIZE`: Tamaño máximo de archivo
-- `ACCEPTED_FILE_TYPES`: Tipos de archivo aceptados
+Parámetros de configuración:
+- `API_URL`: Dirección del servidor backend
+- `MAX_FILE_SIZE`: Límite de tamaño de archivo
+- `ACCEPTED_FILE_TYPES`: Formatos de imagen soportados
 
 ### `diseaseData.js`
-Datos de enfermedades:
-- `diseaseEmojis`: Emojis por enfermedad
-- `diseaseInfo`: Información detallada (científica, síntomas, tratamiento)
-- `diseaseResources`: Enlaces a recursos externos
-- `generalResources`: Recursos generales
+Base de datos de patologías:
+- `diseaseEmojis`: Iconografía asociada a enfermedades
+- `diseaseInfo`: Fichas técnicas (nomenclatura, sintomatología, tratamiento)
+- `diseaseResources`: Referencias bibliográficas externas
+- `generalResources`: Recursos complementarios
 
-## 🛠️ Utilidades
+## Módulo de utilidades
 
 ### `api.js`
-Funciones para comunicación con backend:
-- `predictDisease(file)`: Enviar imagen para predicción
+Funciones de comunicación con backend:
+- `predictDisease(file)`: Envío de imagen para clasificación
 
 ### `diseaseHelpers.js`
-Helpers para manejo de enfermedades:
-- `getDiseaseEmoji(name)`: Obtener emoji
-- `isHealthy(name)`: Verificar si es saludable
-- `getHealthStatus(name)`: Estado de salud
-- `getSeverityLevel(name, confidence)`: Nivel de severidad
-- `getDiseaseInfo(name)`: Información de enfermedad
-- `getPlantType(name)`: Tipo de planta
-- `getResourceLinks(name)`: Recursos externos
-- `getConfidenceColor(confidence)`: Color según confianza
+Funciones auxiliares para gestión de patologías:
+- `getDiseaseEmoji(name)`: Obtención de iconografía
+- `isHealthy(name)`: Validación de estado saludable
+- `getHealthStatus(name)`: Determinación de estado fitosanitario
+- `getSeverityLevel(name, confidence)`: Cálculo de nivel de severidad
+- `getDiseaseInfo(name)`: Recuperación de ficha técnica
+- `getPlantType(name)`: Identificación de especie vegetal
+- `getResourceLinks(name)`: Obtención de referencias bibliográficas
+- `getConfidenceColor(confidence)`: Asignación de codificación cromática
 
-## 🎨 Ventajas de la Modularización
+## Ventajas de la arquitectura modular
 
-1. **Código más limpio**: Cada componente tiene una responsabilidad única
-2. **Fácil mantenimiento**: Cambios aislados en módulos específicos
-3. **Reutilización**: Componentes y utilidades reutilizables
+1. **Separación de responsabilidades**: Cada componente posee una función específica bien definida
+2. **Mantenibilidad mejorada**: Modificaciones localizadas sin impacto en otros módulos
+3. **Reutilización de código**: Componentes y utilidades aplicables en múltiples contextos
 4. **Testing**: Más fácil probar componentes individuales
 5. **Escalabilidad**: Agregar features sin afectar código existente
 

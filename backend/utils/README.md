@@ -1,123 +1,123 @@
-# 🛠️ Utilidades
+# Utilidades del Sistema
 
-Esta carpeta contiene scripts de utilidad para configuración, verificación y testing del proyecto.
+Directorio de scripts auxiliares para configuración, validación y pruebas del sistema.
 
 ## Archivos
 
-### ✅ verify_installation.py
-**Propósito:** Verificar que todo esté correctamente instalado
+### verify_installation.py
+**Objetivo:** Validación integral de la configuración del entorno
 
-**Funcionalidades:**
-- Verifica versión de Python
-- Comprueba dependencias instaladas
-- Valida estructura de directorios
-- Verifica archivos del proyecto
-- Comprueba dataset y modelo
-- Prueba imports de TensorFlow
+**Comprobaciones realizadas:**
+- Validación de versión de Python
+- Verificación de dependencias instaladas
+- Inspección de estructura de directorios
+- Validación de archivos críticos del proyecto
+- Confirmación de disponibilidad de dataset y modelo
+- Pruebas de importación de TensorFlow
 
-**Uso:**
+**Ejecución:**
 ```bash
 python utils/verify_installation.py
 ```
 
-**Cuándo usar:**
-- Después de clonar el repositorio
-- Después de instalar dependencias
-- Para diagnosticar problemas
-- Antes de comenzar a trabajar
+**Casos de uso recomendados:**
+- Posterior a la clonación del repositorio
+- Después de actualizar dependencias
+- Para diagnóstico de problemas de configuración
+- Antes de iniciar desarrollo
 
 ---
 
-### 📥 download_sample_dataset.py
-**Propósito:** Ayudar a configurar el dataset
+### download_sample_dataset.py
+**Objetivo:** Asistencia en la configuración del conjunto de datos
 
-**Funcionalidades:**
-- Crear estructura de carpetas vacía
-- Guía para descargar desde Kaggle
-- Crear imágenes de prueba (testing)
-- Instrucciones paso a paso
+**Funcionalidades disponibles:**
+- Generación de estructura de directorios
+- Instructivo para descarga desde Kaggle
+- Creación de imágenes sintéticas para pruebas
+- Guía paso a paso
 
-**Uso:**
+**Ejecución:**
 ```bash
 python utils/download_sample_dataset.py
 ```
 
-**Opciones:**
-1. Crear estructura vacía
-2. Guía de Kaggle
-3. Generar imágenes de prueba
-4. Salir
+**Menú de opciones:**
+1. Generar estructura de directorios
+2. Mostrar guía de descarga Kaggle
+3. Crear dataset de prueba sintético
+4. Salir del programa
 
 ---
 
-### 🧪 quick_test.py
-**Propósito:** Suite de tests rápidos
+### quick_test.py
+**Objetivo:** Batería de pruebas rápidas del sistema
 
-**Funcionalidades:**
-- Test de imports
-- Test de TensorFlow
-- Test de procesamiento de imágenes
-- Test de Flask
-- Test de estructura de archivos
-- Test de configuración
-- Test de creación de modelo
+**Pruebas ejecutadas:**
+- Validación de importaciones
+- Verificación de TensorFlow
+- Prueba de procesamiento de imágenes
+- Validación de Flask
+- Inspección de estructura de archivos
+- Revisión de configuración
+- Prueba de instanciación del modelo
 
-**Uso:**
+**Ejecución:**
 ```bash
 python utils/quick_test.py
 ```
 
-**Salida:**
-- Reporte detallado de cada test
-- Resumen de tests pasados/fallados
-- Recomendaciones de acción
+**Información generada:**
+- Informe detallado por prueba
+- Resumen de pruebas exitosas y fallidas
+- Sugerencias de corrección
 
 ---
 
-## Cuándo Usar Cada Utilidad
+## Guía de uso de utilidades
 
 ### verify_installation.py
-✅ **Usar cuando:**
-- Acabas de clonar el proyecto
-- Instalaste nuevas dependencias
-- Algo no funciona correctamente
-- Quieres un diagnóstico completo
+**Escenarios de aplicación:**
+- Posterior a clonación del repositorio
+- Después de actualizar dependencias
+- Cuando se presentan problemas de funcionamiento
+- Para obtener un diagnóstico completo del sistema
 
 ### download_sample_dataset.py
-✅ **Usar cuando:**
-- No tienes un dataset propio
-- Necesitas crear la estructura de carpetas
-- Quieres probar el sistema rápidamente
-- Necesitas guía para descargar datos
+**Escenarios de aplicación:**
+- Ausencia de conjunto de datos propio
+- Necesidad de crear estructura de directorios
+- Pruebas rápidas del sistema
+- Requerimiento de orientación para descarga de datos
 
 ### quick_test.py
-✅ **Usar cuando:**
-- Quieres verificar que todo funciona
-- Hiciste cambios en el código
-- Antes de entrenar el modelo
-- Para debugging rápido
+**Escenarios de aplicación:**
+- Verificación de funcionamiento general
+- Posterior a modificaciones en el código
+- Previo al proceso de entrenamiento
+- Diagnóstico rápido de problemas
 
 ---
 
-## Flujo Recomendado
+## Secuencia de ejecución recomendada
 
 ```
 1. verify_installation.py
    ↓
-   ¿Todo OK?
+   Validación exitosa
    ↓
 2. download_sample_dataset.py
    ↓
-   Dataset configurado
+   Conjunto de datos configurado
    ↓
 3. quick_test.py
    ↓
-   Tests pasados → ¡Listo para usar!
+   Pruebas exitosas → Sistema operativo
 ```
 
-## Notas
+## Consideraciones importantes
 
-- Estos scripts NO modifican el modelo ni los datos
-- Son seguros de ejecutar en cualquier momento
-- Proporcionan información útil para debugging
-- No requieren GPU ni recursos intensivos
+- Estos scripts no modifican modelo ni datos de entrenamiento
+- Pueden ejecutarse de forma segura en cualquier momento
+- Generan información valiosa para diagnóstico
+- No requieren GPU ni recursos computacionales intensivos

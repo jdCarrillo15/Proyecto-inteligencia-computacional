@@ -1,6 +1,6 @@
-# Backend - Clasificador de Enfermedades de Plantas
+# Backend - Sistema de Clasificación Fitopatológica
 
-Sistema de clasificación de enfermedades en plantas usando Deep Learning con Transfer Learning (MobileNetV2).
+Servicio de clasificación de enfermedades en plantas basado en aprendizaje profundo mediante técnicas de transfer learning sobre arquitectura MobileNetV2.
 
 ## 📁 Estructura
 
@@ -19,138 +19,138 @@ backend/
 └── cache/                     # Cache (generado automáticamente)
 ```
 
-## 🚀 Uso
+## Guía de uso
 
-### 1. Instalar dependencias
+### 1. Instalación de dependencias
 ```bash
 pip install -r backend/requirements.txt
 ```
 
-### 2. Entrenar el modelo
+### 2. Entrenamiento del modelo
 ```bash
 python backend/scripts/train.py
 ```
 
-El script hace automáticamente:
-- ✅ Detecta si necesita preparar datos
-- ✅ Usa cache si existe
-- ✅ Entrena con Transfer Learning
-- ✅ Evalúa y guarda el modelo
-- ✅ Genera visualizaciones
+Procesos automatizados:
+- Detección de necesidad de preparación de datos
+- Utilización de caché si está disponible
+- Entrenamiento mediante transfer learning
+- Evaluación y persistencia del modelo
+- Generación de visualizaciones de rendimiento
 
-**Tiempo estimado:**
-- Primera vez: 15-30 min (prepara datos + entrena)
-- Con cache: 10-20 min (solo entrena)
-- Re-entrenamiento: 10-15 min (cache + train)
+**Tiempos de ejecución estimados:**
+- Ejecución inicial: 15-30 min (preparación + entrenamiento)
+- Con caché disponible: 10-20 min (solo entrenamiento)
+- Re-entrenamiento: 10-15 min (caché + entrenamiento)
 
-### 3. Probar predicciones
+### 3. Evaluación mediante predicciones
 ```bash
 python backend/scripts/predict.py dataset/raw/test/AppleScab1.JPG
 python backend/scripts/predict.py dataset/raw/test/TomatoHealthy1.JPG --all
 ```
 
-### 4. Iniciar API
+### 4. Inicialización del servidor API
 ```bash
 python backend/app.py
 ```
-API disponible en: http://localhost:5000
+Servicio disponible en: http://localhost:5000
 
-## 📊 Scripts Disponibles
+## Scripts del sistema
 
-### `train.py` ⭐
-Script principal de entrenamiento:
+### `train.py` (Principal)
+Script principal para el proceso de entrenamiento:
 ```bash
 python backend/scripts/train.py
 ```
 
-**Características:**
-- Detecta automáticamente si hay cache
-- Prepara datos si es necesario
-- Entrena y evalúa el modelo
-- Guarda todo automáticamente
+**Funcionalidades integradas:**
+- Detección automática de caché disponible
+- Preparación de datos según necesidad
+- Entrenamiento y evaluación del modelo
+- Persistencia automática de resultados
 
 ### `prepare_dataset.py`
-Preparación manual de datos (opcional):
+Preparación manual del conjunto de datos (uso opcional):
 ```bash
 python backend/scripts/prepare_dataset.py
 ```
-Nota: `train.py` ya prepara datos automáticamente si es necesario.
+Observación: El script `train.py` gestiona automáticamente la preparación de datos.
 
 ### `predict.py`
-Predicciones desde terminal:
+Inferencia desde línea de comandos:
 ```bash
 python backend/scripts/predict.py <imagen> [--all] [--model <ruta>]
 ```
 
-## 🎯 15 Enfermedades Clasificadas
+## Categorías de clasificación (15 clases)
 
-1. Apple___Apple_scab
-2. Apple___Black_rot
-3. Apple___Cedar_apple_rust
-4. Apple___healthy
-5. Corn_(maize)___Common_rust_
-6. Corn_(maize)___healthy
-7. Corn_(maize)___Northern_Leaf_Blight
-8. Potato___Early_blight
-9. Potato___healthy
-10. Potato___Late_blight
-11. Tomato___Bacterial_spot
-12. Tomato___Early_blight
-13. Tomato___healthy
-14. Tomato___Late_blight
+1. Manzana - Sarna del manzano
+2. Manzana - Pudrición negra
+3. Manzana - Roya del cedro
+4. Manzana - Tejido sano
+5. Maíz - Roya común
+6. Maíz - Tejido sano
+7. Maíz - Tizón del norte
+8. Papa - Tizón temprano
+9. Papa - Tejido sano
+10. Papa - Tizón tardío
+11. Tomate - Mancha bacteriana
+12. Tomate - Tizón temprano
+13. Tomate - Tejido sano
+14. Tomate - Tizón tardío
 15. Tomato___Leaf_Mold
 
-## 🧠 Arquitectura del Modelo
+## Arquitectura del modelo
 
-- **Base:** MobileNetV2 pre-entrenado (ImageNet)
-- **Data Augmentation:** RandomFlip, RandomRotation, RandomZoom, RandomContrast
-- **Regularización:** Dropout 0.3, Batch size 32
-- **Optimizador:** Adam (lr=0.001)
+- **Modelo base:** MobileNetV2 preentrenado en ImageNet
+- **Aumentación de datos:** RandomFlip, RandomRotation, RandomZoom, RandomContrast
+- **Técnicas de regularización:** Dropout 0.3, Batch size 32
+- **Optimizador:** Adam con tasa de aprendizaje 0.001
 
-## 📈 Resultados Esperados
+## Resultados esperados
 
 - **Precisión objetivo:** 60-80%
-- **Tiempo de entrenamiento:** 15-30 min (primera vez)
-- **15 clases:** Apple, Corn, Potato, Tomato (sanas y enfermas)
+- **Tiempo de entrenamiento inicial:** 15-30 minutos
+- **Clasificación:** 15 categorías patológicas en 4 especies vegetales
 
-## 📚 API REST
+## Endpoints de la API
 
 ### POST /predict
-Clasificar imagen:
+Clasificación de imagen:
 ```bash
 curl -X POST -F "file=@imagen.jpg" http://localhost:5000/predict
 ```
 
 ### GET /health
-Estado del servicio
+Verificación de disponibilidad del servicio
 
 ### GET /
-Info de la API
+Metadata de la API
 
-## 🔧 Solución de Problemas
+## Resolución de problemas
 
-**"Cache no encontrado"**
+**"Caché no localizado"**
 ```bash
-python backend/scripts/train.py  # Regenera automáticamente
+python backend/scripts/train.py  # Regeneración automática
 ```
 
-**"Modelo no encontrado"**
+**"Modelo no localizado"**
 ```bash
 python backend/scripts/train.py
 ```
 
-**"Baja precisión"**
-- Asegúrate de que fine-tuning esté desactivado
-- Verifica que data augmentation esté activo
-- Limpia cache y re-entrena
+**"Precisión por debajo de lo esperado"**
+- Verificar que el fine-tuning esté desactivado
+- Confirmar activación de aumentación de datos
+- Eliminar caché y ejecutar re-entrenamiento
 
-## 📝 Notas
+## Notas técnicas
 
-- **train.py:** Script principal, hace todo automáticamente
-- **Cache:** Acelera entrenamientos reutilizando datos procesados
-- **Transfer Learning:** Usa MobileNetV2 pre-entrenado
-- **Data Augmentation:** Previene overfitting
+- **train.py:** Script principal con ejecución automatizada completa
+- **Sistema de caché:** Optimización de entrenamientos mediante reutilización de datos procesados
+- **Transfer Learning:** Implementación basada en MobileNetV2 preentrenado
+- **Aumentación de datos:** Mitigación de sobreajuste
 
 ---
 
-**Stack:** TensorFlow 2.18, Keras 3.6, Flask 3.0, OpenCV 4.8
+**Stack tecnológico:** TensorFlow 2.18, Keras 3.6, Flask 3.0, OpenCV 4.8

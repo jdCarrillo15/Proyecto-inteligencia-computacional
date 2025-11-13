@@ -1,96 +1,96 @@
-# 📜 Scripts Principales
+# Scripts del Sistema
 
-Esta carpeta contiene los scripts principales del proyecto para el procesamiento de datos, entrenamiento y predicción.
+Directorio que contiene los scripts fundamentales para procesamiento de datos, entrenamiento del modelo y ejecución de inferencias.
 
 ## Archivos
 
-### 🧹 data_preparation.py
-**Propósito:** Limpieza y preparación del dataset
+### data_preparation.py
+**Objetivo:** Preprocesamiento y acondicionamiento del conjunto de datos
 
-**Funcionalidades:**
-- Verificación de imágenes corruptas
-- Validación de dimensiones
-- Redimensionamiento a 100x100 píxeles
-- Normalización de valores (0-1)
-- División train/test (80/20)
-- Generación de visualizaciones
+**Operaciones realizadas:**
+- Verificación de integridad de archivos de imagen
+- Validación dimensional
+- Redimensionamiento uniforme a 100x100 píxeles
+- Normalización de valores de píxeles al rango [0,1]
+- Partición entrenamiento/prueba (ratio 80/20)
+- Generación de gráficos exploratorios
 
-**Uso:**
+**Ejecución:**
 ```bash
 python scripts/data_preparation.py
 ```
 
-**Salida:**
-- `dataset/processed/train/` - Datos de entrenamiento
-- `dataset/processed/test/` - Datos de prueba
-- `dataset/processed/visualizations/` - Gráficos
+**Estructura de salida:**
+- `dataset/processed/train/` - Conjunto de entrenamiento
+- `dataset/processed/test/` - Conjunto de prueba
+- `dataset/processed/visualizations/` - Visualizaciones
 
 ---
 
-### 🧠 train_model.py
-**Propósito:** Entrenamiento del modelo CNN
+### train_model.py
+**Objetivo:** Entrenamiento y optimización de la red neuronal convolucional
 
-**Funcionalidades:**
+**Procesos implementados:**
 - Construcción de arquitectura CNN
-- Data augmentation
-- Entrenamiento con callbacks
-- Evaluación y métricas
-- Exportación del modelo
+- Aplicación de técnicas de aumentación de datos
+- Entrenamiento con callbacks de control
+- Cálculo de métricas de evaluación
+- Persistencia del modelo entrenado
 
-**Uso:**
+**Ejecución:**
 ```bash
 python scripts/train_model.py
 ```
 
-**Salida:**
-- `models/fruit_classifier.h5` - Modelo entrenado
-- `models/best_model.h5` - Mejor modelo
-- `models/class_mapping.json` - Mapeo de clases
-- `models/visualizations/` - Métricas y gráficos
+**Artefactos generados:**
+- `models/fruit_classifier.h5` - Modelo final
+- `models/best_model.h5` - Modelo con mejor rendimiento
+- `models/class_mapping.json` - Diccionario de clases
+- `models/visualizations/` - Métricas y curvas de aprendizaje
 
 ---
 
-### 🔍 predict.py
-**Propósito:** Predicción desde línea de comandos
+### predict.py
+**Objetivo:** Inferencia mediante interfaz de línea de comandos
 
-**Funcionalidades:**
-- Carga del modelo entrenado
-- Preprocesamiento de imagen
-- Predicción con probabilidades
-- Visualización de resultados
+**Capacidades:**
+- Carga dinámica del modelo entrenado
+- Preprocesamiento automático de imagen de entrada
+- Generación de predicciones con distribuciones de probabilidad
+- Presentación formateada de resultados
 
-**Uso:**
+**Sintaxis de uso:**
 ```bash
-# Predicción simple
+# Inferencia básica
 python scripts/predict.py imagen.jpg
 
-# Mostrar todas las probabilidades
+# Visualizar distribución completa de probabilidades
 python scripts/predict.py imagen.jpg --all
 
-# Usar modelo específico
+# Especificar ruta de modelo personalizado
 python scripts/predict.py imagen.jpg --model models/best_model.h5 --all
 ```
 
 ---
 
-## Flujo de Trabajo
+## Flujo de ejecución recomendado
 
 ```
 1. data_preparation.py
    ↓
-   Dataset limpio y organizado
+   Conjunto de datos preprocesado y particionado
    ↓
 2. train_model.py
    ↓
-   Modelo entrenado (.h5)
+   Modelo entrenado y serializado (.h5)
    ↓
 3. predict.py
    ↓
-   Predicciones
+   Inferencias sobre imágenes
 ```
 
-## Notas
+## Consideraciones técnicas
 
-- Ejecuta los scripts en orden: preparación → entrenamiento → predicción
-- Todos los scripts incluyen logging detallado
-- Los parámetros se pueden configurar en `config.py`
+- Secuencia de ejecución: preparación → entrenamiento → inferencia
+- Todos los scripts incorporan logging exhaustivo
+- Parámetros configurables centralizados en `config.py`
