@@ -19,12 +19,12 @@
 }
 
 *:focus-visible {
-  outline: 3px solid #3b82f6;
+  outline: 3px solid var(--info);
   outline-offset: 2px;
 }
 
 .App.dark-mode *:focus-visible {
-  outline-color: #60a5fa;
+  outline-color: var(--info-dark);
 }
 
 /* Animaciones */
@@ -71,7 +71,7 @@
 /* App Container */
 .App {
   min-height: 100vh;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: var(--gradient-primary);
   padding: 20px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -80,7 +80,7 @@
 }
 
 .App.dark-mode {
-  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  background: var(--gradient-primary);
 }
 
 .container {
@@ -103,27 +103,27 @@
 
 /* Cards base */
 .card {
-  background: white;
+  background: var(--bg-secondary);
   border-radius: 20px;
   padding: 30px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-xl);
   animation: slideUp 0.5s ease-out;
 }
 
 .App.dark-mode .card {
-  background: #1f2937;
-  color: #e5e7eb;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .card-title {
   font-size: 1.5em;
   margin-bottom: 20px;
-  color: #333;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
 .App.dark-mode .card-title {
-  color: #f9fafb;
+  color: var(--text-primary);
 }
 
 /* Sections */
@@ -146,15 +146,15 @@
 }
 
 .alert-error {
-  background: #fee2e2;
-  color: #991b1b;
-  border: 2px solid #fecaca;
+  background: var(--danger-light);
+  color: var(--danger-text);
+  border: 2px solid var(--danger-border);
 }
 
 .App.dark-mode .alert-error {
-  background: #7f1d1d;
-  color: #fecaca;
-  border-color: #991b1b;
+  background: var(--danger-dark);
+  color: var(--danger-light);
+  border-color: var(--danger-border);
 }
 
 /* Buttons */
@@ -178,34 +178,34 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
+  background: var(--gradient-success);
+  color: var(--text-on-primary);
 }
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 6px 20px hsl(160, 84%, 39%, 0.4);
 }
 
 .btn-secondary {
-  background: #e5e7eb;
-  color: #1f2937;
-  border: 2px solid #9ca3af;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 2px solid var(--border-medium);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #d1d5db;
-  border-color: #6b7280;
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
   transform: translateY(-2px);
 }
 
 .App.dark-mode .btn-secondary {
-  background: #374151;
-  color: #e5e7eb;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
 .App.dark-mode .btn-secondary:hover:not(:disabled) {
-  background: #4b5563;
+  background: var(--bg-hover);
 }
 
 .btn:disabled {
@@ -214,7 +214,7 @@
 }
 
 .btn:focus-visible {
-  outline: 3px solid #3b82f6;
+  outline: 3px solid var(--info);
   outline-offset: 2px;
 }
 

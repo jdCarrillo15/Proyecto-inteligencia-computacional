@@ -52,7 +52,7 @@
 
 .fruit-name {
   font-size: 2.5em;
-  color: #333;
+  color: var(--text-primary);
   font-weight: 700;
   margin: 0;
 }
@@ -93,7 +93,7 @@
 
 .confidence-label {
   font-size: 1em;
-  color: #666;
+  color: var(--text-tertiary);
   margin-bottom: 8px;
   font-weight: 500;
 }
@@ -107,10 +107,10 @@
 .confidence-bar {
   width: 100%;
   height: 30px;
-  background: #e5e7eb;
+  background: var(--gray-200);
   border-radius: 15px;
   overflow: hidden;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 2px 4px hsl(0, 0%, 0%, 0.1);
 }
 
 .confidence-fill {
@@ -125,13 +125,13 @@
 .all-predictions {
   margin-top: 30px;
   padding-top: 30px;
-  border-top: 2px solid #f0f0f0;
+  border-top: 2px solid var(--border-light);
 }
 
 .predictions-title {
   font-size: 1.3em;
   margin-bottom: 20px;
-  color: #333;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -141,7 +141,7 @@
   gap: 15px;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .prediction-item:last-child {
@@ -160,13 +160,13 @@
 
 .prediction-class {
   font-weight: 600;
-  color: #374151;
+  color: var(--text-secondary);
 }
 
 .prediction-bar-container {
   flex: 1;
   height: 20px;
-  background: #f3f4f6;
+  background: var(--gray-100);
   border-radius: 10px;
   overflow: hidden;
 }
@@ -180,7 +180,7 @@
 .prediction-percentage {
   text-align: right;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-secondary);
   min-width: 60px;
 }
 
@@ -190,18 +190,18 @@
 .disease-info-card {
   margin-top: 30px;
   padding: 25px;
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  background: linear-gradient(135deg, var(--warning-light) 0%, var(--warning-light) 100%);
   border-radius: 15px;
-  border-left: 6px solid #f59e0b;
+  border-left: 6px solid var(--warning);
   animation: fadeIn 0.6s ease-in;
 }
 
 .disease-info-title {
   font-size: 1.4em;
-  color: #92400e;
+  color: var(--warning-text);
   margin-bottom: 20px;
   font-weight: 700;
-  border-bottom: 2px solid #fbbf24;
+  border-bottom: 2px solid var(--warning);
   padding-bottom: 10px;
 }
 
@@ -212,16 +212,16 @@
 .info-label {
   font-size: 0.95em;
   font-weight: 700;
-  color: #78350f;
+  color: var(--warning-dark);
   margin-bottom: 6px;
   display: block;
 }
 
 .info-value {
   font-size: 0.95em;
-  color: #92400e;
+  color: var(--warning-text);
   line-height: 1.6;
-  background: rgba(255, 255, 255, 0.5);
+  background: hsl(0, 0%, 100%, 0.5);
   padding: 10px 12px;
   border-radius: 8px;
 }
@@ -242,8 +242,8 @@
 
 .symptoms-list li {
   padding: 6px 0;
-  color: #92400e;
-  border-bottom: 1px solid rgba(251, 191, 36, 0.3);
+  color: var(--warning-text);
+  border-bottom: 1px solid hsl(45, 93%, 47%, 0.3);
   padding-left: 20px;
   position: relative;
 }
@@ -256,28 +256,28 @@
   content: "•";
   position: absolute;
   left: 5px;
-  color: #f59e0b;
+  color: var(--warning);
   font-weight: bold;
   font-size: 1.2em;
 }
 
 .treatment-section .info-value {
-  background: rgba(254, 202, 202, 0.3);
-  border-left: 3px solid #dc2626;
+  background: hsl(0, 84%, 60%, 0.15);
+  border-left: 3px solid var(--danger);
   font-weight: 500;
 }
 
 .disease-info-footer {
   margin-top: 20px;
   padding: 15px;
-  background: rgba(220, 38, 38, 0.1);
+  background: hsl(0, 84%, 60%, 0.1);
   border-radius: 8px;
-  border-left: 4px solid #dc2626;
+  border-left: 4px solid var(--danger);
 }
 
 .disease-info-footer p {
   margin: 0;
-  color: #7f1d1d;
+  color: var(--danger-text);
   font-size: 0.9em;
   line-height: 1.5;
 }
@@ -292,8 +292,8 @@
 .comparison-toggle-btn {
   width: 100%;
   padding: 15px 20px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
+  background: var(--gradient-info);
+  color: var(--text-on-primary);
   border: none;
   border-radius: 12px;
   font-size: 1.1em;
@@ -318,17 +318,17 @@
 }
 
 .comparison-card {
-  background: white;
+  background: var(--bg-secondary);
   border-radius: 15px;
   padding: 25px;
   margin-bottom: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: 2px solid #e5e7eb;
+  box-shadow: var(--shadow-md);
+  border: 2px solid var(--border-light);
 }
 
 .comparison-title {
   font-size: 1.3em;
-  color: #333;
+  color: var(--text-primary);
   margin-bottom: 20px;
   font-weight: 700;
 }
@@ -354,20 +354,20 @@
 }
 
 .healthy-label {
-  background: #d1fae5;
-  color: #059669;
+  background: var(--success-light);
+  color: var(--success-dark);
 }
 
 .diseased-label {
-  background: #fee2e2;
-  color: #dc2626;
+  background: var(--danger-light);
+  color: var(--danger);
 }
 
 .comparison-placeholder {
-  background: #f9fafb;
+  background: var(--bg-primary);
   border-radius: 12px;
   padding: 30px 20px;
-  border: 2px dashed #d1d5db;
+  border: 2px dashed var(--border-medium);
   min-height: 200px;
   display: flex;
   flex-direction: column;
@@ -382,7 +382,7 @@
 }
 
 .comparison-description {
-  color: #6b7280;
+  color: var(--text-tertiary);
   font-weight: 500;
   margin: 0;
   text-transform: capitalize;
@@ -391,16 +391,16 @@
 .comparison-divider {
   font-size: 1.5em;
   font-weight: 700;
-  color: #9ca3af;
+  color: var(--text-muted);
   text-align: center;
 }
 
 .comparison-note {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--info-light);
+  color: var(--info-text);
   padding: 12px 15px;
   border-radius: 8px;
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid var(--info);
   font-size: 0.95em;
 }
 
@@ -418,9 +418,9 @@
 }
 
 .feature-status-banner.development {
-  background: #fef3c7;
-  border-left-color: #f59e0b;
-  color: #92400e;
+  background: var(--warning-light);
+  border-left-color: var(--warning);
+  color: var(--warning-text);
 }
 
 .feature-status-banner .status-icon {
@@ -436,7 +436,7 @@
   display: block;
   margin-bottom: 5px;
   font-size: 1.05em;
-  color: #78350f;
+  color: var(--warning-dark);
 }
 
 .feature-status-banner .status-content p {
@@ -460,7 +460,7 @@
   margin: 0 0 10px 0;
   font-size: 0.9em;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-secondary);
 }
 
 .placeholder-info ul {
@@ -471,7 +471,7 @@
 
 .placeholder-info li {
   font-size: 0.85em;
-  color: #6b7280;
+  color: var(--text-tertiary);
   margin-bottom: 5px;
   line-height: 1.4;
 }
@@ -482,15 +482,15 @@
 .comparison-alternatives {
   margin-top: 20px;
   padding: 20px;
-  background: #f9fafb;
+  background: var(--bg-primary);
   border-radius: 10px;
-  border: 2px dashed #d1d5db;
+  border: 2px dashed var(--border-medium);
 }
 
 .comparison-alternatives h5 {
   margin: 0 0 15px 0;
   font-size: 1em;
-  color: #374151;
+  color: var(--text-secondary);
 }
 
 .alternative-links {
@@ -504,19 +504,19 @@
   align-items: center;
   gap: 10px;
   padding: 12px 15px;
-  background: white;
+  background: var(--bg-secondary);
   border-radius: 8px;
   text-decoration: none;
-  color: #374151;
-  border: 1px solid #e5e7eb;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
   transition: all 0.3s ease;
 }
 
 .alternative-link:hover {
-  background: #3b82f6;
-  color: white;
+  background: var(--info);
+  color: var(--text-on-primary);
   transform: translateX(5px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px hsl(199, 89%, 48%, 0.3);
 }
 
 .alternative-link span {
@@ -527,18 +527,18 @@
    DATASET INFO CARD
    =============================== */
 .dataset-info-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-secondary);
   border-radius: 15px;
   padding: 25px;
   margin-bottom: 20px;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-  color: white;
+  box-shadow: var(--shadow-md);
+  color: var(--text-on-primary);
 }
 
 .dataset-title {
   font-size: 1.3em;
   margin-bottom: 20px;
-  color: white;
+  color: var(--text-on-primary);
   font-weight: 700;
 }
 
@@ -554,7 +554,7 @@
   align-items: center;
   gap: 12px;
   padding: 15px;
-  background: rgba(255, 255, 255, 0.2);
+  background: hsl(0, 0%, 100%, 0.2);
   border-radius: 10px;
   backdrop-filter: blur(10px);
 }
@@ -577,7 +577,7 @@
 
 .dataset-note {
   padding: 15px;
-  background: rgba(255, 255, 255, 0.15);
+  background: hsl(0, 0%, 100%, 0.15);
   border-radius: 8px;
   font-size: 0.9em;
   line-height: 1.6;
@@ -592,11 +592,11 @@
    RESOURCES CARD
    =============================== */
 .resources-card {
-  background: white;
+  background: var(--bg-secondary);
   border-radius: 15px;
   padding: 25px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: 2px solid #e5e7eb;
+  box-shadow: var(--shadow-md);
+  border: 2px solid var(--border-light);
 }
 
 .resources-title {
@@ -650,39 +650,39 @@
 
 /* Resource Type Specific Styles */
 .resource-type-encyclopedia {
-  border-left: 4px solid #8b5cf6;
+  border-left: 4px solid var(--secondary-500);
 }
 
 .resource-type-guide {
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid var(--info);
 }
 
 .resource-type-extension {
-  border-left: 4px solid #10b981;
+  border-left: 4px solid var(--primary-500);
 }
 
 .resource-type-official {
-  border-left: 4px solid #f59e0b;
+  border-left: 4px solid var(--warning);
 }
 
 .resource-type-research {
-  border-left: 4px solid #ec4899;
+  border-left: 4px solid hsl(330, 81%, 60%);
 }
 
 .resource-type-tool {
-  border-left: 4px solid #06b6d4;
+  border-left: 4px solid hsl(189, 94%, 43%);
 }
 
 .resource-type-general {
-  border-left: 4px solid #6b7280;
+  border-left: 4px solid var(--gray-500);
 }
 
 .resource-type-data {
-  border-left: 4px solid #14b8a6;
+  border-left: 4px solid hsl(173, 80%, 40%);
 }
 
 .resources-subtitle {
-  color: #6b7280;
+  color: var(--text-tertiary);
   font-size: 0.9em;
   margin-bottom: 15px;
   font-style: italic;
@@ -691,20 +691,20 @@
 .no-resources {
   padding: 20px;
   text-align: center;
-  background: #f3f4f6;
+  background: var(--gray-100);
   border-radius: 10px;
-  color: #6b7280;
+  color: var(--text-tertiary);
 }
 
 .resources-footer {
   margin-top: 15px;
   padding-top: 15px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-light);
 }
 
 .resources-note {
   font-size: 0.85em;
-  color: #6b7280;
+  color: var(--text-tertiary);
   margin: 0;
 }
 
@@ -717,32 +717,32 @@
 
 .learn-more-btn {
   padding: 12px 30px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
+  background: var(--gradient-success);
+  color: var(--text-on-primary);
   border: none;
   border-radius: 25px;
   font-size: 1em;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 12px hsl(160, 84%, 39%, 0.3);
 }
 
 .learn-more-btn:hover,
 .learn-more-btn:focus-visible {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 6px 16px hsl(160, 84%, 39%, 0.4);
 }
 
 /* ===============================
    PLACEHOLDER CARD
    =============================== */
 .placeholder-card {
-  background: white;
+  background: var(--bg-secondary);
   border-radius: 15px;
   padding: 40px 25px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: 2px solid #e5e7eb;
+  box-shadow: var(--shadow-md);
+  border: 2px solid var(--border-light);
   text-align: center;
 }
 
@@ -759,7 +759,7 @@
 
 .supported-plants-title {
   font-size: 1.3em;
-  color: #333;
+  color: var(--text-primary);
   margin: 30px 0 20px;
   font-weight: 700;
 }
@@ -777,24 +777,24 @@
   align-items: center;
   gap: 8px;
   padding: 12px 20px;
-  background: #f3f4f6;
+  background: var(--gray-100);
   border-radius: 20px;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-secondary);
   transition: all 0.3s ease;
   border: 2px solid transparent;
 }
 
 .fruit-chip:hover {
-  background: #e5e7eb;
+  background: var(--gray-200);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-color: #9ca3af;
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
 }
 
 .chip-count {
-  background: white;
-  color: #6b7280;
+  background: var(--bg-secondary);
+  color: var(--text-tertiary);
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 0.85em;
