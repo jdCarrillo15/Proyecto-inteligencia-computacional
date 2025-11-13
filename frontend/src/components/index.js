@@ -9,3 +9,4 @@ export { default as ConfidenceRadialChart } from './ConfidenceRadialChart';
 export { default as TopPredictionsChart } from './TopPredictionsChart';
 export { default as SeverityTimeline } from './SeverityTimeline';
 export { default as LeafDamageHeatmap } from './LeafDamageHeatmap';
+export { default as StatCards } from './StatCards';

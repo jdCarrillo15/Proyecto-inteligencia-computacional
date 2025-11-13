@@ -102,6 +102,8 @@ function App() {
     <div className={`App ${darkMode ? 'dark-mode' : ''}`}>
       <div className="container">
         <Header darkMode={darkMode} onToggleDarkMode={() => setDarkMode(!darkMode)} />
+        
+        <StatCards />
 
         <main className="main-content" role="main">
           <section className="upload-section" aria-label="Sección de carga de imagen">

@@ -1,0 +1,417 @@
+/* ===============================
+   STAT CARDS CONTAINER
+   =============================== */
+
+.stat-cards-container {
+  margin-top: var(--space-xl);
+  padding: var(--space-xl);
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.App.dark-mode .stat-cards-container {
+  background: var(--bg-tertiary);
+  border-color: var(--border-dark);
+}
+
+/* ===============================
+   HEADER
+   =============================== */
+.stat-cards-header {
+  margin-bottom: var(--space-xl);
+  text-align: center;
+}
+
+.stat-cards-title {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-sm) 0;
+}
+
+.stat-cards-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ===============================
+   STAT CARDS GRID
+   =============================== */
+.stat-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+/* ===============================
+   STAT CARD
+   =============================== */
+.stat-card {
+  position: relative;
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: var(--bg-primary);
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  animation: slideInCard 0.6s ease-out;
+  animation-fill-mode: both;
+}
+
+.App.dark-mode .stat-card {
+  background: var(--bg-secondary);
+  border-color: var(--border-dark);
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary);
+}
+
+@keyframes slideInCard {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Card Badge Decorativo */
+.stat-card-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60px;
+  height: 60px;
+  background: var(--primary);
+  opacity: 0.05;
+  border-radius: 0 12px 0 100%;
+  transition: opacity 0.3s ease;
+}
+
+.stat-card:hover .stat-card-badge {
+  opacity: 0.1;
+}
+
+/* ===============================
+   STAT CARD ICON
+   =============================== */
+.stat-card-icon {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover .stat-card-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+/* ===============================
+   STAT CARD CONTENT
+   =============================== */
+.stat-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.stat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.stat-card-title {
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.stat-card-value {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--text-primary);
+  margin: var(--space-xs) 0;
+}
+
+.stat-card-description {
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-normal);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ===============================
+   TREND INDICATOR
+   =============================== */
+.trend-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: currentColor;
+  background-clip: padding-box;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
+}
+
+.stat-card:hover .trend-indicator {
+  opacity: 1;
+}
+
+.trend-arrow {
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.trend-value {
+  font-weight: var(--font-weight-bold);
+}
+
+.trend-label {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+/* Ajustar opacidad del background */
+.trend-indicator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: currentColor;
+  opacity: 0.1;
+  border-radius: inherit;
+  z-index: -1;
+}
+
+.trend-indicator {
+  position: relative;
+  background: transparent;
+}
+
+/* ===============================
+   STAT CARDS NOTE
+   =============================== */
+.stat-cards-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--bg-tertiary);
+  border-left: 3px solid var(--primary);
+  border-radius: 6px;
+}
+
+.App.dark-mode .stat-cards-note {
+  background: var(--bg-secondary);
+}
+
+.note-icon {
+  font-size: 1.2em;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.note-text {
+  font-family: var(--font-body);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-relaxed);
+  color: var(--text-secondary);
+}
+
+/* ===============================
+   RESPONSIVE
+   =============================== */
+@media (max-width: 1024px) {
+  .stat-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .stat-cards-container {
+    padding: var(--space-lg);
+  }
+
+  .stat-cards-title {
+    font-size: var(--font-size-h3);
+  }
+
+  .stat-cards-subtitle {
+    font-size: var(--font-size-small);
+  }
+
+  .stat-cards-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  .stat-card {
+    padding: var(--space-md);
+  }
+
+  .stat-card-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+
+  .stat-card-value {
+    font-size: var(--font-size-h2);
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-cards-container {
+    padding: var(--space-md);
+  }
+
+  .stat-cards-header {
+    margin-bottom: var(--space-lg);
+  }
+
+  .stat-cards-title {
+    font-size: var(--font-size-h4);
+  }
+
+  .stat-cards-subtitle {
+    font-size: 12px;
+  }
+
+  .stat-card {
+    padding: var(--space-sm);
+    gap: var(--space-sm);
+  }
+
+  .stat-card-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+  }
+
+  .stat-card-title {
+    font-size: 11px;
+  }
+
+  .stat-card-value {
+    font-size: var(--font-size-h3);
+    margin: 4px 0;
+  }
+
+  .stat-card-description {
+    font-size: 11px;
+  }
+
+  .trend-indicator {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+
+  .trend-arrow {
+    font-size: 12px;
+  }
+
+  .trend-label {
+    display: none;
+  }
+
+  .stat-cards-note {
+    padding: var(--space-sm);
+  }
+
+  .note-text {
+    font-size: 11px;
+  }
+}
+
+/* ===============================
+   ANIMATION ENTRANCE
+   =============================== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===============================
+   ACCESSIBILITY
+   =============================== */
+.stat-card:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+/* Mejorar contraste en modo oscuro */
+.App.dark-mode .stat-card-title {
+  color: var(--text-secondary);
+}
+
+.App.dark-mode .stat-card-value {
+  color: var(--text-primary);
+}
+
+/* ===============================
+   PRINT STYLES
+   =============================== */
+@media print {
+  .stat-cards-container {
+    break-inside: avoid;
+    box-shadow: none;
+  }
+
+  .stat-card {
+    box-shadow: none;
+    animation: none;
+  }
+
+  .stat-card:hover {
+    transform: none;
+  }
+}
