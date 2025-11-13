@@ -104,8 +104,14 @@
   background: var(--bg-secondary);
   border-radius: 20px;
   padding: 30px;
-  box-shadow: var(--shadow-xl);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
   animation: slideUp 0.5s ease-out;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .App.dark-mode .card {
@@ -177,6 +183,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   min-width: 200px;
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-primary {
@@ -186,7 +193,7 @@
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px hsl(160, 84%, 39%, 0.4);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-secondary {
@@ -199,6 +206,7 @@
   background: var(--bg-hover);
   border-color: var(--border-strong);
   transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
 }
 
 .App.dark-mode .btn-secondary {
