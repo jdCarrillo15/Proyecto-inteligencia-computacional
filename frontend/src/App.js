@@ -216,10 +216,12 @@ function App() {
 
             {/* Información */}
             <div className="info-card">
-              <h3>ℹ️ Información</h3>
+              <h3>ℹ️ Información del Sistema</h3>
               <ul className="info-list">
-                <li>Modelo CNN entrenado con TensorFlow</li>
-                <li>Detecta enfermedades en cultivos</li>
+                <li>Detecta 15 enfermedades en 4 cultivos</li>
+                <li>Cultivos: Tomate, Papa, Maíz y Manzana</li>
+                <li>Dataset de Kaggle con 15,000+ imágenes</li>
+                <li>Modelo CNN con Transfer Learning (TensorFlow)</li>
                 <li>Precisión del modelo: ~95%</li>
                 <li>Tiempo de predicción: &lt;1 segundo</li>
               </ul>
