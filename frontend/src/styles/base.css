@@ -72,7 +72,7 @@
 .App {
   min-height: 100vh;
   background: var(--gradient-primary);
-  padding: 20px;
+  padding: var(--space-lg);
   font-family: var(--font-body);
   transition: background 0.3s ease;
 }
