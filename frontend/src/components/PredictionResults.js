@@ -14,6 +14,7 @@ import {
 import ConfidenceRadialChart from './ConfidenceRadialChart';
 import TopPredictionsChart from './TopPredictionsChart';
 import SeverityTimeline from './SeverityTimeline';
+import LeafDamageHeatmap from './LeafDamageHeatmap';
 
 const PredictionResults = ({ prediction }) => {
   const [showComparison, setShowComparison] = useState(false);
@@ -118,6 +119,14 @@ const PredictionResults = ({ prediction }) => {
       {!isHealthy(prediction.predicted_class) && (
         <SeverityTimeline 
           severityLevel={getSeverityLevel(prediction.predicted_class, prediction.confidence).level}
+          confidence={prediction.confidence_percentage}
+        />
+      )}
+
+      {/* Heatmap de Área Afectada */}
+      {!isHealthy(prediction.predicted_class) && (
+        <LeafDamageHeatmap 
+          diseaseName={prediction.predicted_class}
           confidence={prediction.confidence_percentage}
         />
       )}
