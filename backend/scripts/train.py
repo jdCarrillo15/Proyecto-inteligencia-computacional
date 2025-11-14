@@ -210,44 +210,121 @@ class PlantDiseaseClassifier:
         return self.history
     
     def fine_tune(self, X_train, y_train, X_test, y_test, 
-                  epochs=10, batch_size=64):
+                  epochs_phase2=15, batch_size=64):
         """
-        Fine-tuning del modelo (solo si usa transfer learning).
-        NOTA: Desactivado por defecto debido a overfitting.
+        Fine-tuning del modelo con descongelamiento gradual (solo si usa transfer learning).
+        
+        Estrategia de 2 Fases:
+        - Fase 2a: Descongelar últimas 50 capas con LR bajo
+        - Fase 2b: Descongelar últimas 100 capas con LR muy bajo
         
         Args:
             X_train, y_train: Datos de entrenamiento
             X_test, y_test: Datos de prueba
-            epochs: Épocas de fine-tuning
+            epochs_phase2: Épocas totales de fine-tuning (se divide en 2 subfases)
             batch_size: Tamaño del batch
         """
         if not self.use_transfer_learning:
             print("⚠️  Fine-tuning solo disponible con transfer learning")
             return
         
+        total_layers = len(self.base_model.layers)
+        print(f"\n📊 Base model tiene {total_layers} capas totales")
+        
+        # ==================================================================
+        # FASE 2a: Descongelamiento de features de alto nivel (últimas 50 capas)
+        # ==================================================================
         print("\n" + "=" * 60)
-        print("🔥 FASE DE FINE-TUNING")
+        print("🔥 FASE 2a: FINE-TUNING - Features de Alto Nivel")
         print("=" * 60)
         
-        # Descongelar últimas capas
+        # Descongelar base model
         self.base_model.trainable = True
         
-        # Congelar todas excepto las últimas 10 capas (reducido de 20)
-        fine_tune_at = len(self.base_model.layers) - 10
+        # Congelar todas excepto las últimas 50 capas
+        fine_tune_at = max(0, total_layers - 50)
         for layer in self.base_model.layers[:fine_tune_at]:
             layer.trainable = False
         
-        print(f"  - Capas descongeladas: {len(self.base_model.layers) - fine_tune_at}")
+        trainable_layers = sum([1 for layer in self.base_model.layers if layer.trainable])
+        print(f"  - Capas congeladas: {fine_tune_at}")
+        print(f"  - Capas descongeladas: {trainable_layers}")
+        print(f"  - Learning Rate: 0.0001")
         
-        # Recompilar con LR menor (aumentado de 0.0001 a 0.00005)
+        # Recompilar con LR bajo
+        self.model.compile(
+            optimizer=keras.optimizers.Adam(learning_rate=0.0001),
+            loss='categorical_crossentropy',
+            metrics=['accuracy']
+        )
+        
+        # Callbacks para Fase 2a
+        callbacks_2a = [
+            EarlyStopping(
+                monitor='val_accuracy',
+                patience=6,
+                restore_best_weights=True,
+                verbose=1
+            ),
+            ModelCheckpoint(
+                'models/finetuned_phase2a.keras',
+                monitor='val_accuracy',
+                save_best_only=True,
+                verbose=1
+            ),
+            ReduceLROnPlateau(
+                monitor='val_loss',
+                factor=0.5,
+                patience=3,
+                min_lr=1e-7,
+                verbose=1
+            )
+        ]
+        
+        # Entrenar Fase 2a
+        epochs_2a = max(epochs_phase2 // 2, 7)  # Mínimo 7 epochs
+        start_time_2a = time.time()
+        
+        history_2a = self.model.fit(
+            X_train, y_train,
+            batch_size=batch_size,
+            epochs=epochs_2a,
+            validation_data=(X_test, y_test),
+            callbacks=callbacks_2a,
+            verbose=1
+        )
+        
+        time_2a = time.time() - start_time_2a
+        print(f"\n⏱️  Tiempo Fase 2a: {time_2a/60:.2f} minutos")
+        
+        # ==================================================================
+        # FASE 2b: Descongelamiento de más capas (últimas 100 capas)
+        # ==================================================================
+        print("\n" + "=" * 60)
+        print("🔥 FASE 2b: FINE-TUNING - Features Intermedias")
+        print("=" * 60)
+        
+        # Descongelar más capas (últimas 100)
+        fine_tune_at_2b = max(0, total_layers - 100)
+        for layer in self.base_model.layers[:fine_tune_at_2b]:
+            layer.trainable = False
+        for layer in self.base_model.layers[fine_tune_at_2b:]:
+            layer.trainable = True
+        
+        trainable_layers_2b = sum([1 for layer in self.base_model.layers if layer.trainable])
+        print(f"  - Capas congeladas: {fine_tune_at_2b}")
+        print(f"  - Capas descongeladas: {trainable_layers_2b}")
+        print(f"  - Learning Rate: 0.00005 (muy bajo para estabilidad)")
+        
+        # Recompilar con LR muy bajo
         self.model.compile(
             optimizer=keras.optimizers.Adam(learning_rate=0.00005),
             loss='categorical_crossentropy',
             metrics=['accuracy']
         )
         
-        # Callbacks
-        callbacks = [
+        # Callbacks para Fase 2b
+        callbacks_2b = [
             EarlyStopping(
                 monitor='val_accuracy',
                 patience=5,
@@ -259,29 +336,42 @@ class PlantDiseaseClassifier:
                 monitor='val_accuracy',
                 save_best_only=True,
                 verbose=1
+            ),
+            ReduceLROnPlateau(
+                monitor='val_loss',
+                factor=0.5,
+                patience=3,
+                min_lr=1e-8,
+                verbose=1
             )
         ]
         
-        # Fine-tuning
-        start_time = time.time()
+        # Entrenar Fase 2b
+        epochs_2b = epochs_phase2 - epochs_2a
+        start_time_2b = time.time()
         
-        history_ft = self.model.fit(
+        history_2b = self.model.fit(
             X_train, y_train,
             batch_size=batch_size,
-            epochs=epochs,
+            epochs=epochs_2b,
             validation_data=(X_test, y_test),
-            callbacks=callbacks,
+            callbacks=callbacks_2b,
             verbose=1
         )
         
-        ft_time = time.time() - start_time
+        time_2b = time.time() - start_time_2b
+        print(f"\n⏱️  Tiempo Fase 2b: {time_2b/60:.2f} minutos")
         
-        print(f"\n⏱️  Tiempo de fine-tuning: {ft_time/60:.2f} minutos")
-        
-        # Combinar historiales - solo las claves que existen en ambos
+        # Combinar historiales
         for key in self.history.history.keys():
-            if key in history_ft.history:
-                self.history.history[key].extend(history_ft.history[key])
+            if key in history_2a.history:
+                self.history.history[key].extend(history_2a.history[key])
+            if key in history_2b.history:
+                self.history.history[key].extend(history_2b.history[key])
+        
+        total_ft_time = time_2a + time_2b
+        print(f"\n⏱️  Tiempo total de fine-tuning: {total_ft_time/60:.2f} minutos")
+        print(f"\n✅ Fine-tuning completado con {trainable_layers_2b} capas entrenables")
     
     def evaluate(self, X_test, y_test, class_names):
         """
@@ -410,18 +500,20 @@ def main():
     IMG_SIZE = (100, 100)
     
     # Parámetros de entrenamiento optimizados
-    EPOCHS_PHASE1 = 20      # Entrenamiento inicial
-    EPOCHS_PHASE2 = 8       # Fine-tuning
+    EPOCHS_PHASE1 = 15      # Entrenamiento inicial (capas Dense)
+    EPOCHS_PHASE2 = 15      # Fine-tuning gradual (2 subfases)
     BATCH_SIZE = 32         # Batch size para regularización
     USE_TRANSFER_LEARNING = True
-    DO_FINE_TUNING = False  # Desactivado por defecto (causa overfitting)
+    DO_FINE_TUNING = True   # Activado con estrategia gradual mejorada
     
     print("\n⚙️  CONFIGURACIÓN:")
     print(f"  - Transfer Learning: {'✅ MobileNetV2' if USE_TRANSFER_LEARNING else '❌'}")
     print(f"  - Batch Size: {BATCH_SIZE}")
-    print(f"  - Épocas Fase 1: {EPOCHS_PHASE1}")
+    print(f"  - Épocas Fase 1 (clasificador): {EPOCHS_PHASE1}")
     if DO_FINE_TUNING and USE_TRANSFER_LEARNING:
-        print(f"  - Épocas Fase 2 (Fine-tuning): {EPOCHS_PHASE2}")
+        print(f"  - Épocas Fase 2 (fine-tuning gradual): {EPOCHS_PHASE2}")
+        print(f"    • Subfase 2a: ~{EPOCHS_PHASE2//2} epochs (últimas 50 capas)")
+        print(f"    • Subfase 2b: ~{EPOCHS_PHASE2 - EPOCHS_PHASE2//2} epochs (últimas 100 capas)")
     
     # Cargar datos desde cache
     cache = DataCache()
@@ -545,6 +637,7 @@ def main():
     print("  ✅ Cache PKL: Datos se guardan para reuso")
     print("  ✅ Transfer Learning: Usa MobileNetV2 pre-entrenado")
     print("  ✅ Data Augmentation: Previene overfitting")
+    print("  ✅ Fine-tuning Gradual: Descongelamiento progresivo en 2 fases")
     print("  ✅ Optimizado: Hiperparámetros balanceados")
     
     print("\n🎯 PRÓXIMOS PASOS:")
