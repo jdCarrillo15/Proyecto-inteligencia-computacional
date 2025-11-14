@@ -168,7 +168,7 @@ class PlantDiseaseClassifier:
         # Crear directorio para modelos
         Path('models').mkdir(exist_ok=True)
         
-        # Callbacks optimizados
+        # Callbacks optimizados para Fase 1
         callbacks = [
             EarlyStopping(
                 monitor='val_accuracy',
@@ -184,9 +184,9 @@ class PlantDiseaseClassifier:
             ),
             ReduceLROnPlateau(
                 monitor='val_loss',
-                factor=0.5,
-                patience=4,
-                min_lr=1e-7,
+                factor=0.5,          # Decay agresivo para convergencia rápida
+                patience=3,          # Reacción rápida a estancamiento
+                min_lr=0.0001,       # Mínimo para Fase 1
                 verbose=1
             )
         ]
@@ -249,7 +249,8 @@ class PlantDiseaseClassifier:
         trainable_layers = sum([1 for layer in self.base_model.layers if layer.trainable])
         print(f"  - Capas congeladas: {fine_tune_at}")
         print(f"  - Capas descongeladas: {trainable_layers}")
-        print(f"  - Learning Rate: 0.0001")
+        print(f"  - Learning Rate: 0.0001 (10x más bajo que Fase 1)")
+        print(f"  - LR Decay: factor=0.2, patience=5, min_lr=0.00001")
         
         # Recompilar con LR bajo
         self.model.compile(
@@ -258,7 +259,7 @@ class PlantDiseaseClassifier:
             metrics=['accuracy']
         )
         
-        # Callbacks para Fase 2a
+        # Callbacks para Fase 2a (fine-tuning conservador)
         callbacks_2a = [
             EarlyStopping(
                 monitor='val_accuracy',
@@ -274,9 +275,9 @@ class PlantDiseaseClassifier:
             ),
             ReduceLROnPlateau(
                 monitor='val_loss',
-                factor=0.5,
-                patience=3,
-                min_lr=1e-7,
+                factor=0.2,          # Decay suave para evitar olvido catastrófico
+                patience=5,          # Más paciente en fine-tuning
+                min_lr=0.00001,      # Mínimo para Fase 2
                 verbose=1
             )
         ]
@@ -314,7 +315,8 @@ class PlantDiseaseClassifier:
         trainable_layers_2b = sum([1 for layer in self.base_model.layers if layer.trainable])
         print(f"  - Capas congeladas: {fine_tune_at_2b}")
         print(f"  - Capas descongeladas: {trainable_layers_2b}")
-        print(f"  - Learning Rate: 0.00005 (muy bajo para estabilidad)")
+        print(f"  - Learning Rate: 0.00005 (ultra-bajo para evitar catastrophic forgetting)")
+        print(f"  - LR Decay: factor=0.2, patience=5, min_lr=0.00001")
         
         # Recompilar con LR muy bajo
         self.model.compile(
@@ -323,7 +325,7 @@ class PlantDiseaseClassifier:
             metrics=['accuracy']
         )
         
-        # Callbacks para Fase 2b
+        # Callbacks para Fase 2b (fine-tuning ultra-conservador)
         callbacks_2b = [
             EarlyStopping(
                 monitor='val_accuracy',
@@ -339,9 +341,9 @@ class PlantDiseaseClassifier:
             ),
             ReduceLROnPlateau(
                 monitor='val_loss',
-                factor=0.5,
-                patience=3,
-                min_lr=1e-8,
+                factor=0.2,          # Decay suave para preservar features ImageNet
+                patience=5,          # Más paciente con más capas descongeladas
+                min_lr=0.00001,      # Mínimo para Fase 2
                 verbose=1
             )
         ]
