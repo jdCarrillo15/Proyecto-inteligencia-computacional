@@ -25,7 +25,7 @@ import time
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers, models
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, Callback
 from sklearn.metrics import classification_report, confusion_matrix
 
 # Agregar el directorio backend al path
@@ -44,6 +44,109 @@ physical_devices = tf.config.list_physical_devices('GPU')
 if physical_devices:
     tf.config.experimental.set_memory_growth(physical_devices[0], True)
     print("✅ GPU detectada y configurada")
+
+
+class FineTuningMonitor(Callback):
+    """
+    Callback personalizado para monitorear señales de éxito y problemas durante fine-tuning.
+    
+    Señales de éxito:
+    - ✅ Val accuracy sube gradualmente
+    - ✅ Val loss baja sin oscilar mucho
+    - ✅ Gap train-val no es muy grande (<10%)
+    
+    Señales de problemas:
+    - ❌ Val loss explota → LR demasiado alto
+    - ❌ Overfitting severo (train 95%, val 50%) → Más regularización
+    - ❌ No mejora nada → Posible problema en datos
+    """
+    
+    def __init__(self, phase_name="Fine-tuning"):
+        super().__init__()
+        self.phase_name = phase_name
+        self.best_val_loss = float('inf')
+        self.best_val_acc = 0.0
+        self.epochs_no_improve = 0
+        self.val_loss_history = []
+        
+    def on_epoch_end(self, epoch, logs=None):
+        logs = logs or {}
+        
+        val_loss = logs.get('val_loss', 0)
+        val_acc = logs.get('val_accuracy', 0)
+        train_loss = logs.get('loss', 0)
+        train_acc = logs.get('accuracy', 0)
+        
+        # Calcular gap train-val
+        acc_gap = abs(train_acc - val_acc)
+        
+        # Guardar historial
+        self.val_loss_history.append(val_loss)
+        
+        # Detectar volatilidad en val_loss
+        if len(self.val_loss_history) >= 3:
+            recent_losses = self.val_loss_history[-3:]
+            volatility = max(recent_losses) - min(recent_losses)
+        else:
+            volatility = 0
+        
+        print(f"\n📊 [{self.phase_name}] Epoch {epoch + 1} - Monitoreo:")
+        
+        # SEÑALES DE ÉXITO
+        success_signals = []
+        
+        if val_acc > self.best_val_acc:
+            improvement = (val_acc - self.best_val_acc) * 100
+            success_signals.append(f"✅ Val accuracy mejora: +{improvement:.2f}%")
+            self.best_val_acc = val_acc
+            self.epochs_no_improve = 0
+        
+        if val_loss < self.best_val_loss:
+            success_signals.append(f"✅ Val loss baja: {val_loss:.4f}")
+            self.best_val_loss = val_loss
+        
+        if acc_gap < 0.10:
+            success_signals.append(f"✅ Gap train-val saludable: {acc_gap*100:.1f}%")
+        
+        if volatility < 0.2:
+            success_signals.append("✅ Val loss estable (baja oscilación)")
+        
+        # SEÑALES DE PROBLEMAS
+        problem_signals = []
+        
+        # Val loss explota
+        if len(self.val_loss_history) >= 2:
+            if val_loss > self.val_loss_history[-2] * 1.5:
+                problem_signals.append("❌ ALERTA: Val loss explota - LR puede ser muy alto")
+        
+        # Overfitting severo
+        if train_acc > 0.95 and val_acc < 0.70:
+            problem_signals.append(f"❌ OVERFITTING SEVERO: train={train_acc:.1%}, val={val_acc:.1%}")
+        elif acc_gap > 0.15:
+            problem_signals.append(f"⚠️  Gap train-val alto: {acc_gap*100:.1f}% (>15%)")
+        
+        # Estancamiento
+        if val_acc <= self.best_val_acc:
+            self.epochs_no_improve += 1
+            if self.epochs_no_improve >= 5:
+                problem_signals.append(f"⚠️  Sin mejora por {self.epochs_no_improve} epochs")
+        
+        # Volatilidad alta
+        if volatility > 0.3:
+            problem_signals.append(f"⚠️  Val loss oscila mucho: volatilidad={volatility:.3f}")
+        
+        # Imprimir señales
+        if success_signals:
+            print("  " + "\n  ".join(success_signals))
+        
+        if problem_signals:
+            print("  " + "\n  ".join(problem_signals))
+        
+        if not success_signals and not problem_signals:
+            print("  🔵 Entrenamiento en progreso normal")
+        
+        # Métricas actuales
+        print(f"  📋 Métricas: train_acc={train_acc:.1%}, val_acc={val_acc:.1%}, gap={acc_gap*100:.1f}%")
 
 
 class PlantDiseaseClassifier:
@@ -283,6 +386,7 @@ class PlantDiseaseClassifier:
         
         # Callbacks para Fase 2a (fine-tuning conservador)
         callbacks_2a = [
+            FineTuningMonitor(phase_name="Fase 2a"),
             EarlyStopping(
                 monitor='val_accuracy',
                 patience=6,
@@ -363,6 +467,7 @@ class PlantDiseaseClassifier:
         
         # Callbacks para Fase 2b (fine-tuning ultra-conservador)
         callbacks_2b = [
+            FineTuningMonitor(phase_name="Fase 2b"),
             EarlyStopping(
                 monitor='val_accuracy',
                 patience=5,
@@ -539,10 +644,10 @@ def main():
     
     # Parámetros de entrenamiento optimizados
     EPOCHS_PHASE1 = 15      # Entrenamiento inicial (capas Dense)
-    EPOCHS_PHASE2 = 15      # Fine-tuning gradual (2 subfases)
+    EPOCHS_PHASE2 = 20      # Fine-tuning gradual (2 subfases) - Aumentado para mejor adaptación
     BATCH_SIZE = 32         # Batch size para regularización
     USE_TRANSFER_LEARNING = True
-    DO_FINE_TUNING = True   # Activado con estrategia gradual mejorada
+    DO_FINE_TUNING = True   # ✅ Activado con estrategia gradual mejorada
     
     print("\n⚙️  CONFIGURACIÓN:")
     print(f"  - Transfer Learning: {'✅ MobileNetV2' if USE_TRANSFER_LEARNING else '❌'}")
@@ -553,6 +658,7 @@ def main():
         print(f"    • Subfase 2a: ~{EPOCHS_PHASE2//2} epochs (capas 101-154: features complejas)")
         print(f"    • Subfase 2b: ~{EPOCHS_PHASE2 - EPOCHS_PHASE2//2} epochs (capas 51-154: +features intermedias)")
         print(f"    • Capas 0-50 permanecen congeladas (features básicas de ImageNet)")
+        print(f"  - Monitoreo: Sistema automático de detección de éxito/problemas activo")
     
     # Cargar datos desde cache
     cache = DataCache()
@@ -677,6 +783,7 @@ def main():
     print("  ✅ Transfer Learning: Usa MobileNetV2 pre-entrenado")
     print("  ✅ Data Augmentation: Previene overfitting")
     print("  ✅ Fine-tuning Gradual: Descongelamiento progresivo en 2 fases")
+    print("  ✅ Monitoreo Inteligente: Detecta automáticamente éxito y problemas")
     print("  ✅ Optimizado: Hiperparámetros balanceados")
     
     print("\n🎯 PRÓXIMOS PASOS:")
