@@ -151,6 +151,16 @@ class DatasetProcessor:
         print("\n" + "=" * 60)
         print("🔄 PROCESAMIENTO DE DATASET")
         print("=" * 60)
+        print(f"\n📊 CONFIGURACIÓN:")
+        print(f"  - Resolución: {self.img_size[0]}x{self.img_size[1]} ({self.img_size[0]*self.img_size[1]:,} píxeles)")
+        print(f"  - Clases objetivo: {len(self.classes)}")
+        
+        # Estimación de tamaño de cache
+        pixels = self.img_size[0] * self.img_size[1]
+        estimated_mb = (pixels * 3 * 15000) / (1024 * 1024)  # Estimación para ~15k imágenes
+        print(f"\n💾 Tamaño estimado de cache: ~{estimated_mb:.0f} MB")
+        if pixels > 20000:  # Mayor a ~140x140
+            print(f"  ⏱️  Alta resolución - La generación puede tardar 15-25 min")
         
         # Buscar directorios de train y test
         train_dir = self._find_train_dir()
@@ -199,10 +209,20 @@ class DatasetProcessor:
         # Guardar en cache para futuros entrenamientos
         if use_cache:
             print("\n💾 Guardando en cache para futuros entrenamientos...")
+            
+            # Calcular tamaños
+            train_size_mb = (X_train.nbytes + y_train.nbytes) / (1024 * 1024)
+            test_size_mb = (X_test.nbytes + y_test.nbytes) / (1024 * 1024)
+            
+            print(f"  - Train: {X_train.shape[0]} muestras (~{train_size_mb:.1f} MB)")
             self.cache.save(X_train, y_train, class_names, 
                           str(self.raw_dataset_path), config, 'train')
+            
+            print(f"  - Test: {X_test.shape[0]} muestras (~{test_size_mb:.1f} MB)")
             self.cache.save(X_test, y_test, class_names, 
                           str(self.raw_dataset_path), config, 'test')
+            
+            print(f"  ✅ Cache guardado: {train_size_mb + test_size_mb:.1f} MB total")
         
         print(f"\n✅ Procesamiento completado:")
         print(f"  - Entrenamiento: {X_train.shape[0]} muestras")
