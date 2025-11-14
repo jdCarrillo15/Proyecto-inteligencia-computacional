@@ -214,9 +214,15 @@ class PlantDiseaseClassifier:
         """
         Fine-tuning del modelo con descongelamiento gradual (solo si usa transfer learning).
         
-        Estrategia de 2 Fases:
-        - Fase 2a: Descongelar últimas 50 capas con LR bajo
-        - Fase 2b: Descongelar últimas 100 capas con LR muy bajo
+        Estrategia basada en análisis de features de MobileNetV2:
+        - Capas 0-50:   Features básicas (bordes, texturas) → MANTENER CONGELADAS
+        - Capas 51-100: Features intermedias (patrones) → Fase 2b
+        - Capas 101-154: Features complejas (objetos) → Fase 2a (más relevantes para hojas)
+        
+        Fase 2a: Descongela capas 101-154 (features complejas)
+        Fase 2b: Descongela capas 51-154 (añade features intermedias)
+        
+        Nota: BatchNormalization layers se manejan cuidadosamente con batch_size pequeño.
         
         Args:
             X_train, y_train: Datos de entrenamiento
@@ -232,23 +238,39 @@ class PlantDiseaseClassifier:
         print(f"\n📊 Base model tiene {total_layers} capas totales")
         
         # ==================================================================
-        # FASE 2a: Descongelamiento de features de alto nivel (últimas 50 capas)
+        # FASE 2a: Descongelamiento de features complejas (capas 101-154)
         # ==================================================================
         print("\n" + "=" * 60)
-        print("🔥 FASE 2a: FINE-TUNING - Features de Alto Nivel")
+        print("🔥 FASE 2a: FINE-TUNING - Features Complejas (Capas 101-154)")
         print("=" * 60)
+        print("  🌿 Objetivo: Adaptar detección de objetos completos a morfología de hojas")
         
         # Descongelar base model
         self.base_model.trainable = True
         
-        # Congelar todas excepto las últimas 50 capas
-        fine_tune_at = max(0, total_layers - 50)
-        for layer in self.base_model.layers[:fine_tune_at]:
-            layer.trainable = False
+        # Estrategia: Descongelar solo capas 101-154 (features complejas)
+        # Mantener congeladas 0-100 (features básicas e intermedias)
+        fine_tune_at = min(101, total_layers - 1)
+        
+        for i, layer in enumerate(self.base_model.layers):
+            if i < fine_tune_at:
+                layer.trainable = False
+            else:
+                # Proteger BatchNormalization con batch_size pequeño
+                if 'BatchNormalization' in layer.__class__.__name__ and batch_size < 16:
+                    layer.trainable = False
+                else:
+                    layer.trainable = True
         
         trainable_layers = sum([1 for layer in self.base_model.layers if layer.trainable])
-        print(f"  - Capas congeladas: {fine_tune_at}")
+        frozen_bn = sum([1 for layer in self.base_model.layers[fine_tune_at:] 
+                        if 'BatchNormalization' in layer.__class__.__name__ and not layer.trainable])
+        
+        print(f"  - Rango de capas: {fine_tune_at}-{total_layers} (features complejas)")
+        print(f"  - Capas congeladas: 0-{fine_tune_at-1} (features básicas/intermedias)")
         print(f"  - Capas descongeladas: {trainable_layers}")
+        if frozen_bn > 0:
+            print(f"  - BatchNorm protegidas: {frozen_bn} (batch_size={batch_size} < 16)")
         print(f"  - Learning Rate: 0.0001 (10x más bajo que Fase 1)")
         print(f"  - LR Decay: factor=0.2, patience=5, min_lr=0.00001")
         
@@ -299,22 +321,36 @@ class PlantDiseaseClassifier:
         print(f"\n⏱️  Tiempo Fase 2a: {time_2a/60:.2f} minutos")
         
         # ==================================================================
-        # FASE 2b: Descongelamiento de más capas (últimas 100 capas)
+        # FASE 2b: Descongelamiento de features intermedias (capas 51-154)
         # ==================================================================
         print("\n" + "=" * 60)
-        print("🔥 FASE 2b: FINE-TUNING - Features Intermedias")
+        print("🔥 FASE 2b: FINE-TUNING - Features Intermedias (Capas 51-154)")
         print("=" * 60)
+        print("  🍃 Objetivo: Adaptar detección de patrones/formas a síntomas de enfermedades")
         
-        # Descongelar más capas (últimas 100)
-        fine_tune_at_2b = max(0, total_layers - 100)
-        for layer in self.base_model.layers[:fine_tune_at_2b]:
-            layer.trainable = False
-        for layer in self.base_model.layers[fine_tune_at_2b:]:
-            layer.trainable = True
+        # Estrategia: Descongelar capas 51-154 (features intermedias + complejas)
+        # Mantener congeladas 0-50 (features básicas: bordes, texturas)
+        fine_tune_at_2b = min(51, total_layers - 1)
+        
+        for i, layer in enumerate(self.base_model.layers):
+            if i < fine_tune_at_2b:
+                layer.trainable = False
+            else:
+                # Proteger BatchNormalization con batch_size pequeño
+                if 'BatchNormalization' in layer.__class__.__name__ and batch_size < 16:
+                    layer.trainable = False
+                else:
+                    layer.trainable = True
         
         trainable_layers_2b = sum([1 for layer in self.base_model.layers if layer.trainable])
-        print(f"  - Capas congeladas: {fine_tune_at_2b}")
+        frozen_bn_2b = sum([1 for layer in self.base_model.layers[fine_tune_at_2b:] 
+                           if 'BatchNormalization' in layer.__class__.__name__ and not layer.trainable])
+        
+        print(f"  - Rango de capas: {fine_tune_at_2b}-{total_layers} (features intermedias/complejas)")
+        print(f"  - Capas congeladas: 0-{fine_tune_at_2b-1} (features básicas preservadas)")
         print(f"  - Capas descongeladas: {trainable_layers_2b}")
+        if frozen_bn_2b > 0:
+            print(f"  - BatchNorm protegidas: {frozen_bn_2b} (batch_size={batch_size} < 16)")
         print(f"  - Learning Rate: 0.00005 (ultra-bajo para evitar catastrophic forgetting)")
         print(f"  - LR Decay: factor=0.2, patience=5, min_lr=0.00001")
         
@@ -514,8 +550,9 @@ def main():
     print(f"  - Épocas Fase 1 (clasificador): {EPOCHS_PHASE1}")
     if DO_FINE_TUNING and USE_TRANSFER_LEARNING:
         print(f"  - Épocas Fase 2 (fine-tuning gradual): {EPOCHS_PHASE2}")
-        print(f"    • Subfase 2a: ~{EPOCHS_PHASE2//2} epochs (últimas 50 capas)")
-        print(f"    • Subfase 2b: ~{EPOCHS_PHASE2 - EPOCHS_PHASE2//2} epochs (últimas 100 capas)")
+        print(f"    • Subfase 2a: ~{EPOCHS_PHASE2//2} epochs (capas 101-154: features complejas)")
+        print(f"    • Subfase 2b: ~{EPOCHS_PHASE2 - EPOCHS_PHASE2//2} epochs (capas 51-154: +features intermedias)")
+        print(f"    • Capas 0-50 permanecen congeladas (features básicas de ImageNet)")
     
     # Cargar datos desde cache
     cache = DataCache()
