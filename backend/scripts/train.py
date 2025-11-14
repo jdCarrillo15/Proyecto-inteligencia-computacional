@@ -640,18 +640,19 @@ def main():
     # ================================================================
     RAW_DATASET = "dataset/raw"
     PROCESSED_DATASET = "dataset/processed"
-    IMG_SIZE = (100, 100)
+    IMG_SIZE = (224, 224)  # Resolución aumentada para mejor detección de síntomas
     
     # Parámetros de entrenamiento optimizados
     EPOCHS_PHASE1 = 15      # Entrenamiento inicial (capas Dense)
     EPOCHS_PHASE2 = 20      # Fine-tuning gradual (2 subfases) - Aumentado para mejor adaptación
-    BATCH_SIZE = 32         # Batch size para regularización
+    BATCH_SIZE = 16         # Reducido de 32 para resolución 224x224 (50,176 píxeles vs 10,000)
     USE_TRANSFER_LEARNING = True
     DO_FINE_TUNING = True   # ✅ Activado con estrategia gradual mejorada
     
     print("\n⚙️  CONFIGURACIÓN:")
     print(f"  - Transfer Learning: {'✅ MobileNetV2' if USE_TRANSFER_LEARNING else '❌'}")
-    print(f"  - Batch Size: {BATCH_SIZE}")
+    print(f"  - Resolución de Imagen: {IMG_SIZE[0]}x{IMG_SIZE[1]} ({IMG_SIZE[0]*IMG_SIZE[1]:,} píxeles)")
+    print(f"  - Batch Size: {BATCH_SIZE} (ajustado para resolución alta)")
     print(f"  - Épocas Fase 1 (clasificador): {EPOCHS_PHASE1}")
     if DO_FINE_TUNING and USE_TRANSFER_LEARNING:
         print(f"  - Épocas Fase 2 (fine-tuning gradual): {EPOCHS_PHASE2}")
@@ -723,6 +724,18 @@ def main():
     print(f"  - X_test: {X_test.shape}")
     print(f"  - Clases: {class_names}")
     
+    # Validación de shapes
+    expected_shape = (IMG_SIZE[0], IMG_SIZE[1], 3)
+    actual_shape = X_train.shape[1:]
+    if actual_shape != expected_shape:
+        print(f"\n⚠️  ALERTA: Shape mismatch detectado!")
+        print(f"  - Esperado: {expected_shape}")
+        print(f"  - Actual: {actual_shape}")
+        print(f"  - Acción requerida: BORRAR backend/cache/*.pkl y re-ejecutar")
+        return
+    else:
+        print(f"  ✅ Validación de shape exitosa: {actual_shape}")
+    
     # Crear y construir modelo
     classifier = PlantDiseaseClassifier(
         img_size=IMG_SIZE,
@@ -781,6 +794,7 @@ def main():
     print("  ✅ Preparación automática: Detecta y prepara datos si es necesario")
     print("  ✅ Cache PKL: Datos se guardan para reuso")
     print("  ✅ Transfer Learning: Usa MobileNetV2 pre-entrenado")
+    print("  ✅ Alta Resolución: 224x224 para mejor detección de texturas y manchas")
     print("  ✅ Data Augmentation: Previene overfitting")
     print("  ✅ Fine-tuning Gradual: Descongelamiento progresivo en 2 fases")
     print("  ✅ Monitoreo Inteligente: Detecta automáticamente éxito y problemas")
@@ -790,6 +804,10 @@ def main():
     print("  1. Probar predicciones: python backend/scripts/predict.py <imagen>")
     print("  2. Iniciar API: python backend/app.py")
     print("  3. Re-entrenar: python backend/scripts/train.py")
+    print("\n⚠️  IMPORTANTE - Si cambias IMG_SIZE:")
+    print("  1. BORRAR: backend/cache/*.pkl")
+    print("  2. BORRAR: models/*.keras (modelos incompatibles)")
+    print("  3. Re-ejecutar entrenamiento completo")
 
 
 if __name__ == "__main__":
