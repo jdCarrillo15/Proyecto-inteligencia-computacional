@@ -26,7 +26,8 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers, models
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, Callback
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report, confusion_matrix, precision_recall_fscore_support, top_k_accuracy_score
+from datetime import datetime
 
 # Agregar el directorio backend al path
 backend_dir = Path(__file__).parent.parent
@@ -44,6 +45,82 @@ physical_devices = tf.config.list_physical_devices('GPU')
 if physical_devices:
     tf.config.experimental.set_memory_growth(physical_devices[0], True)
     print("✅ GPU detectada y configurada")
+
+
+class MetricsLogger(Callback):
+    """
+    Callback personalizado para loggear métricas detalladas cada epoch.
+    Calcula F1-score, per-crop accuracy y otras métricas avanzadas.
+    """
+    
+    def __init__(self, X_val, y_val, class_names, phase_name="Training"):
+        super().__init__()
+        self.X_val = X_val
+        self.y_val = y_val
+        self.class_names = class_names
+        self.phase_name = phase_name
+        self.epoch_metrics = []
+        
+        # Mapear clases a cultivos
+        self.crop_mapping = self._create_crop_mapping()
+    
+    def _create_crop_mapping(self):
+        """Mapea cada clase a su cultivo."""
+        mapping = {}
+        for i, class_name in enumerate(self.class_names):
+            if 'Apple' in class_name:
+                mapping[i] = 'Apple'
+            elif 'Corn' in class_name or 'maize' in class_name:
+                mapping[i] = 'Corn'
+            elif 'Potato' in class_name:
+                mapping[i] = 'Potato'
+            elif 'Tomato' in class_name:
+                mapping[i] = 'Tomato'
+            else:
+                mapping[i] = 'Other'
+        return mapping
+    
+    def on_epoch_end(self, epoch, logs=None):
+        logs = logs or {}
+        
+        # Predicciones
+        y_pred = self.model.predict(self.X_val, verbose=0)
+        y_pred_classes = np.argmax(y_pred, axis=1)
+        y_true_classes = np.argmax(self.y_val, axis=1)
+        
+        # Calcular F1-score macro
+        _, _, f1_scores, _ = precision_recall_fscore_support(
+            y_true_classes, y_pred_classes, average='macro', zero_division=0
+        )
+        
+        # Calcular per-crop accuracy
+        crop_accuracies = {}
+        for crop in ['Apple', 'Corn', 'Potato', 'Tomato']:
+            crop_indices = [i for i, c in self.crop_mapping.items() if c == crop]
+            if crop_indices:
+                mask = np.isin(y_true_classes, crop_indices)
+                if mask.sum() > 0:
+                    crop_acc = (y_true_classes[mask] == y_pred_classes[mask]).mean()
+                    crop_accuracies[crop] = crop_acc
+        
+        # Guardar métricas
+        epoch_data = {
+            'epoch': epoch + 1,
+            'train_loss': logs.get('loss', 0),
+            'train_acc': logs.get('accuracy', 0),
+            'val_loss': logs.get('val_loss', 0),
+            'val_acc': logs.get('val_accuracy', 0),
+            'val_f1': f1_scores,
+            'crop_acc': crop_accuracies
+        }
+        self.epoch_metrics.append(epoch_data)
+        
+        # Imprimir resumen
+        print(f"\n📋 [{self.phase_name}] Métricas adicionales:")
+        print(f"  - Val F1 (macro): {f1_scores:.4f}")
+        if crop_accuracies:
+            crop_str = ", ".join([f"{crop}={acc:.2%}" for crop, acc in crop_accuracies.items()])
+            print(f"  - Per-Crop: {crop_str}")
 
 
 class FineTuningMonitor(Callback):
@@ -244,7 +321,7 @@ class PlantDiseaseClassifier:
         return model
     
     def train_with_arrays(self, X_train, y_train, X_test, y_test, 
-                         epochs=20, batch_size=64):
+                         class_names, epochs=20, batch_size=64):
         """
         Entrena el modelo con arrays numpy (datos desde cache).
         
@@ -253,6 +330,7 @@ class PlantDiseaseClassifier:
             y_train: Labels de entrenamiento (one-hot)
             X_test: Array de imágenes de prueba
             y_test: Labels de prueba (one-hot)
+            class_names: Nombres de las clases
             epochs: Número de épocas
             batch_size: Tamaño del batch
             
@@ -273,6 +351,7 @@ class PlantDiseaseClassifier:
         
         # Callbacks optimizados para Fase 1
         callbacks = [
+            MetricsLogger(X_test, y_test, class_names, phase_name="Fase 1"),
             EarlyStopping(
                 monitor='val_accuracy',
                 patience=7,
@@ -313,7 +392,7 @@ class PlantDiseaseClassifier:
         return self.history
     
     def fine_tune(self, X_train, y_train, X_test, y_test, 
-                  epochs_phase2=15, batch_size=64):
+                  class_names, epochs_phase2=15, batch_size=64):
         """
         Fine-tuning del modelo con descongelamiento gradual (solo si usa transfer learning).
         
@@ -330,6 +409,7 @@ class PlantDiseaseClassifier:
         Args:
             X_train, y_train: Datos de entrenamiento
             X_test, y_test: Datos de prueba
+            class_names: Nombres de las clases
             epochs_phase2: Épocas totales de fine-tuning (se divide en 2 subfases)
             batch_size: Tamaño del batch
         """
@@ -386,6 +466,7 @@ class PlantDiseaseClassifier:
         
         # Callbacks para Fase 2a (fine-tuning conservador)
         callbacks_2a = [
+            MetricsLogger(X_test, y_test, class_names, phase_name="Fase 2a"),
             FineTuningMonitor(phase_name="Fase 2a"),
             EarlyStopping(
                 monitor='val_accuracy',
@@ -467,6 +548,7 @@ class PlantDiseaseClassifier:
         
         # Callbacks para Fase 2b (fine-tuning ultra-conservador)
         callbacks_2b = [
+            MetricsLogger(X_test, y_test, class_names, phase_name="Fase 2b"),
             FineTuningMonitor(phase_name="Fase 2b"),
             EarlyStopping(
                 monitor='val_accuracy',
@@ -518,7 +600,7 @@ class PlantDiseaseClassifier:
     
     def evaluate(self, X_test, y_test, class_names):
         """
-        Evalúa el modelo.
+        Evaluación exhaustiva del modelo con métricas detalladas.
         
         Args:
             X_test: Datos de prueba
@@ -526,49 +608,491 @@ class PlantDiseaseClassifier:
             class_names: Nombres de las clases
         """
         print("\n" + "=" * 60)
-        print("📊 EVALUACIÓN DEL MODELO")
+        print("📊 EVALUACIÓN DETALLADA DEL MODELO")
         print("=" * 60)
         
         # Evaluar
         test_loss, test_accuracy = self.model.evaluate(X_test, y_test, verbose=0)
         
-        print(f"\n✅ Resultados:")
-        print(f"  - Pérdida: {test_loss:.4f}")
-        print(f"  - Precisión: {test_accuracy:.4f} ({test_accuracy*100:.2f}%)")
-        
         # Predicciones
+        print("\n🔮 Generando predicciones...")
         predictions = self.model.predict(X_test, verbose=0)
         predicted_classes = np.argmax(predictions, axis=1)
         true_classes = np.argmax(y_test, axis=1)
         
-        # Reporte de clasificación
-        print("\n📋 Reporte de clasificación:")
-        print(classification_report(true_classes, predicted_classes, 
-                                   target_names=class_names, digits=4))
+        # Métricas básicas
+        print(f"\n✅ MÉTRICAS GLOBALES:")
+        print(f"  - Accuracy: {test_accuracy:.4f} ({test_accuracy*100:.2f}%)")
+        print(f"  - Loss: {test_loss:.4f}")
+        
+        # Top-K Accuracy
+        top3_acc = top_k_accuracy_score(true_classes, predictions, k=3)
+        top5_acc = top_k_accuracy_score(true_classes, predictions, k=5)
+        print(f"  - Top-3 Accuracy: {top3_acc:.4f} ({top3_acc*100:.2f}%)")
+        print(f"  - Top-5 Accuracy: {top5_acc:.4f} ({top5_acc*100:.2f}%)")
+        
+        # Métricas por clase
+        per_class_metrics = self._calculate_per_class_metrics(
+            true_classes, predicted_classes, class_names
+        )
+        
+        # Métricas por cultivo
+        per_crop_metrics = self._calculate_per_crop_metrics(
+            true_classes, predicted_classes, class_names
+        )
+        
+        # Healthy vs Diseased
+        healthy_diseased_metrics = self._calculate_healthy_vs_diseased(
+            true_classes, predicted_classes, class_names
+        )
         
         # Matriz de confusión
         cm = confusion_matrix(true_classes, predicted_classes)
-        self._plot_confusion_matrix(cm, class_names)
+        
+        # Análisis de confusiones
+        top_confusions = self._analyze_confusions(cm, class_names)
+        
+        # Visualizaciones
+        viz_path = Path('models/visualizations')
+        viz_path.mkdir(parents=True, exist_ok=True)
+        
+        self._plot_confusion_matrix_detailed(cm, class_names, viz_path)
+        self._plot_per_class_metrics(per_class_metrics, viz_path)
+        self._plot_per_crop_performance(per_crop_metrics, viz_path)
+        self._plot_healthy_vs_diseased(healthy_diseased_metrics, viz_path)
+        
+        # Generar reporte detallado
+        self._generate_detailed_report(
+            test_accuracy, test_loss, top3_acc, top5_acc,
+            per_class_metrics, per_crop_metrics, 
+            healthy_diseased_metrics, top_confusions,
+            class_names, viz_path
+        )
         
         return test_loss, test_accuracy
     
-    def _plot_confusion_matrix(self, cm, class_names):
-        """Visualiza matriz de confusión."""
-        plt.figure(figsize=(10, 8))
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
-                   xticklabels=class_names,
-                   yticklabels=class_names)
-        plt.title('Matriz de Confusión', fontsize=16, fontweight='bold')
-        plt.ylabel('Clase Real', fontsize=12)
-        plt.xlabel('Clase Predicha', fontsize=12)
-        plt.tight_layout()
+    def _calculate_per_class_metrics(self, y_true, y_pred, class_names):
+        """Calcula métricas detalladas por clase."""
+        print("\n📊 MÉTRICAS POR CLASE:")
+        print("-" * 80)
         
-        viz_path = Path('models/visualizations')
-        viz_path.mkdir(parents=True, exist_ok=True)
-        plt.savefig(viz_path / 'confusion_matrix.png', dpi=300, bbox_inches='tight')
+        precision, recall, f1, support = precision_recall_fscore_support(
+            y_true, y_pred, average=None, zero_division=0
+        )
+        
+        # Crear DataFrame para mejor visualización
+        metrics_data = []
+        for i, class_name in enumerate(class_names):
+            metrics_data.append({
+                'class': class_name,
+                'precision': precision[i],
+                'recall': recall[i],
+                'f1': f1[i],
+                'support': support[i]
+            })
+        
+        # Ordenar por F1-score
+        metrics_data = sorted(metrics_data, key=lambda x: x['f1'], reverse=True)
+        
+        # Imprimir
+        print(f"{'Clase':<35} {'Precision':<12} {'Recall':<12} {'F1-Score':<12} {'Support':<10}")
+        print("-" * 80)
+        
+        for item in metrics_data:
+            precision_str = f"{item['precision']:.4f}"
+            recall_str = f"{item['recall']:.4f}"
+            f1_str = f"{item['f1']:.4f}"
+            
+            # Colorear según rendimiento
+            if item['f1'] < 0.6:
+                indicator = "🔴"
+            elif item['f1'] < 0.8:
+                indicator = "🟡"
+            else:
+                indicator = "🟢"
+            
+            print(f"{item['class']:<35} {precision_str:<12} {recall_str:<12} {f1_str:<12} {item['support']:<10} {indicator}")
+        
+        # Promedios
+        print("-" * 80)
+        macro_p, macro_r, macro_f1, _ = precision_recall_fscore_support(
+            y_true, y_pred, average='macro', zero_division=0
+        )
+        weighted_p, weighted_r, weighted_f1, _ = precision_recall_fscore_support(
+            y_true, y_pred, average='weighted', zero_division=0
+        )
+        
+        print(f"{'Macro Avg':<35} {macro_p:.4f}       {macro_r:.4f}       {macro_f1:.4f}")
+        print(f"{'Weighted Avg':<35} {weighted_p:.4f}       {weighted_r:.4f}       {weighted_f1:.4f}")
+        
+        return metrics_data
+    
+    def _calculate_per_crop_metrics(self, y_true, y_pred, class_names):
+        """Calcula accuracy por cultivo."""
+        print("\n🌾 MÉTRICAS POR CULTIVO:")
+        print("-" * 50)
+        
+        crop_mapping = {}
+        for i, class_name in enumerate(class_names):
+            if 'Apple' in class_name:
+                crop_mapping[i] = 'Apple'
+            elif 'Corn' in class_name or 'maize' in class_name:
+                crop_mapping[i] = 'Corn'
+            elif 'Potato' in class_name:
+                crop_mapping[i] = 'Potato'
+            elif 'Tomato' in class_name:
+                crop_mapping[i] = 'Tomato'
+        
+        crop_metrics = {}
+        for crop in ['Apple', 'Corn', 'Potato', 'Tomato']:
+            crop_indices = [i for i, c in crop_mapping.items() if c == crop]
+            if crop_indices:
+                mask = np.isin(y_true, crop_indices)
+                if mask.sum() > 0:
+                    correct = (y_true[mask] == y_pred[mask]).sum()
+                    total = mask.sum()
+                    accuracy = correct / total
+                    crop_metrics[crop] = {
+                        'accuracy': accuracy,
+                        'correct': correct,
+                        'total': total
+                    }
+        
+        # Imprimir
+        for crop, metrics in sorted(crop_metrics.items(), key=lambda x: x[1]['accuracy'], reverse=True):
+            acc = metrics['accuracy']
+            indicator = "🟢" if acc > 0.8 else "🟡" if acc > 0.6 else "🔴"
+            print(f"{crop:<10} Accuracy: {acc:.4f} ({acc*100:.2f}%) - {metrics['correct']}/{metrics['total']} {indicator}")
+        
+        return crop_metrics
+    
+    def _calculate_healthy_vs_diseased(self, y_true, y_pred, class_names):
+        """Calcula métricas binarias: sano vs enfermo."""
+        print("\n🏥 ANÁLISIS: SANO VS ENFERMO")
+        print("-" * 50)
+        
+        # Mapear a binario
+        y_true_binary = np.array(['healthy' in class_names[i].lower() for i in y_true]).astype(int)
+        y_pred_binary = np.array(['healthy' in class_names[i].lower() for i in y_pred]).astype(int)
+        
+        # Confusion matrix 2x2
+        cm_binary = confusion_matrix(y_true_binary, y_pred_binary)
+        
+        # Calcular métricas
+        tn, fp, fn, tp = cm_binary.ravel() if cm_binary.size == 4 else (0, 0, 0, 0)
+        
+        accuracy = (tp + tn) / (tp + tn + fp + fn) if (tp + tn + fp + fn) > 0 else 0
+        precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+        recall = tp / (tp + fn) if (tp + fn) > 0 else 0
+        
+        print(f"Binary Accuracy: {accuracy:.4f} ({accuracy*100:.2f}%)")
+        print(f"\\nConfusion Matrix (Binaria):")
+        print(f"  Diseased→Diseased: {tn:4d}   Diseased→Healthy: {fp:4d} ⚠️")
+        print(f"  Healthy→Diseased:  {fn:4d} ⚠️  Healthy→Healthy:  {tp:4d}")
+        
+        if fn > 0:
+            print(f"\\n⚠️  CRÍTICO: {fn} falsos negativos (enfermo clasificado como sano)")
+        if fp > 0:
+            print(f"⚠️  {fp} falsos positivos (sano clasificado como enfermo)")
+        
+        return {
+            'accuracy': accuracy,
+            'precision': precision,
+            'recall': recall,
+            'tn': tn, 'fp': fp, 'fn': fn, 'tp': tp,
+            'cm_binary': cm_binary
+        }
+    
+    def _analyze_confusions(self, cm, class_names):
+        """Analiza las confusiones más frecuentes."""
+        print("\n🔍 TOP 10 CONFUSIONES:")
+        print("-" * 70)
+        
+        confusions = []
+        for i in range(len(class_names)):
+            for j in range(len(class_names)):
+                if i != j and cm[i, j] > 0:
+                    confusions.append({
+                        'true': class_names[i],
+                        'pred': class_names[j],
+                        'count': cm[i, j]
+                    })
+        
+        # Ordenar por cantidad
+        confusions = sorted(confusions, key=lambda x: x['count'], reverse=True)[:10]
+        
+        for idx, conf in enumerate(confusions, 1):
+            print(f"{idx:2d}. {conf['true']:<30} → {conf['pred']:<30} : {conf['count']:4d} veces")
+        
+        return confusions
+    
+    def _plot_confusion_matrix_detailed(self, cm, class_names, viz_path):
+        """Visualiza matriz de confusión detallada con alta resolución."""
+        # Calcular matriz normalizada
+        cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(24, 10))
+        
+        # Matriz absoluta
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax1,
+                   xticklabels=class_names, yticklabels=class_names,
+                   cbar_kws={'label': 'Cantidad'})
+        ax1.set_title('Matriz de Confusión (Valores Absolutos)', fontsize=14, fontweight='bold')
+        ax1.set_ylabel('Clase Real', fontsize=12)
+        ax1.set_xlabel('Clase Predicha', fontsize=12)
+        ax1.tick_params(axis='x', rotation=45, labelsize=8)
+        ax1.tick_params(axis='y', rotation=0, labelsize=8)
+        
+        # Matriz normalizada
+        sns.heatmap(cm_normalized, annot=True, fmt='.2f', cmap='RdYlGn', ax=ax2,
+                   xticklabels=class_names, yticklabels=class_names,
+                   vmin=0, vmax=1, cbar_kws={'label': 'Proporción'})
+        ax2.set_title('Matriz de Confusión (Normalizada por Fila)', fontsize=14, fontweight='bold')
+        ax2.set_ylabel('Clase Real', fontsize=12)
+        ax2.set_xlabel('Clase Predicha', fontsize=12)
+        ax2.tick_params(axis='x', rotation=45, labelsize=8)
+        ax2.tick_params(axis='y', rotation=0, labelsize=8)
+        
+        plt.tight_layout()
+        plt.savefig(viz_path / 'confusion_matrix_detailed.png', dpi=300, bbox_inches='tight')
         plt.close()
         
-        print(f"✅ Matriz guardada en: {viz_path / 'confusion_matrix.png'}")
+        print(f"  ✅ Matriz detallada: {viz_path / 'confusion_matrix_detailed.png'}")
+    
+    def _plot_per_class_metrics(self, metrics_data, viz_path):
+        """Visualiza métricas por clase en gráfico de barras."""
+        fig, ax = plt.subplots(figsize=(14, 10))
+        
+        # Ordenar por F1-score
+        metrics_data = sorted(metrics_data, key=lambda x: x['f1'], reverse=True)
+        
+        classes = [m['class'] for m in metrics_data]
+        precision = [m['precision'] for m in metrics_data]
+        recall = [m['recall'] for m in metrics_data]
+        f1 = [m['f1'] for m in metrics_data]
+        
+        x = np.arange(len(classes))
+        width = 0.25
+        
+        bars1 = ax.barh(x - width, precision, width, label='Precision', color='#3498db')
+        bars2 = ax.barh(x, recall, width, label='Recall', color='#2ecc71')
+        bars3 = ax.barh(x + width, f1, width, label='F1-Score', color='#e74c3c')
+        
+        # Colorear según rendimiento
+        for i, bar in enumerate(bars3):
+            if f1[i] < 0.6:
+                bar.set_color('#e74c3c')  # Rojo
+            elif f1[i] < 0.8:
+                bar.set_color('#f39c12')  # Amarillo
+            else:
+                bar.set_color('#2ecc71')  # Verde
+        
+        ax.set_yticks(x)
+        ax.set_yticklabels(classes, fontsize=9)
+        ax.set_xlabel('Score', fontsize=12)
+        ax.set_title('Métricas por Clase (Ordenado por F1-Score)', fontsize=14, fontweight='bold')
+        ax.legend(loc='lower right')
+        ax.set_xlim(0, 1.0)
+        ax.grid(axis='x', alpha=0.3)
+        
+        plt.tight_layout()
+        plt.savefig(viz_path / 'per_class_metrics.png', dpi=300, bbox_inches='tight')
+        plt.close()
+        
+        print(f"  ✅ Métricas por clase: {viz_path / 'per_class_metrics.png'}")
+    
+    def _plot_per_crop_performance(self, crop_metrics, viz_path):
+        """Visualiza accuracy por cultivo."""
+        fig, ax = plt.subplots(figsize=(10, 6))
+        
+        crops = list(crop_metrics.keys())
+        accuracies = [crop_metrics[crop]['accuracy'] for crop in crops]
+        
+        # Colores según rendimiento
+        colors = []
+        for acc in accuracies:
+            if acc >= 0.8:
+                colors.append('#2ecc71')  # Verde
+            elif acc >= 0.6:
+                colors.append('#f39c12')  # Amarillo
+            else:
+                colors.append('#e74c3c')  # Rojo
+        
+        bars = ax.bar(crops, accuracies, color=colors, alpha=0.7, edgecolor='black')
+        
+        # Agregar valores encima de barras
+        for bar, acc in zip(bars, accuracies):
+            height = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2., height,
+                   f'{acc:.2%}',
+                   ha='center', va='bottom', fontsize=12, fontweight='bold')
+        
+        # Línea de referencia del promedio
+        avg_acc = np.mean(accuracies)
+        ax.axhline(y=avg_acc, color='red', linestyle='--', linewidth=2, 
+                  label=f'Promedio: {avg_acc:.2%}', alpha=0.7)
+        
+        ax.set_ylabel('Accuracy', fontsize=12)
+        ax.set_title('Accuracy por Cultivo', fontsize=14, fontweight='bold')
+        ax.set_ylim(0, 1.0)
+        ax.legend()
+        ax.grid(axis='y', alpha=0.3)
+        
+        plt.tight_layout()
+        plt.savefig(viz_path / 'per_crop_performance.png', dpi=300, bbox_inches='tight')
+        plt.close()
+        
+        print(f"  ✅ Performance por cultivo: {viz_path / 'per_crop_performance.png'}")
+    
+    def _plot_healthy_vs_diseased(self, metrics, viz_path):
+        """Visualiza análisis binario: sano vs enfermo."""
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+        
+        # Matriz de confusión binaria
+        cm_binary = metrics['cm_binary']
+        labels = ['Diseased', 'Healthy']
+        
+        sns.heatmap(cm_binary, annot=True, fmt='d', cmap='RdYlGn', ax=ax1,
+                   xticklabels=labels, yticklabels=labels,
+                   cbar_kws={'label': 'Cantidad'})
+        ax1.set_title('Confusion Matrix: Sano vs Enfermo', fontsize=14, fontweight='bold')
+        ax1.set_ylabel('Clase Real', fontsize=12)
+        ax1.set_xlabel('Clase Predicha', fontsize=12)
+        
+        # Métricas
+        metric_names = ['Accuracy', 'Precision\n(Healthy)', 'Recall\n(Healthy)']
+        metric_values = [metrics['accuracy'], metrics['precision'], metrics['recall']]
+        colors_metrics = ['#3498db', '#2ecc71', '#e74c3c']
+        
+        bars = ax2.bar(metric_names, metric_values, color=colors_metrics, alpha=0.7, edgecolor='black')
+        
+        for bar, val in zip(bars, metric_values):
+            height = bar.get_height()
+            ax2.text(bar.get_x() + bar.get_width()/2., height,
+                    f'{val:.2%}',
+                    ha='center', va='bottom', fontsize=12, fontweight='bold')
+        
+        ax2.set_ylim(0, 1.0)
+        ax2.set_ylabel('Score', fontsize=12)
+        ax2.set_title('Métricas Binarias', fontsize=14, fontweight='bold')
+        ax2.grid(axis='y', alpha=0.3)
+        
+        # Agregar anotaciones de falsos
+        if metrics['fn'] > 0:
+            ax2.text(0.5, 0.15, f"⚠️ {metrics['fn']} Falsos Negativos\n(Enfermo → Sano)",
+                    transform=ax2.transAxes, ha='center', fontsize=10,
+                    bbox=dict(boxstyle='round', facecolor='#e74c3c', alpha=0.3))
+        
+        plt.tight_layout()
+        plt.savefig(viz_path / 'healthy_vs_diseased.png', dpi=300, bbox_inches='tight')
+        plt.close()
+        
+        print(f"  ✅ Análisis binario: {viz_path / 'healthy_vs_diseased.png'}")
+    
+    def _generate_detailed_report(self, accuracy, loss, top3_acc, top5_acc,
+                                  per_class_metrics, per_crop_metrics,
+                                  healthy_diseased_metrics, top_confusions,
+                                  class_names, viz_path):
+        """Genera reporte de texto detallado."""
+        report_path = viz_path / 'training_report.txt'
+        
+        with open(report_path, 'w', encoding='utf-8') as f:
+            # Encabezado
+            f.write("=" * 80 + "\n")
+            f.write(" " * 20 + "REPORTE DE ENTRENAMIENTO\n")
+            f.write("=" * 80 + "\n\n")
+            
+            # Metadata
+            f.write(f"Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(f"Resolución: {self.img_size[0]}x{self.img_size[1]}\n")
+            f.write(f"Arquitectura: {'MobileNetV2 + Transfer Learning' if self.use_transfer_learning else 'CNN desde cero'}\n")
+            f.write(f"Número de clases: {self.num_classes}\n\n")
+            
+            # Métricas globales
+            f.write("=" * 80 + "\n")
+            f.write("MÉTRICAS GLOBALES\n")
+            f.write("=" * 80 + "\n")
+            f.write(f"Accuracy:          {accuracy:.4f} ({accuracy*100:.2f}%)\n")
+            f.write(f"Loss:              {loss:.4f}\n")
+            f.write(f"Top-3 Accuracy:    {top3_acc:.4f} ({top3_acc*100:.2f}%)\n")
+            f.write(f"Top-5 Accuracy:    {top5_acc:.4f} ({top5_acc*100:.2f}%)\n\n")
+            
+            # Métricas por clase
+            f.write("=" * 80 + "\n")
+            f.write("MÉTRICAS POR CLASE\n")
+            f.write("=" * 80 + "\n")
+            f.write(f"{'Clase':<35} {'Precision':<12} {'Recall':<12} {'F1-Score':<12} {'Support'}\n")
+            f.write("-" * 80 + "\n")
+            
+            for item in per_class_metrics:
+                f.write(f"{item['class']:<35} {item['precision']:<12.4f} {item['recall']:<12.4f} "
+                       f"{item['f1']:<12.4f} {item['support']}\n")
+            
+            # Per-crop
+            f.write("\n" + "=" * 80 + "\n")
+            f.write("ACCURACY POR CULTIVO\n")
+            f.write("=" * 80 + "\n")
+            
+            for crop, metrics in sorted(per_crop_metrics.items(), key=lambda x: x[1]['accuracy'], reverse=True):
+                acc = metrics['accuracy']
+                f.write(f"{crop:<10} {acc:.4f} ({acc*100:.2f}%) - {metrics['correct']}/{metrics['total']} correctas\n")
+            
+            # Healthy vs Diseased
+            f.write("\n" + "=" * 80 + "\n")
+            f.write("ANÁLISIS: SANO VS ENFERMO\n")
+            f.write("=" * 80 + "\n")
+            hd = healthy_diseased_metrics
+            f.write(f"Binary Accuracy: {hd['accuracy']:.4f} ({hd['accuracy']*100:.2f}%)\n")
+            f.write(f"Precision:       {hd['precision']:.4f}\n")
+            f.write(f"Recall:          {hd['recall']:.4f}\n\n")
+            f.write(f"True Negatives:   {hd['tn']:4d} (Diseased → Diseased)\n")
+            f.write(f"False Positives:  {hd['fp']:4d} (Diseased → Healthy)\n")
+            f.write(f"False Negatives:  {hd['fn']:4d} (Healthy → Diseased) ⚠️\n")
+            f.write(f"True Positives:   {hd['tp']:4d} (Healthy → Healthy)\n")
+            
+            # Top confusiones
+            f.write("\n" + "=" * 80 + "\n")
+            f.write("TOP 10 CONFUSIONES MÁS FRECUENTES\n")
+            f.write("=" * 80 + "\n")
+            
+            for idx, conf in enumerate(top_confusions, 1):
+                f.write(f"{idx:2d}. {conf['true']:<30} → {conf['pred']:<30} : {conf['count']:4d} veces\n")
+            
+            # Recomendaciones
+            f.write("\n" + "=" * 80 + "\n")
+            f.write("RECOMENDACIONES\n")
+            f.write("=" * 80 + "\n")
+            
+            # Detectar sesgos
+            max_f1 = max([m['f1'] for m in per_class_metrics])
+            min_f1 = min([m['f1'] for m in per_class_metrics])
+            
+            if max_f1 - min_f1 > 0.3:
+                worst_class = min(per_class_metrics, key=lambda x: x['f1'])
+                f.write(f"⚠️  Detectado desbalanceo: {worst_class['class']} tiene F1={worst_class['f1']:.2f}\n")
+                f.write("💡 Sugerencia: Aplicar class weights o data augmentation específico\n\n")
+            
+            if hd['fn'] > 10:
+                f.write(f"⚠️  CRÍTICO: {hd['fn']} falsos negativos (enfermo → sano)\n")
+                f.write("💡 Sugerencia: Ajustar umbral de decisión o mejorar recall en clases enfermas\n\n")
+            
+            if accuracy < 0.7:
+                f.write("⚠️  Accuracy global por debajo del 70%\n")
+                f.write("💡 Sugerencias:\n")
+                f.write("   - Aumentar epochs de fine-tuning\n")
+                f.write("   - Verificar calidad del dataset\n")
+                f.write("   - Considerar data augmentation más agresivo\n\n")
+            
+            f.write("\n" + "=" * 80 + "\n")
+            f.write("ARCHIVOS GENERADOS\n")
+            f.write("=" * 80 + "\n")
+            f.write(f"- {viz_path / 'confusion_matrix_detailed.png'}\n")
+            f.write(f"- {viz_path / 'per_class_metrics.png'}\n")
+            f.write(f"- {viz_path / 'per_crop_performance.png'}\n")
+            f.write(f"- {viz_path / 'healthy_vs_diseased.png'}\n")
+            f.write(f"- {viz_path / 'training_report.txt'}\n")
+        
+        print(f"\n📄 Reporte detallado guardado en: {report_path}")
     
     def plot_training_history(self):
         """Visualiza historial de entrenamiento."""
@@ -755,6 +1279,7 @@ def main():
     classifier.train_with_arrays(
         X_train, y_train,
         X_test, y_test,
+        class_names=class_names,
         epochs=EPOCHS_PHASE1,
         batch_size=BATCH_SIZE
     )
@@ -764,6 +1289,7 @@ def main():
         classifier.fine_tune(
             X_train, y_train,
             X_test, y_test,
+            class_names=class_names,
             epochs=EPOCHS_PHASE2,
             batch_size=BATCH_SIZE
         )
