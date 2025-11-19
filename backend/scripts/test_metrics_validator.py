@@ -106,9 +106,28 @@ def test_class_weights():
     print("TESTING CLASS WEIGHTS CALCULATION")
     print("=" * 80 + "\n")
     
-    # Simular dataset desbalanceado
+    # Usar conteos reales del dataset (del audit report)
     y_train = []
-    class_sizes = [2000, 1800, 1900, 1850, 1700, 1950, 1900, 1800, 1850, 1900, 1750, 1900, 1800, 1700, 1600]
+    class_sizes = [
+        2016,  # Apple___Apple_scab
+        1987,  # Apple___Black_rot
+        1760,  # Apple___Cedar_apple_rust
+        2008,  # Apple___healthy
+        1907,  # Corn_(maize)___Common_rust_
+        1859,  # Corn_(maize)___healthy
+        1908,  # Corn_(maize)___Northern_Leaf_Blight
+        1939,  # Potato___Early_blight
+        1824,  # Potato___healthy
+        1939,  # Potato___Late_blight
+        1702,  # Tomato___Bacterial_spot
+        1920,  # Tomato___Early_blight
+        1926,  # Tomato___healthy
+        1851,  # Tomato___Late_blight
+        1882   # Tomato___Leaf_Mold
+    ]
+    
+    # Verificar que tenemos 15 clases
+    assert len(class_sizes) == NUM_CLASSES, f"Error: esperadas {NUM_CLASSES} clases, pero se proporcionaron {len(class_sizes)}"
     
     for class_idx, size in enumerate(class_sizes):
         y_train.extend([class_idx] * size)
@@ -118,14 +137,19 @@ def test_class_weights():
     # Calcular pesos
     class_weights = calculate_class_weights(y_train, NUM_CLASSES)
     
-    print("Class Weights (inverse frequency, normalized):\n")
+    print("Class Weights (inverse frequency, normalized):")
+    print("(Based on real dataset distribution from audit)\n")
     for class_idx, weight in class_weights.items():
         class_name = CLASSES[class_idx]
         samples = class_sizes[class_idx]
         print(f"  {class_name:<45} Samples: {samples:>5}  Weight: {weight:.3f}")
     
-    print(f"\n✅ Average weight: {np.mean(list(class_weights.values())):.3f} (should be ~1.0)")
+    total_samples = sum(class_sizes)
+    print(f"\n✅ Total samples: {total_samples:,}")
+    print(f"✅ Average samples per class: {total_samples / NUM_CLASSES:.0f}")
+    print(f"✅ Average weight: {np.mean(list(class_weights.values())):.3f} (should be ~1.0)")
     print(f"✅ Weight range: {min(class_weights.values()):.3f} - {max(class_weights.values()):.3f}")
+    print(f"✅ Balance ratio: {max(class_sizes) / min(class_sizes):.2f}:1")
 
 
 if __name__ == "__main__":
