@@ -159,6 +159,26 @@ METRIC_PRIORITY = 'macro_f1'  # Opciones: 'macro_f1', 'recall', 'accuracy'
 FN_FP_TOLERANCE_RATIO = 1.5  # Preferimos 1.5x falsos positivos sobre falsos negativos
 
 # ============================================================================
+# CONFIGURACIÓN DE BALANCEO DE CLASES
+# ============================================================================
+
+# Activar balanceo de clases en prepare_dataset.py
+APPLY_CLASS_BALANCING = True
+
+# Target de muestras por clase después de oversampling
+TARGET_SAMPLES_PER_CLASS = 2500
+
+# Objetivo de ratio de balance (max/min samples)
+TARGET_BALANCE_RATIO = 2.0  # Máximo 2:1 de diferencia entre clases
+
+# Usar Focal Loss en lugar de Categorical Crossentropy
+USE_FOCAL_LOSS = False  # Cambiar a True para usar Focal Loss
+FOCAL_LOSS_GAMMA = 2.0  # Factor de enfoque para Focal Loss
+
+# Usar class weights en entrenamiento (recomendado siempre)
+USE_CLASS_WEIGHTS = True
+
+# ============================================================================
 # CONFIGURACIÓN DE LA APLICACIÓN WEB
 # ============================================================================
 
