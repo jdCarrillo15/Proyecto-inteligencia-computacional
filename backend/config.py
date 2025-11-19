@@ -55,9 +55,10 @@ CLASSES = [
 ]
 NUM_CLASSES = len(CLASSES)  # 15 clases
 
-# Tamaño de las imágenes
-IMG_WIDTH = 100
-IMG_HEIGHT = 100
+# Tamaño de las imágenes (224x224 = estándar ImageNet para transfer learning)
+# IMPORTANTE: Al cambiar esto, debes BORRAR backend/cache/*.pkl
+IMG_WIDTH = 224   # Aumentado de 100 para mejor detección de síntomas
+IMG_HEIGHT = 224  # Preserva texturas finas y manchas pequeñas
 IMG_SIZE = (IMG_WIDTH, IMG_HEIGHT)
 IMG_CHANNELS = 3  # RGB
 
@@ -79,7 +80,7 @@ DROPOUT_RATE = 0.5
 CONV_DROPOUT_RATE = 0.25
 
 # Hiperparámetros de entrenamiento
-BATCH_SIZE = 32  # Batch size óptimo para regularización
+BATCH_SIZE = 16  # Reducido de 32 debido a resolución 224x224 (5x más píxeles)
 EPOCHS = 50
 LEARNING_RATE = 0.001  # LR inicial para transfer learning
 
