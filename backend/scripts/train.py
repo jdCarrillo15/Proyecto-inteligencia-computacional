@@ -702,10 +702,11 @@ class PlantDiseaseClassifier:
         cm = confusion_matrix(true_classes, predicted_classes)
         top_confusions = metrics_system.analyze_top_confusions(cm, class_names, top_n=10)
         
-        # Imprimir métricas en consola
+        # Imprimir métricas en consola con formato estructurado
         metrics_system.print_detailed_metrics(
             class_metrics, crop_metrics, binary_metrics,
-            top3_acc, top5_acc, top_confusions, class_names
+            top3_acc, top5_acc, top_confusions, class_names, 
+            test_loss, test_accuracy
         )
         
         # Generar visualizaciones
