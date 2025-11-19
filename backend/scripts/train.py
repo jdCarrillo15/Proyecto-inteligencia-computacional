@@ -39,6 +39,7 @@ sys.path.insert(0, str(backend_dir))
 
 from utils.data_cache import DataCache
 from scripts.detailed_metrics import DetailedMetrics
+from config import IMG_SIZE, CLASSES, NUM_CLASSES, BATCH_SIZE
 
 # Configurar para mejor rendimiento
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Reducir logs de TensorFlow
@@ -158,7 +159,7 @@ class FineTuningMonitor(Callback):
 class PlantDiseaseClassifier:
     """Clasificador de enfermedades de plantas con Transfer Learning."""
     
-    def __init__(self, img_size=(100, 100), num_classes=15, use_transfer_learning=True):
+    def __init__(self, img_size=IMG_SIZE, num_classes=NUM_CLASSES, use_transfer_learning=True):
         """
         Inicializa el clasificador.
         
@@ -819,12 +820,12 @@ def main():
     # ================================================================
     RAW_DATASET = "dataset/raw"
     PROCESSED_DATASET = "dataset/processed"
-    IMG_SIZE = (224, 224)  # Resolución aumentada para mejor detección de síntomas
+    # IMG_SIZE importado desde config.py para consistencia (224x224)
     
     # Parámetros de entrenamiento optimizados
     EPOCHS_PHASE1 = 15      # Entrenamiento inicial (capas Dense)
     EPOCHS_PHASE2 = 20      # Fine-tuning gradual (2 subfases) - Aumentado para mejor adaptación
-    BATCH_SIZE = 16         # Reducido de 32 para resolución 224x224 (50,176 píxeles vs 10,000)
+    # BATCH_SIZE importado desde config.py (16 para resolución 224x224)
     USE_TRANSFER_LEARNING = True
     DO_FINE_TUNING = True   # ✅ Activado con estrategia gradual mejorada
     

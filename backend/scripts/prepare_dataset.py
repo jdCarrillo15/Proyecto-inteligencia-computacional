@@ -19,12 +19,13 @@ sys.path.insert(0, str(backend_dir))
 from utils.data_cache import DataCache, create_data_arrays_from_directory
 from utils.aggressive_augmenter import AggressiveAugmenter
 from utils.model_metrics import calculate_class_weights
+from config import IMG_SIZE
 
 
 class DatasetProcessor:
     """Procesador de dataset con sistema de cache PKL y balanceo de clases."""
     
-    def __init__(self, raw_dataset_path, processed_path, img_size=(100, 100), 
+    def __init__(self, raw_dataset_path, processed_path, img_size=IMG_SIZE, 
                  apply_balancing=True, target_samples=2500):
         """
         Inicializa el procesador.

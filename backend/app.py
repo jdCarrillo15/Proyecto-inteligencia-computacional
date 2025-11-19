@@ -41,7 +41,14 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 # Variables globales para el modelo
 model = None
 class_names = None
-img_size = (100, 100)
+
+# Importar IMG_SIZE desde config para consistencia
+import sys
+from pathlib import Path
+backend_dir = Path(__file__).parent
+sys.path.insert(0, str(backend_dir))
+from config import IMG_SIZE
+img_size = IMG_SIZE  # (224, 224)
 
 
 def load_model_and_classes():

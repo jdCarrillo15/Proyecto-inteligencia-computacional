@@ -9,6 +9,13 @@ import numpy as np
 from pathlib import Path
 from datetime import datetime
 import json
+import sys
+
+# Agregar el directorio backend al path para imports
+backend_dir = Path(__file__).parent.parent
+sys.path.insert(0, str(backend_dir))
+
+from config import IMG_SIZE
 
 
 class DataCache:
@@ -235,7 +242,7 @@ class DataCache:
         print("=" * 60)
 
 
-def create_data_arrays_from_directory(directory, img_size=(100, 100), classes=None):
+def create_data_arrays_from_directory(directory, img_size=IMG_SIZE, classes=None):
     """
     Crea arrays numpy directamente desde un directorio de imágenes.
     Función auxiliar para trabajar con el cache.
