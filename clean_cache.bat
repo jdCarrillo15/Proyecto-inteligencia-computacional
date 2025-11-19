@@ -9,15 +9,23 @@ echo ================================================================
 echo     LIMPIEZA DE CACHE Y MODELOS INCOMPATIBLES
 echo ================================================================
 echo.
+echo CAMBIO DE RESOLUCION: 100x100 -^> 224x224
+echo.
 echo Este script eliminara:
-echo   - backend/cache/*.pkl (datos cacheados con resolucion antigua)
-echo   - backend/cache/*.json (metadatos)
-echo   - models/*.keras (modelos entrenados con resolucion antigua)
+echo   - backend/cache/*.pkl (datos cacheados con resolucion 100x100)
+echo   - backend/cache/*.json (metadatos antiguos)
+echo   - models/*.keras (modelos entrenados con 100x100)
+echo.
+echo Por que es necesario?
+echo   - Cache antiguo: (100, 100, 3) = 10,000 pixels
+echo   - Nueva config: (224, 224, 3) = 50,176 pixels (5x mas)
+echo   - Incompatibilidad: Shape mismatch en modelo
 echo.
 echo SOLO ejecuta esto si:
-echo   1. Cambiaste IMG_SIZE en config.py
-echo   2. Hay errores de shape mismatch
-echo   3. Quieres re-entrenar desde cero
+echo   1. Es tu primera vez con resolucion 224x224
+echo   2. Cambiaste IMG_SIZE en config.py
+echo   3. Hay errores de shape mismatch
+echo   4. Quieres re-entrenar desde cero
 echo.
 
 pause
