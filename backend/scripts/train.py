@@ -205,9 +205,9 @@ class PlantDiseaseClassifier:
             x = keras.applications.mobilenet_v2.preprocess_input(x)
             x = base_model(x, training=False)
             x = layers.GlobalAveragePooling2D()(x)
-            x = layers.Dropout(0.3)(x)
+            x = layers.Dropout(0.5)(x)
             x = layers.Dense(256, activation='relu')(x)
-            x = layers.Dropout(0.3)(x)
+            x = layers.Dropout(0.5)(x)
             outputs = layers.Dense(self.num_classes, activation='softmax')(x)
             
             model = keras.Model(inputs, outputs)
@@ -381,12 +381,12 @@ class PlantDiseaseClassifier:
         print(f"  - Capas descongeladas: {trainable_layers}")
         if frozen_bn > 0:
             print(f"  - BatchNorm protegidas: {frozen_bn} (batch_size={batch_size} < 16)")
-        print(f"  - Learning Rate: 0.0001 (10x más bajo que Fase 1)")
-        print(f"  - LR Decay: factor=0.2, patience=5, min_lr=0.00001")
+        print(f"  - Learning Rate: 0.00005 (20x más bajo que Fase 1 - proteger ImageNet)")
+        print(f"  - LR Decay: factor=0.2, patience=5, min_lr=0.000001")
         
-        # Recompilar con LR bajo
+        # Recompilar con LR más conservador
         self.model.compile(
-            optimizer=keras.optimizers.Adam(learning_rate=0.0001),
+            optimizer=keras.optimizers.Adam(learning_rate=0.00005),
             loss='categorical_crossentropy',
             metrics=['accuracy']
         )
@@ -396,7 +396,7 @@ class PlantDiseaseClassifier:
             FineTuningMonitor(phase_name="Fase 2a"),
             EarlyStopping(
                 monitor='val_accuracy',
-                patience=6,
+                patience=5,
                 restore_best_weights=True,
                 verbose=1
             ),
@@ -410,13 +410,13 @@ class PlantDiseaseClassifier:
                 monitor='val_loss',
                 factor=0.2,          # Decay suave para evitar olvido catastrófico
                 patience=5,          # Más paciente en fine-tuning
-                min_lr=0.00001,      # Mínimo para Fase 2
+                min_lr=0.000001,     # Mínimo ultra-bajo para Fase 2a
                 verbose=1
             )
         ]
         
         # Entrenar Fase 2a
-        epochs_2a = max(epochs_phase2 // 2, 7)  # Mínimo 7 epochs
+        epochs_2a = max(epochs_phase2 // 2, 5)  # Mínimo 5 epochs (reducido)
         start_time_2a = time.time()
         
         history_2a = self.model.fit(
@@ -462,12 +462,12 @@ class PlantDiseaseClassifier:
         print(f"  - Capas descongeladas: {trainable_layers_2b}")
         if frozen_bn_2b > 0:
             print(f"  - BatchNorm protegidas: {frozen_bn_2b} (batch_size={batch_size} < 16)")
-        print(f"  - Learning Rate: 0.00005 (ultra-bajo para evitar catastrophic forgetting)")
-        print(f"  - LR Decay: factor=0.2, patience=5, min_lr=0.00001")
+        print(f"  - Learning Rate: 0.00001 (ultra-bajo para evitar catastrophic forgetting)")
+        print(f"  - LR Decay: factor=0.2, patience=5, min_lr=0.000001")
         
-        # Recompilar con LR muy bajo
+        # Recompilar con LR ultra-conservador
         self.model.compile(
-            optimizer=keras.optimizers.Adam(learning_rate=0.00005),
+            optimizer=keras.optimizers.Adam(learning_rate=0.00001),
             loss='categorical_crossentropy',
             metrics=['accuracy']
         )
@@ -491,7 +491,7 @@ class PlantDiseaseClassifier:
                 monitor='val_loss',
                 factor=0.2,          # Decay suave para preservar features ImageNet
                 patience=5,          # Más paciente con más capas descongeladas
-                min_lr=0.00001,      # Mínimo para Fase 2
+                min_lr=0.000001,     # Mínimo ultra-bajo para Fase 2b
                 verbose=1
             )
         ]
@@ -702,10 +702,11 @@ class PlantDiseaseClassifier:
         cm = confusion_matrix(true_classes, predicted_classes)
         top_confusions = metrics_system.analyze_top_confusions(cm, class_names, top_n=10)
         
-        # Imprimir métricas en consola
+        # Imprimir métricas en consola con formato estructurado
         metrics_system.print_detailed_metrics(
             class_metrics, crop_metrics, binary_metrics,
-            top3_acc, top5_acc, top_confusions, class_names
+            top3_acc, top5_acc, top_confusions, class_names, 
+            test_loss, test_accuracy
         )
         
         # Generar visualizaciones
@@ -824,10 +825,10 @@ def main():
     
     # Parámetros de entrenamiento optimizados
     EPOCHS_PHASE1 = 15      # Entrenamiento inicial (capas Dense)
-    EPOCHS_PHASE2 = 20      # Fine-tuning gradual (2 subfases) - Aumentado para mejor adaptación
+    EPOCHS_PHASE2 = 10      # Fine-tuning gradual (2 subfases) - Reducido: converge más rápido con balance corregido
     # BATCH_SIZE importado desde config.py (16 para resolución 224x224)
     USE_TRANSFER_LEARNING = True
-    DO_FINE_TUNING = True   # ✅ Activado con estrategia gradual mejorada
+    DO_FINE_TUNING = True   # ✅ Activado con estrategia gradual optimizada
     
     print("\n⚙️  CONFIGURACIÓN:")
     print(f"  - Transfer Learning: {'✅ MobileNetV2' if USE_TRANSFER_LEARNING else '❌'}")
