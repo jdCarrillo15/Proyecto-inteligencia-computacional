@@ -2,11 +2,25 @@
 
 Herramienta de diagnóstico agrícola basada en redes neuronales convolucionales que identifica enfermedades en cultivos de manzana, maíz, papa y tomate mediante análisis visual.
 
+## 🎯 Objetivos de Performance del Modelo
+
+El sistema está diseñado para **minimizar falsos negativos** (prioridad: detectar enfermedades sobre evitar falsas alarmas).
+
+| Métrica | Mínimo Aceptable | Objetivo | Ideal |
+|---------|------------------|----------|-------|
+| **Macro F1-Score** | ≥ 70% | ≥ 75% | ≥ 85% |
+| **Overall Accuracy** | ≥ 75% | ≥ 80% | ≥ 90% |
+| **Recall por clase** | ≥ 60% | ≥ 70% | ≥ 85% |
+| **Recall crítico*** | ≥ 75% | ≥ 80% | ≥ 90% |
+
+> **Enfermedades críticas*:** Potato/Tomato Late Blight, Corn Northern Leaf Blight  
+> Ver detalles completos en [`MODEL_REQUIREMENTS.md`](./MODEL_REQUIREMENTS.md)
+
 ## Descripción
 
 Aplicación web desarrollada para facilitar la detección temprana de enfermedades en plantas a través del análisis de imágenes. El sistema procesa fotografías de hojas y utiliza un modelo CNN entrenado con TensorFlow para clasificar entre 15 tipos de enfermedades distribuidas en 4 cultivos.
 
-Este proyecto surge como respuesta a la necesidad de herramientas accesibles que apoyen a agricultores en la identificación preliminar de problemas fitosanitarios. Si bien proporciona resultados precisos, recomendamos validar cualquier diagnóstico con un especialista agrónomo antes de aplicar tratamientos.
+Este proyecto surge como respuesta a la necesidad de herramientas accesibles que apoyen a agricultores en la identificación preliminar de problemas fitosanitarios. El sistema prioriza **detectar todas las enfermedades** aunque genere algunas falsas alarmas, ya que es más seguro tratar preventivamente que perder un cultivo por diagnóstico tardío.
 
 ## Características principales
 

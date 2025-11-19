@@ -12,6 +12,12 @@ import tensorflow as tf
 from tensorflow import keras
 import json
 
+# Agregar el directorio backend al path para imports
+backend_dir = Path(__file__).parent.parent
+sys.path.insert(0, str(backend_dir))
+
+from config import IMG_SIZE
+
 
 def load_model_and_classes(model_path='models/fruit_classifier.h5'):
     """Carga el modelo y el mapeo de clases."""
@@ -52,7 +58,7 @@ def load_model_and_classes(model_path='models/fruit_classifier.h5'):
     return model, class_names
 
 
-def preprocess_image(image_path, img_size=(100, 100)):
+def preprocess_image(image_path, img_size=IMG_SIZE):
     """Preprocesa una imagen para predicción."""
     try:
         # Cargar imagen

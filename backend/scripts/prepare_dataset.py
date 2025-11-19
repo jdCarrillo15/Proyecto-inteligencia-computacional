@@ -17,12 +17,16 @@ backend_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(backend_dir))
 
 from utils.data_cache import DataCache, create_data_arrays_from_directory
+from utils.aggressive_augmenter import AggressiveAugmenter
+from utils.model_metrics import calculate_class_weights
+from config import IMG_SIZE
 
 
 class DatasetProcessor:
-    """Procesador de dataset con sistema de cache PKL."""
+    """Procesador de dataset con sistema de cache PKL y balanceo de clases."""
     
-    def __init__(self, raw_dataset_path, processed_path, img_size=(100, 100)):
+    def __init__(self, raw_dataset_path, processed_path, img_size=IMG_SIZE, 
+                 apply_balancing=True, target_samples=2500):
         """
         Inicializa el procesador.
         
@@ -30,17 +34,29 @@ class DatasetProcessor:
             raw_dataset_path: Ruta al dataset original
             processed_path: Ruta donde se guardará el dataset procesado
             img_size: Tamaño de las imágenes
+            apply_balancing: Si True, aplica oversampling para balancear clases
+            target_samples: Número objetivo de muestras por clase después de balanceo
         """
         self.raw_dataset_path = Path(raw_dataset_path)
         self.processed_path = Path(processed_path)
         self.img_size = img_size
         self.cache = DataCache()
+        self.apply_balancing = apply_balancing
+        self.target_samples = target_samples
+        
+        # Inicializar augmentador agresivo si se requiere balanceo
+        if self.apply_balancing:
+            self.augmenter = AggressiveAugmenter(
+                img_size=img_size,
+                target_samples_per_class=target_samples
+            )
         
         # Detectar automáticamente las clases del dataset
         self.classes = self._detect_classes()
         
         print(f"📁 Dataset: {self.raw_dataset_path}")
-        print(f"📊 Clases detectadas: {self.classes}")
+        print(f"📊 Clases detectadas: {len(self.classes)}")
+        print(f"⚖️  Balanceo de clases: {'Activado' if apply_balancing else 'Desactivado'}")
     
     def _detect_classes(self):
         """Detecta automáticamente las clases del dataset."""
@@ -104,19 +120,20 @@ class DatasetProcessor:
     
     def prepare_optimized(self, use_cache=True, force_reprocess=False):
         """
-        Prepara el dataset de forma optimizada usando cache.
+        Prepara el dataset de forma optimizada usando cache y balanceo.
         
         Args:
             use_cache: Si True, usa cache PKL si está disponible
             force_reprocess: Si True, fuerza el reprocesamiento aunque exista cache
             
         Returns:
-            tuple: (X_train, y_train, X_test, y_test, class_names)
+            tuple: (X_train, y_train, X_test, y_test, class_names, class_weights)
         """
         config = {
             'img_size': self.img_size,
             'classes': self.classes,
-            'balance': False
+            'balance': self.apply_balancing,
+            'target_samples': self.target_samples if self.apply_balancing else None
         }
         
         # Intentar cargar desde cache
@@ -138,7 +155,10 @@ class DatasetProcessor:
                     print(f"  - Prueba: {X_test.shape[0]} muestras")
                     print(f"  - Clases: {class_names}")
                     
-                    return X_train, y_train, X_test, y_test, class_names
+                    # Calcular class weights
+                    class_weights = calculate_class_weights(y_train, len(class_names))
+                    
+                    return X_train, y_train, X_test, y_test, class_names, class_weights
                 else:
                     print("⚠️  Cache encontrado pero test está vacío. Reprocesando con división train/test...")
                     # Limpiar cache inválido
@@ -188,6 +208,15 @@ class DatasetProcessor:
             print("❌ Error: No se cargaron imágenes del directorio de entrenamiento")
             return None
         
+        # Aplicar balanceo ANTES de dividir train/test si está activado
+        if self.apply_balancing:
+            # Contar muestras por clase ANTES del balanceo
+            y_train_indices = np.argmax(y_train, axis=1)
+            class_counts = {class_names[i]: np.sum(y_train_indices == i) for i in range(len(class_names))}
+            
+            print(f"\n⚖️  Aplicando balanceo de clases...")
+            X_train, y_train = self.augmenter.balance_dataset(X_train, y_train, class_counts)
+        
         # Cargar test o dividir train
         if test_dir:
             X_test, y_test, _ = self._load_images(test_dir)
@@ -224,12 +253,20 @@ class DatasetProcessor:
             
             print(f"  ✅ Cache guardado: {train_size_mb + test_size_mb:.1f} MB total")
         
+        # Calcular class weights para entrenamiento
+        print(f"\n⚖️  Calculando pesos de clase...")
+        class_weights = calculate_class_weights(y_train, len(class_names))
+        
+        print(f"\n📊 Pesos de clase calculados:")
+        for idx, weight in class_weights.items():
+            print(f"  {class_names[idx]:<45} Weight: {weight:.3f}")
+        
         print(f"\n✅ Procesamiento completado:")
         print(f"  - Entrenamiento: {X_train.shape[0]} muestras")
         print(f"  - Prueba: {X_test.shape[0]} muestras")
         print(f"  - Clases: {class_names}")
         
-        return X_train, y_train, X_test, y_test, class_names
+        return X_train, y_train, X_test, y_test, class_names, class_weights
     
     def _find_train_dir(self):
         """Encuentra el directorio de entrenamiento."""
@@ -366,10 +403,18 @@ def main():
     # Configuración
     RAW_DATASET = "dataset/raw"
     PROCESSED_DATASET = "dataset/processed"
-    IMG_SIZE = (100, 100)
+    IMG_SIZE = (224, 224)  # Usar 224x224 como está configurado
+    APPLY_BALANCING = True  # Activar balanceo de clases
+    TARGET_SAMPLES = 2500  # Objetivo de muestras por clase
     
     # Crear procesador
-    processor = DatasetProcessor(RAW_DATASET, PROCESSED_DATASET, IMG_SIZE)
+    processor = DatasetProcessor(
+        RAW_DATASET, 
+        PROCESSED_DATASET, 
+        IMG_SIZE,
+        apply_balancing=APPLY_BALANCING,
+        target_samples=TARGET_SAMPLES
+    )
     
     # Opciones
     print("\n⚙️  Opciones:")
@@ -398,17 +443,30 @@ def main():
     )
     
     if result:
-        X_train, y_train, X_test, y_test, class_names = result
+        X_train, y_train, X_test, y_test, class_names, class_weights = result
         
-        print("\n" + "=" * 60)
+        print("\n" + "=" * 80)
         print("✅ DATOS LISTOS PARA ENTRENAMIENTO")
-        print("=" * 60)
+        print("=" * 80)
         print(f"\n📊 Resumen:")
         print(f"  - X_train: {X_train.shape}")
         print(f"  - y_train: {y_train.shape}")
         print(f"  - X_test: {X_test.shape}")
         print(f"  - y_test: {y_test.shape}")
-        print(f"  - Clases: {class_names}")
+        print(f"  - Clases: {len(class_names)}")
+        print(f"  - Class weights: {len(class_weights)} clases")
+        
+        # Verificar balance final
+        y_train_indices = np.argmax(y_train, axis=1)
+        final_counts = np.bincount(y_train_indices, minlength=len(class_names))
+        final_ratio = np.max(final_counts) / np.min(final_counts) if np.min(final_counts) > 0 else 0
+        
+        print(f"\n⚖️  Balance final del dataset:")
+        print(f"  - Ratio: {final_ratio:.2f}:1")
+        if final_ratio <= 2.0:
+            print(f"  - ✅ Objetivo alcanzado (≤ 2:1)")
+        else:
+            print(f"  - ⚠️  Ratio mayor a 2:1")
         
         print("\n💡 Siguiente paso:")
         print("   Ejecuta 'python backend/scripts/train.py' para entrenar")
