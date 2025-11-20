@@ -26,6 +26,7 @@ import numpy as np
 from pathlib import Path
 from datetime import datetime
 import json
+import psutil
 
 # Agregar el directorio backend al path para importar módulos
 backend_dir = Path(__file__).resolve().parent.parent
@@ -63,7 +64,7 @@ class DatasetProcessor:
     IMAGENET_STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
     
     def __init__(self, raw_dataset_path, processed_path, img_size=(224, 224), 
-                 apply_balancing=True, target_samples=2500):
+                 apply_balancing=True, target_samples=2500, max_samples_per_class=1500):
         """
         Inicializa el procesador de dataset.
         
@@ -73,12 +74,14 @@ class DatasetProcessor:
             img_size: Tamaño de las imágenes (ancho, alto)
             apply_balancing: Si aplicar balanceo de clases
             target_samples: Muestras objetivo por clase para balanceo
+            max_samples_per_class: Límite máximo de imágenes a cargar por clase (CRÍTICO para evitar OOM)
         """
         self.raw_dataset_path = Path(raw_dataset_path)
         self.processed_path = Path(processed_path)
         self.img_size = img_size
         self.apply_balancing = apply_balancing
         self.target_samples = target_samples
+        self.max_samples_per_class = max_samples_per_class
         self.classes = self.TARGET_CLASSES
         
         # Crear directorio de salida
@@ -101,6 +104,7 @@ class DatasetProcessor:
         print(f"  - Tamaño de imagen: {img_size[0]}x{img_size[1]}")
         print(f"  - Balanceo: {'✅ Activado' if apply_balancing else '❌ Desactivado'}")
         print(f"  - Clases objetivo: {len(self.classes)}")
+        print(f"  - ⚠️  LÍMITE por clase: {max_samples_per_class} imágenes (para evitar OOM)")
     
     def prepare_dataset(self, use_cache=True, force_reprocess=False):
         """
@@ -150,13 +154,20 @@ class DatasetProcessor:
         if self.apply_balancing and self.target_samples > 0:
             print(f"\n⚖️  Balanceando clases (objetivo: {self.target_samples} muestras/clase)...")
             X_all, y_all = self._balance_dataset(X_all, y_all, class_names)
+        else:
+            print(f"\n⏭️  Saltando balanceo (apply_balancing={self.apply_balancing})")
         
         # 5. Realizar split 70/15/15 con estratificación
         X_train, X_val, X_test, y_train, y_val, y_test = self._split_dataset(X_all, y_all)
         
-        # 6. Aplicar augmentation SOLO al training set
-        print("\n🔄 Aplicando augmentation agresiva al training set...")
-        X_train_aug, y_train_aug = self._augment_training_set(X_train, y_train, class_names)
+        # 6. Aplicar augmentation SOLO al training set (SI está activado)
+        if self.apply_balancing:
+            print("\n🔄 Aplicando augmentation agresiva al training set...")
+            X_train_aug, y_train_aug = self._augment_training_set(X_train, y_train, class_names)
+        else:
+            print("\n⏭️  Saltando augmentation (apply_balancing=False)")
+            X_train_aug = X_train
+            y_train_aug = y_train
         
         # 7. Verificar integridad de los splits
         self._verify_split_integrity(X_train_aug, y_train_aug, X_val, y_val, X_test, y_test, class_names)
@@ -165,7 +176,8 @@ class DatasetProcessor:
         self._generate_distribution_report(y_train_aug, y_val, y_test, class_names)
         
         # 9. Calcular class weights
-        class_weights = calculate_class_weights(y_train_aug)
+        num_classes = len(class_names)
+        class_weights = calculate_class_weights(y_train_aug, num_classes)
         
         # 10. Guardar en cache
         if use_cache:
@@ -223,6 +235,7 @@ class DatasetProcessor:
             return np.array([]), np.array([]), []
         
         print(f"\n📸 Cargando imágenes desde {directory.name}...")
+        print(f"   ⚠️  LÍMITE: {self.max_samples_per_class} imágenes por clase (para evitar OOM)\n")
         
         for class_idx, class_name in enumerate(class_names):
             class_dir = class_groups[class_name]
@@ -232,8 +245,34 @@ class DatasetProcessor:
             for ext in ['*.jpg', '*.jpeg', '*.png', '*.JPG', '*.JPEG', '*.PNG']:
                 image_files.extend(list(class_dir.glob(ext)))
             
+            # CRÍTICO: Limitar cantidad de imágenes por clase
+            total_available = len(image_files)
+            if total_available > self.max_samples_per_class:
+                # Tomar muestra aleatoria para mantener variedad
+                import random
+                random.seed(42)
+                image_files = random.sample(image_files, self.max_samples_per_class)
+                print(f"  ⚠️  {class_name}: {total_available} disponibles → usando {self.max_samples_per_class}")
+            
             total_images = 0
             for img_path in image_files:
+                # VERIFICAR MEMORIA cada 50 imágenes (más frecuente)
+                if total_images % 50 == 0 and total_images > 0:
+                    mem = psutil.virtual_memory()
+                    if mem.percent > 75:  # Límite más estricto: 75%
+                        print(f"\n❌ ABORTANDO: Memoria RAM al {mem.percent:.1f}%")
+                        print(f"   Se cargaron {total_images} de {class_name} antes de abortar.")
+                        print(f"   Total cargado hasta ahora: {len(X_list)} imágenes")
+                        print(f"\n🔧 SOLUCIÓN: Ejecuta `python prepare_ultralight.py` (límite 150 img/clase)")
+                        # Convertir lo que tengamos hasta ahora
+                        if len(X_list) > 0:
+                            X = np.array(X_list, dtype=np.float32)
+                            y = np.array(y_list, dtype=np.int32)
+                            y_onehot = np.zeros((len(y), len(class_names)), dtype=np.float32)
+                            y_onehot[np.arange(len(y)), y] = 1
+                            return X, y_onehot, class_names
+                        return np.array([]), np.array([]), []
+                
                 try:
                     # Cargar imagen
                     img = cv2.imread(str(img_path))
@@ -256,7 +295,7 @@ class DatasetProcessor:
                 except Exception as e:
                     continue
             
-            print(f"  ✅ {class_name}: {total_images} imágenes")
+            print(f"  ✅ {class_name}: {total_images} imágenes cargadas")
         
         # Convertir a arrays numpy
         X = np.array(X_list, dtype=np.float32)
@@ -377,6 +416,11 @@ class DatasetProcessor:
             tuple: (X_train_aug, y_train_aug)
         """
         print(f"  📊 Training set antes de augmentation: {len(X_train)} muestras")
+        
+        # SI target_samples es bajo (<500), NO aplicar augmentation para evitar OOM
+        if self.target_samples < 500:
+            print(f"  ⚠️  target_samples={self.target_samples} < 500: SALTANDO augmentation para evitar OOM")
+            return X_train, y_train
         
         # Aplicar augmentation para balancear
         y_train_indices = np.argmax(y_train, axis=1)
@@ -614,8 +658,16 @@ def main():
     RAW_DATASET = "dataset/raw"
     PROCESSED_DATASET = "dataset/processed"
     IMG_SIZE = (224, 224)  # Tamaño estándar para MobileNetV2
-    APPLY_BALANCING = True  # Activar balanceo de clases
-    TARGET_SAMPLES = 2500  # Objetivo de muestras por clase
+    APPLY_BALANCING = False  # DESACTIVADO para evitar OOM
+    TARGET_SAMPLES = 0  # 0 = Sin augmentation (evita OOM)
+    MAX_SAMPLES_PER_CLASS = 200  # LÍMITE CRÍTICO: solo 200 imágenes por clase (15 clases × 200 = 3,000 imágenes max)
+    
+    print("\n⚠️  CONFIGURACIÓN DE SEGURIDAD ULTRA-CONSERVADORA:")
+    print(f"   - Límite por clase: {MAX_SAMPLES_PER_CLASS} imágenes")
+    print(f"   - Total máximo: ~{MAX_SAMPLES_PER_CLASS * 15} imágenes (15 clases)")
+    print(f"   - RAM estimada: ~{MAX_SAMPLES_PER_CLASS * 15 * 224 * 224 * 3 * 4 / (1024**3):.2f} GB")
+    print(f"   - 🔴 MODO EMERGENCIA: Límites mínimos para garantizar funcionamiento")
+    print(f"   - ⚠️  AUGMENTATION: DESACTIVADO (target_samples=0)\n")
     
     # Crear procesador
     processor = DatasetProcessor(
@@ -623,7 +675,8 @@ def main():
         PROCESSED_DATASET,
         IMG_SIZE,
         apply_balancing=APPLY_BALANCING,
-        target_samples=TARGET_SAMPLES
+        target_samples=TARGET_SAMPLES,
+        max_samples_per_class=MAX_SAMPLES_PER_CLASS
     )
     
     # Opciones

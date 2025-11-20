@@ -1,18 +1,3 @@
-"""
-Script de entrenamiento del modelo de clasificación de enfermedades.
-
-Este script:
-1. Prepara los datos automáticamente (con cache PKL)
-2. Entrena el modelo con Transfer Learning
-3. Evalúa y guarda resultados
-
-Uso:
-    python backend/scripts/train.py
-    
-El sistema detecta automáticamente si necesita preparar datos o puede
-usar el cache existente.
-"""
-
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,6 +17,7 @@ from sklearn.metrics import (
     top_k_accuracy_score
 )
 from datetime import datetime
+import psutil
 
 # Agregar el directorio backend al path
 backend_dir = Path(__file__).parent.parent
@@ -860,20 +846,20 @@ def main():
     # IMG_SIZE importado desde config.py para consistencia (224x224)
     
     # Parámetros de entrenamiento
-    EPOCHS_PHASE1 = 100     # Epochs máximo con early stopping (15-20 epochs paciencia)
-    EPOCHS_PHASE2 = 10      # Fine-tuning gradual (2 subfases)
-    BATCH_SIZE_OVERRIDE = 64  # batch size recomendado 32-64
-    # BATCH_SIZE importado desde config.py pero se puede sobrescribir
+    EPOCHS_PHASE1 = 50      # Reducido para pruebas (era 100)
+    EPOCHS_PHASE2 = 5       # Reducido (era 10)
+    # Usar el batch size definido en backend/config.py por defecto (más seguro)
+    BATCH_SIZE_OVERRIDE = BATCH_SIZE
     USE_TRANSFER_LEARNING = True
-    DO_FINE_TUNING = True   # ✅ Activado con estrategia gradual optimizada
+    DO_FINE_TUNING = False  # ❌ DESACTIVADO para reducir uso de memoria
     
-    # Usar batch size
-    BATCH_SIZE_TRAIN = BATCH_SIZE_OVERRIDE
+    # Usar batch size (toma el mínimo entre override y config, seguridad)
+    BATCH_SIZE_TRAIN = min(BATCH_SIZE_OVERRIDE, BATCH_SIZE)
     
     print("\n⚙️  CONFIGURACIÓN:")
     print(f"  - Transfer Learning: {'✅ MobileNetV2' if USE_TRANSFER_LEARNING else '❌'}")
     print(f"  - Resolución de Imagen: {IMG_SIZE[0]}x{IMG_SIZE[1]} ({IMG_SIZE[0]*IMG_SIZE[1]:,} píxeles)")
-    print(f"  - Batch Size: {BATCH_SIZE_TRAIN} (32-64 recomendado)")
+    print(f"  - Batch Size: {BATCH_SIZE_TRAIN} (recomendado: ajustar según RAM/GPU)")
     print(f"  - Epochs máximo Fase 1: {EPOCHS_PHASE1} (con early stopping 15-20)")
     print(f"  - Optimizer: Adam (lr=1e-4)")
     print(f"  - Scheduler: ReduceLROnPlateau (factor=0.5, patience=5)")
@@ -907,47 +893,138 @@ def main():
             'Tomato___Late_blight',
             'Tomato___Leaf_Mold'
         ],
-        'balance': False
+        'balance': False  # DEBE coincidir con el cache creado
     }
     
     print("\n📂 Cargando datos desde cache (split 70/15/15)...")
-    train_data = cache.load(RAW_DATASET, config, 'train')
-    val_data = cache.load(RAW_DATASET, config, 'val')
-    test_data = cache.load(RAW_DATASET, config, 'test')
+    
+    def _normalize_cache_result(res):
+        """Normaliza resultado de cache a formato dict."""
+        if res is None:
+            return None
+        if isinstance(res, tuple) and len(res) >= 3:
+            data, labels, class_names = res[0], res[1], res[2]
+            return {'X': data, 'y': labels, 'class_names': class_names}
+        if isinstance(res, dict):
+            if 'X' in res and 'y' in res and 'class_names' in res:
+                return res
+        return None
+    
+    # Intentar cargar desde cache con múltiples rutas posibles
+    cache_dir = Path('backend/cache')
+    pkl_files = list(cache_dir.glob('*_train.pkl'))
+    
+    train_data = None
+    val_data = None
+    test_data = None
+    
+    if pkl_files:
+        # Usar el cache más reciente
+        latest_cache = max(pkl_files, key=lambda p: p.stat().st_mtime)
+        cache_key = latest_cache.stem.replace('_train', '')
+        
+        print(f"  ✅ Cache encontrado: {cache_key}")
+        
+        # Cargar usando la clave directa
+        train_path = cache_dir / f"{cache_key}_train.pkl"
+        val_path = cache_dir / f"{cache_key}_val.pkl"
+        test_path = cache_dir / f"{cache_key}_test.pkl"
+        
+        if train_path.exists() and val_path.exists() and test_path.exists():
+            import pickle
+            
+            with open(train_path, 'rb') as f:
+                train_cache = pickle.load(f)
+                train_data = {
+                    'X': train_cache['data'],
+                    'y': train_cache['labels'],
+                    'class_names': train_cache['class_names']
+                }
+            
+            with open(val_path, 'rb') as f:
+                val_cache = pickle.load(f)
+                val_data = {
+                    'X': val_cache['data'],
+                    'y': val_cache['labels'],
+                    'class_names': val_cache['class_names']
+                }
+            
+            with open(test_path, 'rb') as f:
+                test_cache = pickle.load(f)
+                test_data = {
+                    'X': test_cache['data'],
+                    'y': test_cache['labels'],
+                    'class_names': test_cache['class_names']
+                }
+            
+            print(f"  ✅ Train: {train_data['X'].shape[0]} muestras")
+            print(f"  ✅ Val: {val_data['X'].shape[0]} muestras")
+            print(f"  ✅ Test: {test_data['X'].shape[0]} muestras")
+    else:
+        # Intentar con el método original (por compatibilidad)
+        train_res = cache.load(RAW_DATASET, config, 'train')
+        val_res = cache.load(RAW_DATASET, config, 'val')
+        test_res = cache.load(RAW_DATASET, config, 'test')
+
+        train_data = _normalize_cache_result(train_res)
+        val_data = _normalize_cache_result(val_res)
+        test_data = _normalize_cache_result(test_res)
     
     if not train_data or not val_data or not test_data:
-        print("\n⚠️  Cache no encontrado o incompleto. Preparando datos automáticamente...")
-        print("=" * 70)
-        
-        # Importar y ejecutar preparación de datos
-        from prepare_dataset import DatasetProcessor
-        
-        processor = DatasetProcessor(RAW_DATASET, PROCESSED_DATASET, IMG_SIZE)
-        result = processor.prepare_dataset(use_cache=True, force_reprocess=False)
-        
-        if not result:
-            print("\n❌ Error preparando datos. Verifica que el dataset exista en:")
-            print(f"   {RAW_DATASET}/New Plant Diseases Dataset(Augmented)/train/")
-            return
-        
-        # Cargar datos recién preparados
-        train_data = cache.load('train')
-        val_data = cache.load('val')
-        test_data = cache.load('test')
-        
-        if not train_data or not val_data or not test_data:
-            print("\n❌ Error cargando datos preparados")
-            return
+        print("\n❌ Error: Cache no encontrado.")
+        print("\n🔧 SOLUCIÓN:")
+        print("   Ejecuta primero uno de estos comandos para generar el cache:")
+        print("   - python prepare_ultralight.py  (recomendado)")
+        print("   - python prepare_minimal.py     (si ultralight falló)")
+        print("   - .\\prepare_safe.bat            (alternativa)")
+        print("\n   Luego vuelve a ejecutar: python backend/scripts/train.py")
+        return
     
     X_train = train_data['X']
     y_train = train_data['y']
     class_names = train_data['class_names']
-    
+
     X_val = val_data['X']
     y_val = val_data['y']
-    
+
     X_test = test_data['X']
     y_test = test_data['y']
+
+    # ---------------------- Seguridad: comprobación de memoria -----------------
+    try:
+        mem = psutil.virtual_memory()
+        total_bytes = int(X_train.nbytes + X_val.nbytes + X_test.nbytes)
+        total_mb = total_bytes / (1024 * 1024)
+        avail_mb = mem.available / (1024 * 1024)
+        used_percent = mem.percent
+        
+        print(f"\n🧮 VERIFICACIÓN DE MEMORIA:")
+        print(f"   - Arrays dataset: {total_mb:.1f} MB")
+        print(f"   - Memoria disponible: {avail_mb:.1f} MB")
+        print(f"   - Memoria usada sistema: {used_percent:.1f}%")
+        
+        # LÍMITE ESTRICTO: arrays no pueden ocupar más del 50% de memoria disponible
+        if total_bytes > mem.available * 0.5:
+            print(f"\n❌ ERROR CRÍTICO: Arrays demasiado grandes ({total_mb:.1f} MB)")
+            print(f"   Esto consumiría más del 50% de tu RAM disponible ({avail_mb:.1f} MB).")
+            print(f"\n🔧 SOLUCIONES INMEDIATAS:")
+            print(f"   1. Borrar cache: rm backend/cache/*.pkl")
+            print(f"   2. Ya configuré APPLY_BALANCING=False en config.py")
+            print(f"   3. Ejecuta: python backend/scripts/prepare_dataset.py")
+            print(f"      (Selecciona opción 4 para limpiar, luego opción 2 para reprocesar)")
+            print(f"\n   Esto generará un dataset MÁS PEQUEÑO sin oversampling.")
+            print(f"\nAbortando para proteger tu sistema.")
+            return
+        
+        # Advertencia si usa más del 30%
+        if total_bytes > mem.available * 0.3:
+            print(f"   ⚠️  ADVERTENCIA: Arrays usan {total_bytes*100/mem.available:.1f}% de RAM disponible")
+            print(f"   El entrenamiento puede ser lento o inestable.")
+        else:
+            print(f"   ✅ Uso de memoria aceptable ({total_bytes*100/mem.available:.1f}% de RAM disponible)")
+            
+    except Exception as e:
+        print(f"⚠️  No se pudo comprobar memoria: {e}")
     
     num_classes = len(class_names)
     
