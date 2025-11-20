@@ -1,7 +1,7 @@
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
 ║         DETECTOR DE ENFERMEDADES EN PLANTAS                  ║
-║         Sistema de Diagnóstico Agrícola CNN                  ║
+║         Sistema de Diagnóstico Agrícola CNN         ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
 
@@ -9,325 +9,565 @@
 DESCRIPCIÓN GENERAL
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+• Pipeline completo de 6 pasos (Preparación → Testing)
 • API REST desarrollada con Flask
-• Interfaz React con alternancia de tema claro/oscuro
-• Clasificación de 15 patologías en 4 especies vegetales
-• Sistema de caché optimizado para entrenamiento
-• Cumplimiento de estándares WCAG 2.1 AA
+• Interfaz React con modo claro/oscuro
+• Clasificación de 15 enfermedades en 4 cultivos
+• Sistema de validación automatizada (118 checks)
+• Transfer learning con MobileNetV2
+• Métricas detalladas con reportes Excel
+• Inference optimizada < 500ms
 
 
 GUÍA DE INICIO RÁPIDO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-1. CONFIGURACIÓN INICIAL (ejecutar una sola vez)
-   ► Ejecutar: setup.bat
-   Tiempo estimado: 5-10 minutos
+1. ENTRENAR MODELO
+   ► Ejecutar: train.bat
+   ► Alternativa: python backend/scripts/train.py
+   Tiempo estimado: 2-4 horas (con GPU)
 
-2. INICIAR BACKEND
+2. EVALUAR MODELO
+   ► Ejecutar: evaluate.bat
+   ► Alternativa: python backend/scripts/evaluate_model.py
+   Genera: Excel, JSON, visualizaciones
+
+3. VERIFICAR READINESS
+   ► Ejecutar: test_ready.bat
+   ► Alternativa: python backend/scripts/test_ready.py
+   Verifica: latencia, memoria, inference script
+
+4. INICIAR BACKEND
    ► Ejecutar: start-backend.bat
    Servidor disponible en http://localhost:5000
 
-3. INICIAR FRONTEND
+5. INICIAR FRONTEND
    ► Ejecutar: start-frontend.bat
    Aplicación disponible en http://localhost:3000
 
 
-ENTRENAMIENTO OPTIMIZADO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-OPCIÓN 1 - Entrenamiento completo (recomendado)
-   ► train-fast.bat
-   ► python backend/scripts/quick_train.py
-   
-   ⏱ Primera vez: 15-30 min
-   ⏱ Con cache: 10-20 min (70-90% más rápido)
+┌───────────────────────────────────────────────────────────────┐
+│  PASO 1: Preparación de Dataset                               │
+├───────────────────────────────────────────────────────────────┤
+│  ► python backend/scripts/prepare_dataset.py                  │
+│  • Split 70/15/15 (train/val/test)                            │
+│  • Normalización ImageNet                                     │
+│  • Data augmentation                                          │
+│  • Cache PKL optimizado                                       │
+│  Output: backend/cache/*.pkl                                  │
+└───────────────────────────────────────────────────────────────┘
 
-OPCIÓN 2 - Preparación de datos
-   ► python backend/scripts/data_preparation_fast.py
-   
-   Menú:
-   [1] Usar cache (rápido)
-   [2] Forzar reprocesamiento
-   [3] Ver info del cache
-   [4] Limpiar cache
+┌───────────────────────────────────────────────────────────────┐
+│  PASO 2: Entrenamiento                                        │
+├───────────────────────────────────────────────────────────────┤
+│  ► train.bat                                                  │
+│  ► python backend/scripts/train.py                            │
+│  • Adam optimizer (lr=1e-4)                                   │
+│  • Batch size: 64                                             │
+│  • Max epochs: 100                                            │
+│  • Early stopping (patience=15)                               │
+│  • ReduceLROnPlateau                                          │
+│  • Dual checkpoints (best + last)                             │
+│  • Class weights balancing                                    │
+│  Output: models/best_model.keras                              │
+│          models/last_model.keras                              │
+│          metrics/training_history.json                        │
+└───────────────────────────────────────────────────────────────┘
 
-OPCIÓN 3 - Solo entrenamiento (si ya tienes cache)
-   ► python backend/scripts/train_model_fast.py
+┌───────────────────────────────────────────────────────────────┐
+│  PASO 3: Evaluación del Modelo                                │
+├───────────────────────────────────────────────────────────────┤
+│  ► evaluate.bat (ejecuta Pasos 3, 4, 5)                       │
+│  ► python backend/scripts/evaluate_model.py                   │
+│  • 25+ métricas (accuracy, precision, recall, F1)             │
+│  • Confusion matrix                                           │
+│  • Reporte Excel (4 hojas)                                    │
+│  • Visualizaciones                                            │
+│  Output: metrics/evaluation_results.json                      │
+│          metrics/evaluation_results.xlsx                      │
+│          models/visualizations/*.png                          │
+└───────────────────────────────────────────────────────────────┘
 
-GESTIÓN DEL CACHE
-   ► python backend/utils/manage_cache.py
-   
-   [1] Ver información
-   [2] Limpiar cache
-   [3] Verificar integridad
+┌───────────────────────────────────────────────────────────────┐
+│  PASO 4: Validación contra Requisitos                         │
+├───────────────────────────────────────────────────────────────┤
+│  ► Ejecutado automáticamente por evaluate_model.py            │
+│  ► python backend/scripts/validate_requirements.py            │
+│  • Macro F1 ≥ 75% (OBLIGATORIO)                               │
+│  • Accuracy ≥ 75% (OBLIGATORIO)                               │
+│  • Recall críticos ≥ 80% (OBLIGATORIO)                        │
+│  • Estado: APROBADO / CONDICIONAL / RECHAZADO                 │
+│  Output: metrics/validation_report.json                       │
+└───────────────────────────────────────────────────────────────┘
 
-BENCHMARK
-   ► python backend/utils/benchmark.py
+┌───────────────────────────────────────────────────────────────┐
+│  PASO 5: Análisis de Problemas (si falla)                     │
+├───────────────────────────────────────────────────────────────┤
+│  ► Ejecutado automáticamente si falla validación              │
+│  ► python backend/scripts/analyze_failures.py                 │
+│  • Clases problemáticas                                       │
+│  • Patrones de confusión                                      │
+│  • Recomendaciones específicas                                │
+│  • Acciones prioritarias                                      │
+│  Output: metrics/failure_analysis.json                        │
+└───────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────┐
+│  PASO 6: Testing Final & Readiness                            │
+├───────────────────────────────────────────────────────────────┤
+│  ► test_ready.bat                                             │
+│  ► python backend/scripts/test_ready.py                       │
+│  • Test guardar/cargar modelo                                 │
+│  • Test predicciones tiempo real                              │
+│  • Test latencia < 500ms                                      │
+│  • Test memoria < 500MB                                       │
+│  • Verificar inference.py                                     │
+│  Output: metrics/readiness_report.json                        │
+└───────────────────────────────────────────────────────────────┘
 
 
-FUNCIONALIDADES PRINCIPALES
+SCRIPTS DE VALIDACIÓN (OPCIONAL)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Interfaz de usuario:
-  • Alternancia entre modo claro y oscuro
-  • Carga de imágenes mediante arrastrar y soltar
-  • Sistema de previsualización con zoom
-  • Indicadores visuales de estado fitosanitario
-  • Clasificación por niveles de severidad
-  • Fichas técnicas de enfermedades
-  • Módulo comparativo de tejido sano vs afectado
-  • Guía de buenas prácticas fotográficas
-  • Diseño adaptable a móviles y tablets
-  • Cumplimiento de estándares WCAG 2.1 AA
+Verificar implementación de cada paso:
 
-Arquitectura del sistema:
-  • Sistema de caché PKL para datos procesados
-  • Transfer learning basado en MobileNetV2
-  • Pipeline de procesamiento automatizado
-  • Optimización de batch size
-  • Detección temprana de sobreajuste (early stopping)
-  • Aumentación de datos integrada
+► python backend/scripts/validate_paso2.py
+  Valida: configuración de entrenamiento (28 checks)
+
+► python backend/scripts/validate_paso3.py
+  Valida: sistema de evaluación (27 checks)
+
+► python backend/scripts/validate_paso4.py
+  Valida: sistema de validación (30 checks)
+
+► python backend/scripts/validate_paso5.py
+  Valida: análisis de fallos (24 checks)
+
+► python backend/scripts/validate_paso6.py
+  Valida: readiness y documentación (19 checks)
 
 
-CULTIVOS Y ENFERMEDADES
+INFERENCIA EN PRODUCCIÓN
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Manzana (4 clases):
-  • Sarna del manzano
-  • Pudrición negra
-  • Roya del cedro
-  • Saludable
+Usar inference.py para predicciones optimizadas:
 
-Maíz (3 clases):
-  • Roya común
-  • Tizón del norte
-  • Saludable
+PREDICCIÓN INDIVIDUAL:
+  ► python backend/scripts/inference.py --image ruta/imagen.jpg
+  Muestra: Top-5 predicciones con confidence
 
-Papa (3 clases):
-  • Tizón temprano
-  • Tizón tardío
-  • Saludable
+PREDICCIÓN EN BATCH:
+  ► python backend/scripts/inference.py --batch ruta/carpeta/
+  Procesa: Múltiples imágenes con progress bar
 
-Tomate (5 clases):
-  • Mancha bacteriana
-  • Tizón temprano
-  • Tizón tardío
-  • Moho de la hoja
-  • Saludable
+INFORMACIÓN DEL MODELO:
+  ► python backend/scripts/inference.py --info
+  Muestra: Arquitectura, parámetros, clases
+
+SALIDA JSON:
+  ► python backend/scripts/inference.py --image foto.jpg --json
+  Retorna: JSON estructurado para integración
 
 
-STACK TECNOLÓGICO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MÉTRICAS Y REQUISITOS DEL MODELO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Backend:
-  Python 3.10+, Flask 3.0, TensorFlow 2.18, Keras 3.6
-  Pillow, Flask-CORS, NumPy, scikit-learn
+UMBRALES OBLIGATORIOS (Paso 4):
+┌─────────────────────┬──────────┬─────────────────────────────┐
+│ Métrica             │ Umbral   │ Descripción                 │
+├─────────────────────┼──────────┼─────────────────────────────┤
+│ Macro F1-Score      │ ≥ 75%    │ Promedio balanceado         │
+│ Overall Accuracy    │ ≥ 75%    │ Accuracy general            │
+│ Recall Críticos     │ ≥ 80%    │ Para enfermedades críticas  │
+└─────────────────────┴──────────┴─────────────────────────────┘
 
-Frontend:
-  React 19, Axios, CSS3
+ENFERMEDADES CRÍTICAS (Prioridad máxima):
+  1. Potato___Late_blight        (Tizón tardío papa)
+  2. Tomato___Late_blight        (Tizón tardío tomate)
+  3. Corn_(maize)___Northern_Leaf_Blight (Tizón norte maíz)
 
-Conjunto de datos:
-  New Plant Diseases Dataset (Kaggle)
-  Colección de 15,000+ imágenes con aumentación
-
-
-MÉTRICAS DE RENDIMIENTO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Latencia de inferencia: < 1 segundo
-Precisión del modelo: ~90-95%
-Tamaño máximo de archivo: 16MB
-Dimensiones de entrada: 100x100 píxeles RGB
+ESTADOS DE VALIDACIÓN:
+  ✅ APROBADO     → Cumple todos los requisitos
+  ⚠️  CONDICIONAL → Cumple obligatorios, falta objetivos
+  ❌ RECHAZADO    → No cumple obligatorios
 
 
-ESTRUCTURA
+CULTIVOS Y ENFERMEDADES SOPORTADAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🍎 MANZANA (4 clases):
+  • Apple___Apple_scab           (Sarna del manzano)
+  • Apple___Black_rot             (Pudrición negra)
+  • Apple___Cedar_apple_rust      (Roya del cedro)
+  • Apple___healthy               (Hojas sanas)
+
+🌽 MAÍZ (3 clases):
+  • Corn_(maize)___Common_rust_   (Roya común)
+  • Corn_(maize)___Northern_Leaf_Blight ⚠️ CRÍTICO
+  • Corn_(maize)___healthy        (Hojas sanas)
+
+🥔 PAPA (3 clases):
+  • Potato___Early_blight         (Tizón temprano)
+  • Potato___Late_blight          ⚠️ CRÍTICO
+  • Potato___healthy              (Hojas sanas)
+
+🍅 TOMATE (5 clases):
+  • Tomato___Bacterial_spot       (Mancha bacteriana)
+  • Tomato___Early_blight         (Tizón temprano)
+  • Tomato___Late_blight          ⚠️ CRÍTICO
+  • Tomato___Leaf_Mold            (Moho de la hoja)
+  • Tomato___healthy              (Hojas sanas)
+
+
+ESTRUCTURA DEL PROYECTO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Proyecto-inteligencia-computacional/
-├── README.md
-├── INSTRUCCIONES.txt
-├── setup.bat
-├── start-backend.bat
-├── start-frontend.bat
-├── train-fast.bat
+├── README.md                    # Documentación principal
+├── MODEL_REQUIREMENTS.md        # Requisitos del modelo
+├── GUIA_SCRIPTS.md             # Guía de scripts
+├── INSTRUCCIONES.txt           # Este archivo
 │
-├── backend/
-│   ├── app.py
-│   ├── requirements.txt
-│   ├── models/
-│   │   ├── best_model.keras
-│   │   ├── class_mapping.json
-│   │   └── visualizations/
+├── 🔧 Scripts .bat (Windows)
+│   ├── train.bat               # Paso 2: Entrenamiento
+│   ├── evaluate.bat            # Pasos 3-5: Evaluación
+│   ├── test_ready.bat          # Paso 6: Testing
+│   ├── start-backend.bat       # Iniciar API
+│   ├── start-frontend.bat      # Iniciar React
+│   └── clean_cache.bat         # Limpiar cache
+│
+├── 📦 backend/
+│   ├── app.py                  # API REST Flask
+│   ├── config.py               # Configuración centralizada
+│   ├── requirements.txt        # Dependencias
+│   │
 │   ├── scripts/
-│   │   ├── quick_train.py
-│   │   ├── data_preparation_fast.py
-│   │   └── train_model_fast.py
+│   │   ├── train.py            # Paso 2
+│   │   ├── evaluate_model.py   # Paso 3
+│   │   ├── validate_requirements.py  # Paso 4
+│   │   ├── analyze_failures.py       # Paso 5
+│   │   ├── test_ready.py       # Paso 6
+│   │   ├── inference.py        # Inferencia optimizada
+│   │   ├── prepare_dataset.py  # Paso 1
+│   │   ├── detailed_metrics.py # Sistema de métricas
+│   │   └── validate_paso*.py   # Validadores
+│   │
 │   ├── utils/
-│   │   ├── manage_cache.py
-│   │   └── benchmark.py
-│   └── cache/              (generado automáticamente)
+│   │   ├── data_cache.py       # Gestión cache PKL
+│   │   └── manage_cache.py     # Utilidades cache
+│   │
+│   ├── models/
+│   │   ├── best_model.keras    # Mejor modelo
+│   │   ├── last_model.keras    # Último checkpoint
+│   │   └── visualizations/     # Gráficos
+│   │
+│   ├── cache/
+│   │   ├── train_data.pkl      # Cache train (70%)
+│   │   ├── val_data.pkl        # Cache val (15%)
+│   │   └── test_data.pkl       # Cache test (15%)
+│   │
+│   └── metrics/
+│       ├── evaluation_results.json
+│       ├── evaluation_results.xlsx
+│       ├── validation_report.json
+│       ├── failure_analysis.json
+│       ├── readiness_report.json
+│       └── training_history.json
 │
-├── frontend/
+├── 📂 frontend/
+│   ├── package.json
 │   ├── src/
 │   │   ├── App.js
-│   │   └── App.css
+│   │   ├── components/
+│   │   ├── data/
+│   │   ├── styles/
+│   │   └── utils/
 │   └── public/
 │
-└── dataset/
+└── 📂 dataset/
     └── raw/
         └── New Plant Diseases Dataset(Augmented)/
+            ├── train/          (70% - para split interno)
+            └── test/           (para split interno)
 
 
-ARCHIVOS GENERADOS
+ARCHIVOS GENERADOS POR EL PIPELINE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-models/
-  best_model.keras              Mejor modelo
-  fruit_classifier.keras        Modelo final
-  class_mapping.json           Mapeo de clases
-  visualizations/
-    confusion_matrix.png       Matriz
-    training_history.png       Historial
+MODELOS:
+  models/best_model.keras           Mejor modelo (val_loss)
+  models/last_model.keras           Último checkpoint
+  models/class_mapping.json         Mapeo de clases
 
-backend/cache/
-  [hash]_train.pkl             Cache train
-  [hash]_test.pkl              Cache test
-  cache_metadata.json          Metadatos
+MÉTRICAS Y REPORTES:
+  metrics/training_history.json     Historial completo
+  metrics/evaluation_results.json   Métricas en JSON
+  metrics/evaluation_results.xlsx   Reporte Excel (4 hojas)
+  metrics/validation_report.json    Estado de validación
+  metrics/failure_analysis.json     Análisis (si falla)
+  metrics/readiness_report.json     Tests producción
+
+VISUALIZACIONES:
+  models/visualizations/confusion_matrix.png
+  models/visualizations/per_class_metrics.png
+  models/visualizations/training_history.png
+  models/visualizations/roc_curves.png
+
+CACHE:
+  backend/cache/train_data.pkl      Datos preprocesados
+  backend/cache/val_data.pkl
+  backend/cache/test_data.pkl
 
 
-TIEMPOS DE ENTRENAMIENTO
+CONFIGURACIÓN DEL ENTRENAMIENTO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Escenario          │ Sin cache  │ Con cache  │ Mejora
-───────────────────┼────────────┼────────────┼─────────
-Primera vez        │ 45-60 min  │ 15-30 min  │ 50%
-Con cache          │ 45-60 min  │ 10-20 min  │ 70-80%
-Carga de datos     │ 10-20 min  │ <30 seg    │ 95%
-Re-entrenamiento   │ 45-60 min  │ 10-15 min  │ 75%
+Editar backend/config.py para ajustar hiperparámetros:
+
+OPTIMIZACIÓN:
+  OPTIMIZER = 'adam'
+  LEARNING_RATE = 0.0001          # 1e-4
+  BATCH_SIZE = 64                 # Ajustar según RAM
+
+ENTRENAMIENTO:
+  EPOCHS = 100                    # Máximo
+  EARLY_STOPPING_PATIENCE = 15    # Paciencia
+  REDUCE_LR_PATIENCE = 5          # Reducir LR
+  REDUCE_LR_FACTOR = 0.5          # Factor reducción
+
+ARQUITECTURA:
+  BASE_MODEL = 'MobileNetV2'      # ImageNet
+  IMG_SIZE = (224, 224)           # Input size
+  DENSE_UNITS = [512, 256]        # Capas densas
+  DROPOUT_RATE = 0.5              # Dropout
+
+DATA AUGMENTATION:
+  rotation_range = 20
+  width_shift_range = 0.2
+  height_shift_range = 0.2
+  zoom_range = 0.2
+  horizontal_flip = True
 
 
-CONFIGURACIÓN
+STACK TECNOLÓGICO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Edita backend/scripts/quick_train.py:
+Backend:
+  • Python 3.10+
+  • Flask 3.0
+  • TensorFlow 2.18
+  • Keras 3.6
+  • Pillow (procesamiento)
+  • psutil (monitoreo)
+  • pandas + openpyxl (reportes)
+  • scikit-learn (métricas)
+  • matplotlib + seaborn (visualización)
 
-PC Potente (GPU + 16GB RAM):
-  BATCH_SIZE = 128
-  EPOCHS_PHASE1 = 20
-  EPOCHS_PHASE2 = 15
+Frontend:
+  • React 19
+  • Axios (HTTP client)
+  • CSS3 (estilos modernos)
 
-PC Normal (8GB RAM):
-  BATCH_SIZE = 64      (default)
-  EPOCHS_PHASE1 = 15
-  EPOCHS_PHASE2 = 10
-
-PC Limitado (4GB RAM):
-  BATCH_SIZE = 32
-  EPOCHS_PHASE1 = 10
-  EPOCHS_PHASE2 = 5
+Machine Learning:
+  • MobileNetV2 (ImageNet)
+  • Transfer Learning
+  • Cache PKL (optimización)
+  • Class Weights (balanceo)
 
 
-VENTAJAS DEL SISTEMA
+TIEMPOS ESTIMADOS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Cache PKL:
-  • Datos procesados guardados para reuso
-  • Re-entrenamientos 70-90% más rápidos
-  • Carga de datos en <30 segundos
+Con GPU (NVIDIA 1060+, 16GB RAM):
+  Preparación (Paso 1):      5-10 min
+  Entrenamiento (Paso 2):    2-4 horas
+  Evaluación (Pasos 3-5):    5-15 min
+  Testing (Paso 6):          2-5 min
+  TOTAL:                     2.5-5 horas
 
-Transfer Learning:
-  • 3-5x más rápido que entrenar desde cero
-  • Mejor precisión con menos datos
-  • Usa ImageNet (1.4M imágenes)
+Sin GPU (CPU, 8GB RAM):
+  Preparación (Paso 1):      10-20 min
+  Entrenamiento (Paso 2):    8-12 horas
+  Evaluación (Pasos 3-5):    10-20 min
+  Testing (Paso 6):          5-10 min
+  TOTAL:                     8.5-13 horas
 
-Pipeline:
-  • Todo automatizado en un comando
-  • Sin intervención manual
-  • Manejo de errores automático
-
-
-SOLUCIÓN DE PROBLEMAS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Modelo no encontrado:
-  ► python backend/scripts/quick_train.py
-
-Cache no encontrado:
-  → Normal en primera ejecución
-  → Se crea automáticamente
-
-Out of memory:
-  → Reduce BATCH_SIZE en quick_train.py
-  → Cierra otras apps
-
-Dataset not found:
-  → Verifica: dataset/raw/New Plant Diseases Dataset(Augmented)/
-  → Descarga dataset si falta
-
-Puerto ocupado:
-  → Cierra apps que usen puerto 5000 o 3000
-  → Cambia puerto en app.py o package.json
-
-CORS error:
-  ► pip install flask-cors
-
-react-scripts error:
-  ► cd frontend
-  ► npm install react-scripts --save
-
-Entrenamiento lento:
-  → Instala TensorFlow con GPU
-  → Aumenta BATCH_SIZE si tienes RAM
-  → Verifica uso de GPU en logs
+INFERENCIA (Producción):
+  Por imagen:                <500ms (GPU) / <2s (CPU)
+  Batch de 32 imágenes:      <100ms/img promedio
 
 
 MEJORES PRÁCTICAS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Para máxima velocidad:
-  ✓ No borres backend/cache/ entre entrenamientos
-  ✓ Mantén USE_TRANSFER_LEARNING = True
-  ✓ Usa BATCH_SIZE alto (dentro de tu RAM)
-  ✓ Early stopping activado por defecto
+ENTRENAMIENTO:
+  ✓ Ejecutar pasos en orden (1 → 2 → 3 → 4 → 5 → 6)
+  ✓ No borrar backend/cache/ entre re-entrenamientos
+  ✓ Monitorear training_history.json durante entrenamiento
+  ✓ Revisar validation_report.json antes de deployment
 
-Para mejor precisión:
-  ✓ Aumenta EPOCHS_PHASE1 y EPOCHS_PHASE2
-  ✓ Mantén DO_FINE_TUNING = True
-  ✓ Data augmentation ya incluido
+EVALUACIÓN:
+  ✓ Siempre ejecutar evaluate.bat después de entrenar
+  ✓ Revisar evaluation_results.xlsx con detalle
+  ✓ Si falla, seguir recomendaciones de failure_analysis.json
+  ✓ Validar que todas las métricas críticas pasen
 
-Para mejores fotos:
+INFERENCIA:
+  ✓ Usar inference.py para predicciones de producción
+  ✓ Batch predictions para múltiples imágenes
+  ✓ Verificar latencia con test_ready.bat
+  ✓ Monitorear memoria con psutil
+
+FOTOS:
   ✓ Iluminación clara y uniforme
-  ✓ Hoja debe ocupar la mayor parte
-  ✓ Fondo simple
-  ✓ JPG, JPEG o PNG
+  ✓ Hoja debe ocupar >70% de la imagen
+  ✓ Fondo simple (sin distracciones)
+  ✓ Formato: JPG, JPEG o PNG
+  ✓ Tamaño: >224x224 píxeles
 
 
-DOCUMENTACIÓN
+SOLUCIÓN DE PROBLEMAS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-README.md              Documentación general
-backend/README.md      API y endpoints
-frontend/README.md     Interfaz React
+"Modelo no encontrado":
+  ► Ejecutar: train.bat
+  ► Verificar: models/best_model.keras existe
+
+"Out of memory durante entrenamiento":
+  ► Reducir BATCH_SIZE en backend/config.py
+  ► Cerrar otras aplicaciones
+  ► Usar GPU si disponible
+
+"Métricas no cumplen requisitos":
+  ► Revisar: metrics/failure_analysis.json
+  ► Seguir recomendaciones prioritarias
+  ► Ajustar hiperparámetros en config.py
+  ► Re-entrenar con train.bat
+
+"Dataset not found":
+  ► Verificar: dataset/raw/New Plant Diseases Dataset(Augmented)/
+  ► Descargar de Kaggle si falta
+  ► URL: kaggle.com/datasets/vipoooool/new-plant-diseases-dataset
+
+"Puerto ocupado (5000 o 3000)":
+  ► Cerrar aplicaciones que usen esos puertos
+  ► Cambiar puerto en app.py (backend)
+  ► Cambiar puerto en package.json (frontend)
+
+"CORS error en frontend":
+  ► pip install flask-cors
+  ► Verificar CORS habilitado en app.py
+
+"Inference muy lenta":
+  ► Verificar GPU disponible
+  ► Usar predict_batch() en inference.py
+  ► Revisar latencia con test_ready.bat
+
+"Validación falla inesperadamente":
+  ► Ejecutar: python backend/scripts/validate_paso*.py
+  ► Revisar errores específicos reportados
+  ► Verificar estructura de archivos
 
 
-PRÓXIMOS PASOS
+DOCUMENTACIÓN ADICIONAL
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Después de entrenar:
+README.md
+  Documentación principal, arquitectura, instalación
 
-1. Probar modelo:
-   ► python backend/scripts/predict.py
+MODEL_REQUIREMENTS.md
+  Requisitos detallados del modelo, umbrales, métricas
 
-2. Iniciar app:
-   ► python backend/app.py
+GUIA_SCRIPTS.md
+  Guía completa de todos los scripts disponibles
 
-3. Ver visualizaciones:
-   ► Abre models/visualizations/
+backend/README.md
+  Documentación del backend, API endpoints
 
-4. Re-entrenar con ajustes:
-   ► python backend/scripts/quick_train.py
+frontend/README.md
+  Documentación del frontend, componentes React
+
+
+WORKFLOW COMPLETO (DE INICIO A FIN)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. INSTALACIÓN INICIAL (una sola vez):
+   cd backend
+   pip install -r requirements.txt
+   
+   cd ../frontend
+   npm install
+
+2. ENTRENAMIENTO:
+   train.bat                    # Paso 2: Entrenar modelo
+
+3. EVALUACIÓN:
+   evaluate.bat                 # Pasos 3-5: Evaluar, validar, analizar
+
+4. TESTING:
+   test_ready.bat              # Paso 6: Verificar readiness
+
+5. DEPLOYMENT:
+   start-backend.bat           # Iniciar API
+   start-frontend.bat          # Iniciar interfaz
+   
+6. USO:
+   Abrir: http://localhost:3000
+   Subir imagen de hoja
+   Ver predicción y recomendaciones
+
+
+ESTADÍSTICAS DEL PROYECTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Líneas de código:          ~15,000+
+Scripts Python:            20+
+Componentes React:         15+
+Dataset:                   28,428 imágenes
+Clases:                    15 enfermedades
+Cultivos:                  4 especies
+Parámetros del modelo:     ~3.5M
+Validaciones automatizadas: 118 checks
+Precisión objetivo:        ≥75% Macro F1
+Latencia objetivo:         <500ms por imagen
+Memory footprint:          <500MB
+
+
+PRÓXIMOS PASOS DESPUÉS DE ENTRENAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Revisar métricas:
+   ► Abrir: metrics/evaluation_results.xlsx
+   ► Verificar: Macro F1 ≥ 75%
+
+2. Validar estado:
+   ► Revisar: metrics/validation_report.json
+   ► Objetivo: Estado = "APROBADO"
+
+3. Si falla validación:
+   ► Revisar: metrics/failure_analysis.json
+   ► Seguir recomendaciones prioritarias
+   ► Ajustar config.py
+   ► Re-entrenar
+
+4. Testing de readiness:
+   ► Ejecutar: test_ready.bat
+   ► Verificar: Todos los tests pasan
+
+5. Probar inferencia:
+   ► python backend/scripts/inference.py --image test.jpg
+   ► Verificar: Latencia <500ms
+
+6. Deployment:
+   ► start-backend.bat
+   ► start-frontend.bat
+   ► Probar en navegador
 
 
 ═══════════════════════════════════════════════════════════════
-UPTC - Inteligencia Computacional - 2024
+UPTC - Inteligencia Computacional - 2025
+Sistema de Detección de Enfermedades en Plantas
+Pipeline Completo de 6 Pasos con Validación Automatizada
 ═══════════════════════════════════════════════════════════════

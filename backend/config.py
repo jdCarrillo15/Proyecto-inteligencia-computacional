@@ -114,29 +114,32 @@ AUGMENTATION_CONFIG = {
 # CONFIGURACIÓN DE MÉTRICAS Y UMBRALES DEL MODELO
 # ============================================================================
 
-# Umbrales de rendimiento (basados en MODEL_REQUIREMENTS.md)
+# Umbrales de rendimiento (basados en requisitos Fase 2)
 PERFORMANCE_THRESHOLDS = {
-    # Mínimos aceptables (rechazo del modelo si no se cumplen)
+    # Umbrales OBLIGATORIOS (Paso 4)
+    'min_macro_f1': 0.75,  # 75% - OBLIGATORIO
+    'min_overall_accuracy': 0.75,  # 75% - OBLIGATORIO
+    'min_critical_recall': 0.80,  # 80% - OBLIGATORIO para clases críticas
+    
+    # Umbrales mínimos por clase (rechazo si no se cumplen)
     'min_recall_per_class': 0.60,  # 60% - umbral de rechazo
     'min_precision_per_class': 0.60,  # 60% - umbral de rechazo
     'min_f1_per_class': 0.60,  # 60% - umbral de rechazo
-    'min_macro_f1': 0.70,  # 70% - umbral crítico
-    'min_overall_accuracy': 0.75,  # 75% - umbral crítico
     
     # Objetivos (cumplimiento esperado)
     'target_recall_per_class': 0.70,  # 70% - objetivo por clase
     'target_precision_per_class': 0.65,  # 65% - objetivo por clase
     'target_f1_per_class': 0.67,  # 67% - objetivo por clase
-    'target_macro_f1': 0.75,  # 75% - objetivo principal
-    'target_weighted_f1': 0.78,  # 78% - objetivo secundario
-    'target_overall_accuracy': 0.80,  # 80% - objetivo de accuracy
+    'target_macro_f1': 0.80,  # 80% - objetivo principal
+    'target_weighted_f1': 0.82,  # 82% - objetivo secundario
+    'target_overall_accuracy': 0.85,  # 85% - objetivo de accuracy
     
     # Ideales (excelencia)
     'ideal_recall_per_class': 0.85,  # 85% - rendimiento ideal
     'ideal_precision_per_class': 0.80,  # 80% - rendimiento ideal
     'ideal_f1_per_class': 0.82,  # 82% - rendimiento ideal
-    'ideal_macro_f1': 0.85,  # 85% - rendimiento ideal
-    'ideal_overall_accuracy': 0.90,  # 90% - rendimiento ideal
+    'ideal_macro_f1': 0.90,  # 90% - rendimiento ideal
+    'ideal_overall_accuracy': 0.95,  # 95% - rendimiento ideal
 }
 
 # Clases críticas que requieren mayor recall (enfermedades de alto impacto)
@@ -146,9 +149,9 @@ CRITICAL_DISEASE_CLASSES = [
     'Corn_(maize)___Northern_Leaf_Blight',  # Tizón del norte - propagación rápida
 ]
 
-# Umbral especial para clases críticas
-CRITICAL_DISEASE_MIN_RECALL = 0.75  # 75% mínimo
-CRITICAL_DISEASE_TARGET_RECALL = 0.80  # 80% objetivo
+# Umbral especial para clases críticas (PASO 4 - OBLIGATORIO)
+CRITICAL_DISEASE_MIN_RECALL = 0.80  # 80% mínimo - OBLIGATORIO
+CRITICAL_DISEASE_TARGET_RECALL = 0.85  # 85% objetivo
 
 # Prioridad de métricas (para optimización)
 METRIC_PRIORITY = 'macro_f1'  # Opciones: 'macro_f1', 'recall', 'accuracy'
