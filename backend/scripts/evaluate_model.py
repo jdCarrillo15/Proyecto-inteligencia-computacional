@@ -427,9 +427,9 @@ def main():
         # 7. Generar visualizaciones detalladas
         evaluator.generate_detailed_visualizations(X_test, y_test, class_names)
         
-        # Resumen final
+        # Resumen de evaluación
         print("\n" + "=" * 80)
-        print("✅ EVALUACIÓN COMPLETADA")
+        print("✅ EVALUACIÓN COMPLETADA (PASO 3)")
         print("=" * 80)
         print(f"\n📁 Archivos generados:")
         print("  - metrics/evaluation_results.json (métricas en JSON)")
@@ -445,10 +445,40 @@ def main():
         print(f"  - Macro F1: {gm['macro_f1']:.4f}")
         print(f"  - Weighted F1: {gm['weighted_f1']:.4f}")
         
-        print("\n💡 Próximos pasos:")
-        print("  1. Revisar metrics/evaluation_results.xlsx")
-        print("  2. Analizar visualizaciones en models/visualizations/")
-        print("  3. Identificar clases con bajo recall y mejorar dataset")
+        # 8. PASO 4: Validación automática contra requisitos
+        print("\n" + "=" * 80)
+        print("🔍 EJECUTANDO VALIDACIÓN AUTOMÁTICA (PASO 4)")
+        print("=" * 80)
+        
+        try:
+            # Importar y ejecutar validador
+            from scripts.validate_requirements import RequirementsValidator
+            
+            validator = RequirementsValidator()
+            approved = validator.run_validation()
+            
+            if approved:
+                print("\n" + "=" * 80)
+                print("✅ EVALUACIÓN Y VALIDACIÓN COMPLETADAS EXITOSAMENTE")
+                print("=" * 80)
+                return 0
+            else:
+                print("\n" + "=" * 80)
+                print("⚠️  EVALUACIÓN COMPLETADA - REQUIERE ACCIONES")
+                print("=" * 80)
+                print("\n💡 Revisa el reporte de validación en:")
+                print("  - metrics/validation_report.json")
+                return 1
+                
+        except ImportError:
+            print(f"\n⚠️  No se pudo ejecutar validación automática")
+            print("   Ejecuta manualmente: python backend/scripts/validate_requirements.py")
+            
+            print("\n💡 Próximos pasos:")
+            print("  1. Revisar metrics/evaluation_results.xlsx")
+            print("  2. Analizar visualizaciones en models/visualizations/")
+            print("  3. Ejecutar validación: python backend/scripts/validate_requirements.py")
+            return 0
         
     except Exception as e:
         print(f"\n❌ Error durante evaluación: {e}")
