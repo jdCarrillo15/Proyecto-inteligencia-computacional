@@ -250,7 +250,7 @@ class PlantDiseaseClassifier:
         print(f"\n✅ Modelo construido: {model.count_params():,} parámetros")
         return model
     
-    def train_with_arrays(self, X_train, y_train, X_test, y_test, 
+    def train_with_arrays(self, X_train, y_train, X_val, y_val, X_test, y_test, 
                          epochs=20, batch_size=64):
         """
         Entrena el modelo con arrays numpy (datos desde cache).
@@ -258,6 +258,8 @@ class PlantDiseaseClassifier:
         Args:
             X_train: Array de imágenes de entrenamiento
             y_train: Labels de entrenamiento (one-hot)
+            X_val: Array de imágenes de validación
+            y_val: Labels de validación (one-hot)
             X_test: Array de imágenes de prueba
             y_test: Labels de prueba (one-hot)
             epochs: Número de épocas
@@ -267,9 +269,10 @@ class PlantDiseaseClassifier:
             History object
         """
         print("\n" + "=" * 60)
-        print("🎯 INICIANDO ENTRENAMIENTO")
+        print("🎯 INICIANDO ENTRENAMIENTO (FASE 1 - SPLIT 70/15/15)")
         print("=" * 60)
         print(f"  - Muestras train: {len(X_train):,}")
+        print(f"  - Muestras val: {len(X_val):,}")
         print(f"  - Muestras test: {len(X_test):,}")
         print(f"  - Batch size: {batch_size}")
         print(f"  - Épocas: {epochs}")
@@ -308,7 +311,7 @@ class PlantDiseaseClassifier:
             X_train, y_train,
             batch_size=batch_size,
             epochs=epochs,
-            validation_data=(X_test, y_test),
+            validation_data=(X_val, y_val),
             callbacks=callbacks,
             verbose=1
         )
@@ -319,7 +322,7 @@ class PlantDiseaseClassifier:
         
         return self.history
     
-    def fine_tune(self, X_train, y_train, X_test, y_test, 
+    def fine_tune(self, X_train, y_train, X_val, y_val, X_test, y_test, 
                   epochs_phase2=15, batch_size=64):
         """
         Fine-tuning del modelo con descongelamiento gradual (solo si usa transfer learning).
@@ -423,7 +426,7 @@ class PlantDiseaseClassifier:
             X_train, y_train,
             batch_size=batch_size,
             epochs=epochs_2a,
-            validation_data=(X_test, y_test),
+            validation_data=(X_val, y_val),
             callbacks=callbacks_2a,
             verbose=1
         )
@@ -504,7 +507,7 @@ class PlantDiseaseClassifier:
             X_train, y_train,
             batch_size=batch_size,
             epochs=epochs_2b,
-            validation_data=(X_test, y_test),
+            validation_data=(X_val, y_val),
             callbacks=callbacks_2b,
             verbose=1
         )
@@ -868,19 +871,20 @@ def main():
         'balance': False
     }
     
-    print("\n📂 Cargando datos desde cache...")
-    train_data = cache.load(RAW_DATASET, config, 'train')
-    test_data = cache.load(RAW_DATASET, config, 'test')
+    print("\n📂 Cargando datos desde cache (split 70/15/15)...")
+    train_data = cache.load('train')
+    val_data = cache.load('val')
+    test_data = cache.load('test')
     
-    if not train_data or not test_data:
-        print("\n⚠️  Cache no encontrado. Preparando datos automáticamente...")
+    if not train_data or not val_data or not test_data:
+        print("\n⚠️  Cache no encontrado o incompleto. Preparando datos automáticamente...")
         print("=" * 70)
         
         # Importar y ejecutar preparación de datos
         from prepare_dataset import DatasetProcessor
         
         processor = DatasetProcessor(RAW_DATASET, PROCESSED_DATASET, IMG_SIZE)
-        result = processor.prepare_optimized(use_cache=True, force_reprocess=False)
+        result = processor.prepare_dataset(use_cache=True, force_reprocess=False)
         
         if not result:
             print("\n❌ Error preparando datos. Verifica que el dataset exista en:")
@@ -888,20 +892,29 @@ def main():
             return
         
         # Cargar datos recién preparados
-        train_data = cache.load(RAW_DATASET, config, 'train')
-        test_data = cache.load(RAW_DATASET, config, 'test')
+        train_data = cache.load('train')
+        val_data = cache.load('val')
+        test_data = cache.load('test')
         
-        if not train_data or not test_data:
+        if not train_data or not val_data or not test_data:
             print("\n❌ Error cargando datos preparados")
             return
     
-    X_train, y_train, class_names = train_data
-    X_test, y_test, _ = test_data
+    X_train = train_data['X']
+    y_train = train_data['y']
+    class_names = train_data['class_names']
+    
+    X_val = val_data['X']
+    y_val = val_data['y']
+    
+    X_test = test_data['X']
+    y_test = test_data['y']
     
     num_classes = len(class_names)
     
-    print(f"\n✅ Datos cargados:")
+    print(f"\n✅ Datos cargados (split 70/15/15):")
     print(f"  - X_train: {X_train.shape}")
+    print(f"  - X_val: {X_val.shape}")
     print(f"  - X_test: {X_test.shape}")
     print(f"  - Clases: {class_names}")
     
@@ -935,6 +948,7 @@ def main():
     
     classifier.train_with_arrays(
         X_train, y_train,
+        X_val, y_val,
         X_test, y_test,
         epochs=EPOCHS_PHASE1,
         batch_size=BATCH_SIZE
@@ -944,6 +958,7 @@ def main():
     if DO_FINE_TUNING and USE_TRANSFER_LEARNING:
         classifier.fine_tune(
             X_train, y_train,
+            X_val, y_val,
             X_test, y_test,
             epochs=EPOCHS_PHASE2,
             batch_size=BATCH_SIZE

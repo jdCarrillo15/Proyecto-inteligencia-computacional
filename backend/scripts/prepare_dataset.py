@@ -1,272 +1,171 @@
+#!/usr/bin/env python3
 """
-Script de preparación de datos con sistema de cache.
-Procesa el dataset y lo guarda para entrenamientos futuros.
+Script de Preparación de Dataset - Fase 2 Paso 1
+================================================
+
+Funcionalidades:
+✅ Split automático 70/15/15 (train/val/test) con estratificación
+✅ Augmentation agresiva solo en training set
+✅ Normalización ImageNet (mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+✅ Cache PKL para cargas rápidas
+✅ Verificación de integridad de splits
+✅ Reporte detallado de distribución
+
+Objetivos de split:
+- Train: 19,899 imágenes (70%)
+- Val: 4,264 imágenes (15%)
+- Test: 4,265 imágenes (15%)
+- Total: 28,428 imágenes
+- Balance: ≤1.18:1 (mantener en todos los splits)
 """
 
 import os
+import sys
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 from pathlib import Path
-from PIL import Image
-import sys
+from datetime import datetime
+import json
 
-# Agregar el directorio backend al path para imports
-backend_dir = Path(__file__).parent.parent
-sys.path.insert(0, str(backend_dir))
+# Agregar el directorio backend al path para importar módulos
+backend_dir = Path(__file__).resolve().parent.parent
+sys.path.append(str(backend_dir))
 
-from utils.data_cache import DataCache, create_data_arrays_from_directory
-from utils.aggressive_augmenter import AggressiveAugmenter
-from utils.model_metrics import calculate_class_weights
-from config import IMG_SIZE
+from utils.data_cache import DataCache
+from utils.manage_cache import AggressiveAugmenter, calculate_class_weights
 
 
 class DatasetProcessor:
-    """Procesador de dataset con sistema de cache PKL y balanceo de clases."""
+    """Procesador de dataset con split 70/15/15 y verificación de integridad."""
     
-    def __init__(self, raw_dataset_path, processed_path, img_size=IMG_SIZE, 
+    # 15 clases objetivo del proyecto
+    TARGET_CLASSES = [
+        'Apple___Apple_scab',
+        'Apple___Black_rot',
+        'Apple___Cedar_apple_rust',
+        'Apple___healthy',
+        'Corn_(maize)___Common_rust_',
+        'Corn_(maize)___healthy',
+        'Corn_(maize)___Northern_Leaf_Blight',
+        'Potato___Early_blight',
+        'Potato___healthy',
+        'Potato___Late_blight',
+        'Tomato___Bacterial_spot',
+        'Tomato___Early_blight',
+        'Tomato___healthy',
+        'Tomato___Late_blight',
+        'Tomato___Leaf_Mold'
+    ]
+    
+    # Estadísticas de normalización ImageNet
+    IMAGENET_MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
+    IMAGENET_STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
+    
+    def __init__(self, raw_dataset_path, processed_path, img_size=(224, 224), 
                  apply_balancing=True, target_samples=2500):
         """
-        Inicializa el procesador.
+        Inicializa el procesador de dataset.
         
         Args:
-            raw_dataset_path: Ruta al dataset original
-            processed_path: Ruta donde se guardará el dataset procesado
-            img_size: Tamaño de las imágenes
-            apply_balancing: Si True, aplica oversampling para balancear clases
-            target_samples: Número objetivo de muestras por clase después de balanceo
+            raw_dataset_path: Ruta al dataset raw
+            processed_path: Ruta para guardar datos procesados
+            img_size: Tamaño de las imágenes (ancho, alto)
+            apply_balancing: Si aplicar balanceo de clases
+            target_samples: Muestras objetivo por clase para balanceo
         """
         self.raw_dataset_path = Path(raw_dataset_path)
         self.processed_path = Path(processed_path)
         self.img_size = img_size
-        self.cache = DataCache()
         self.apply_balancing = apply_balancing
         self.target_samples = target_samples
+        self.classes = self.TARGET_CLASSES
         
-        # Inicializar augmentador agresivo si se requiere balanceo
-        if self.apply_balancing:
-            self.augmenter = AggressiveAugmenter(
-                img_size=img_size,
-                target_samples_per_class=target_samples
-            )
+        # Crear directorio de salida
+        self.processed_path.mkdir(parents=True, exist_ok=True)
         
-        # Detectar automáticamente las clases del dataset
-        self.classes = self._detect_classes()
+        # Inicializar cache y augmenter
+        self.cache = DataCache()
+        self.augmenter = AggressiveAugmenter()
         
-        print(f"📁 Dataset: {self.raw_dataset_path}")
-        print(f"📊 Clases detectadas: {len(self.classes)}")
-        print(f"⚖️  Balanceo de clases: {'Activado' if apply_balancing else 'Desactivado'}")
+        print(f"\n🔧 Configuración del Procesador:")
+        print(f"  - Dataset raw: {self.raw_dataset_path}")
+        print(f"  - Dataset procesado: {self.processed_path}")
+        print(f"  - Tamaño de imagen: {img_size[0]}x{img_size[1]}")
+        print(f"  - Balanceo: {'✅ Activado' if apply_balancing else '❌ Desactivado'}")
+        print(f"  - Clases objetivo: {len(self.classes)}")
     
-    def _detect_classes(self):
-        """Detecta automáticamente las clases del dataset."""
-        # Buscar en la estructura del dataset
-        train_path = self.raw_dataset_path / "New Plant Diseases Dataset(Augmented)" / "train"
-        
-        if train_path.exists():
-            # Obtener todas las clases de enfermedades específicas
-            all_classes = sorted([d.name for d in train_path.iterdir() if d.is_dir()])
-            
-            # Filtrar solo las clases específicas que queremos (15 enfermedades)
-            target_classes = [
-                'Apple___Apple_scab',
-                'Apple___Black_rot',
-                'Apple___Cedar_apple_rust',
-                'Apple___healthy',
-                'Corn_(maize)___Common_rust_',
-                'Corn_(maize)___healthy',
-                'Corn_(maize)___Northern_Leaf_Blight',
-                'Potato___Early_blight',
-                'Potato___healthy',
-                'Potato___Late_blight',
-                'Tomato___Bacterial_spot',
-                'Tomato___Early_blight',
-                'Tomato___healthy',
-                'Tomato___Late_blight',
-                'Tomato___Leaf_Mold'
-            ]
-            
-            # Filtrar solo las clases que existen en el dataset
-            filtered_classes = [cls for cls in target_classes if cls in all_classes]
-            
-            if filtered_classes:
-                return filtered_classes
-        
-        # Si no existe, buscar directamente en raw
-        if self.raw_dataset_path.exists():
-            classes = sorted([d.name for d in self.raw_dataset_path.iterdir() 
-                            if d.is_dir() and not d.name.startswith('.')])
-            if classes:
-                return classes
-        
-        # Default - 15 clases específicas
-        return [
-            'Apple___Apple_scab',
-            'Apple___Black_rot',
-            'Apple___Cedar_apple_rust',
-            'Apple___healthy',
-            'Corn_(maize)___Common_rust_',
-            'Corn_(maize)___healthy',
-            'Corn_(maize)___Northern_Leaf_Blight',
-            'Potato___Early_blight',
-            'Potato___healthy',
-            'Potato___Late_blight',
-            'Tomato___Bacterial_spot',
-            'Tomato___Early_blight',
-            'Tomato___healthy',
-            'Tomato___Late_blight',
-            'Tomato___Leaf_Mold'
-        ]
-    
-    def prepare_optimized(self, use_cache=True, force_reprocess=False):
+    def prepare_dataset(self, use_cache=True, force_reprocess=False):
         """
-        Prepara el dataset de forma optimizada usando cache y balanceo.
+        Prepara el dataset con split 70/15/15 y todas las funcionalidades.
         
         Args:
-            use_cache: Si True, usa cache PKL si está disponible
-            force_reprocess: Si True, fuerza el reprocesamiento aunque exista cache
+            use_cache: Usar cache si está disponible
+            force_reprocess: Forzar reprocesamiento incluso si hay cache
             
         Returns:
-            tuple: (X_train, y_train, X_test, y_test, class_names, class_weights)
+            tuple: (X_train, y_train, X_val, y_val, X_test, y_test, class_names, class_weights)
         """
-        config = {
-            'img_size': self.img_size,
-            'classes': self.classes,
-            'balance': self.apply_balancing,
-            'target_samples': self.target_samples if self.apply_balancing else None
-        }
+        print("\n" + "=" * 80)
+        print("🚀 FASE 2 - PASO 1: PREPARACIÓN DE DATASET CON SPLIT 70/15/15")
+        print("=" * 80)
         
         # Intentar cargar desde cache
         if use_cache and not force_reprocess:
-            print("\n🔍 Verificando cache existente...")
-            
-            train_cache = self.cache.load(str(self.raw_dataset_path), config, 'train')
-            test_cache = self.cache.load(str(self.raw_dataset_path), config, 'test')
-            
-            if train_cache and test_cache:
-                X_train, y_train, class_names = train_cache
-                X_test, y_test, _ = test_cache
-                
-                # Validar que el cache tenga datos de test válidos
-                if len(X_test) > 0:
-                    print("\n✅ ¡CACHE ENCONTRADO! Cargando datos procesados...")
-                    print(f"\n📊 Datos cargados desde cache:")
-                    print(f"  - Entrenamiento: {X_train.shape[0]} muestras")
-                    print(f"  - Prueba: {X_test.shape[0]} muestras")
-                    print(f"  - Clases: {class_names}")
-                    
-                    # Calcular class weights
-                    class_weights = calculate_class_weights(y_train, len(class_names))
-                    
-                    return X_train, y_train, X_test, y_test, class_names, class_weights
-                else:
-                    print("⚠️  Cache encontrado pero test está vacío. Reprocesando con división train/test...")
-                    # Limpiar cache inválido
-                    cache_key = self.cache._get_cache_key(str(self.raw_dataset_path), config)
-                    self.cache.clear(cache_key)
-            else:
-                print("⚠️  Cache no encontrado. Procesando dataset...")
+            cached_data = self._load_from_cache()
+            if cached_data:
+                return cached_data
         
         # Procesar dataset desde cero
-        print("\n" + "=" * 60)
-        print("🔄 PROCESAMIENTO DE DATASET")
-        print("=" * 60)
-        print(f"\n📊 CONFIGURACIÓN:")
-        print(f"  - Resolución: {self.img_size[0]}x{self.img_size[1]} ({self.img_size[0]*self.img_size[1]:,} píxeles)")
-        print(f"  - Clases objetivo: {len(self.classes)}")
+        print("\n📦 Procesando dataset desde cero...")
         
-        # Estimación de tamaño de cache
-        pixels = self.img_size[0] * self.img_size[1]
-        estimated_mb = (pixels * 3 * 15000) / (1024 * 1024)  # Estimación para ~15k imágenes
-        print(f"\n💾 Tamaño estimado de cache: ~{estimated_mb:.0f} MB")
-        if pixels > 20000:  # Mayor a ~140x140
-            print(f"  ⏱️  Alta resolución - La generación puede tardar 15-25 min")
-        
-        # Buscar directorios de train y test
+        # 1. Buscar y cargar directorio de train
         train_dir = self._find_train_dir()
-        test_dir = self._find_test_dir()
-        
         if not train_dir:
-            print("❌ Error: No se encontró directorio de entrenamiento")
-            print("\nBusca el dataset en alguna de estas ubicaciones:")
-            print("  - dataset/raw/New Plant Diseases Dataset(Augmented)/train")
-            print("  - dataset/raw/train")
-            print("  - dataset/processed/train")
+            print("❌ No se encontró directorio de entrenamiento")
             return None
         
-        print(f"\n📂 Train: {train_dir}")
-        if test_dir:
-            print(f"📂 Test: {test_dir}")
-        else:
-            print(f"📂 Test: No encontrado (se dividirá train en 80/20)")
+        # 2. Cargar todas las imágenes
+        X_all, y_all, class_names = self._load_images(train_dir)
         
-        # Cargar y procesar imágenes
-        print("\n⏳ Procesando imágenes...")
-        X_train, y_train, class_names = self._load_images(train_dir)
-        
-        if len(X_train) == 0:
-            print("❌ Error: No se cargaron imágenes del directorio de entrenamiento")
+        if len(X_all) == 0:
+            print("❌ No se cargaron imágenes")
             return None
         
-        # Aplicar balanceo ANTES de dividir train/test si está activado
-        if self.apply_balancing:
-            # Contar muestras por clase ANTES del balanceo
-            y_train_indices = np.argmax(y_train, axis=1)
-            class_counts = {class_names[i]: np.sum(y_train_indices == i) for i in range(len(class_names))}
-            
-            print(f"\n⚖️  Aplicando balanceo de clases...")
-            X_train, y_train = self.augmenter.balance_dataset(X_train, y_train, class_counts)
+        print(f"\n📊 Total de imágenes cargadas: {len(X_all)}")
         
-        # Cargar test o dividir train
-        if test_dir:
-            X_test, y_test, _ = self._load_images(test_dir)
-            # Si test está vacío, dividir train
-            if len(X_test) == 0:
-                print("\n⚠️  Test vacío, dividiendo datos de train (80/20)...")
-                from sklearn.model_selection import train_test_split
-                X_train, X_test, y_train, y_test = train_test_split(
-                    X_train, y_train, test_size=0.2, random_state=42, stratify=np.argmax(y_train, axis=1)
-                )
-        else:
-            # No hay directorio test, dividir train
-            print("\n⚠️  Directorio test no encontrado, dividiendo datos de train (80/20)...")
-            from sklearn.model_selection import train_test_split
-            X_train, X_test, y_train, y_test = train_test_split(
-                X_train, y_train, test_size=0.2, random_state=42, stratify=np.argmax(y_train, axis=1)
-            )
+        # 3. Aplicar normalización ImageNet ANTES de cualquier split
+        print("\n🎨 Aplicando normalización ImageNet...")
+        X_all = self._apply_imagenet_normalization(X_all)
+        print("  ✅ Normalización aplicada (mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])")
         
-        # Guardar en cache para futuros entrenamientos
+        # 4. Aplicar balanceo ANTES del split (si está activado)
+        if self.apply_balancing and self.target_samples > 0:
+            print(f"\n⚖️  Balanceando clases (objetivo: {self.target_samples} muestras/clase)...")
+            X_all, y_all = self._balance_dataset(X_all, y_all, class_names)
+        
+        # 5. Realizar split 70/15/15 con estratificación
+        X_train, X_val, X_test, y_train, y_val, y_test = self._split_dataset(X_all, y_all)
+        
+        # 6. Aplicar augmentation SOLO al training set
+        print("\n🔄 Aplicando augmentation agresiva al training set...")
+        X_train_aug, y_train_aug = self._augment_training_set(X_train, y_train, class_names)
+        
+        # 7. Verificar integridad de los splits
+        self._verify_split_integrity(X_train_aug, y_train_aug, X_val, y_val, X_test, y_test, class_names)
+        
+        # 8. Generar reporte de distribución
+        self._generate_distribution_report(y_train_aug, y_val, y_test, class_names)
+        
+        # 9. Calcular class weights
+        class_weights = calculate_class_weights(y_train_aug)
+        
+        # 10. Guardar en cache
         if use_cache:
-            print("\n💾 Guardando en cache para futuros entrenamientos...")
-            
-            # Calcular tamaños
-            train_size_mb = (X_train.nbytes + y_train.nbytes) / (1024 * 1024)
-            test_size_mb = (X_test.nbytes + y_test.nbytes) / (1024 * 1024)
-            
-            print(f"  - Train: {X_train.shape[0]} muestras (~{train_size_mb:.1f} MB)")
-            self.cache.save(X_train, y_train, class_names, 
-                          str(self.raw_dataset_path), config, 'train')
-            
-            print(f"  - Test: {X_test.shape[0]} muestras (~{test_size_mb:.1f} MB)")
-            self.cache.save(X_test, y_test, class_names, 
-                          str(self.raw_dataset_path), config, 'test')
-            
-            print(f"  ✅ Cache guardado: {train_size_mb + test_size_mb:.1f} MB total")
+            self._save_to_cache(X_train_aug, y_train_aug, X_val, y_val, X_test, y_test, class_names)
         
-        # Calcular class weights para entrenamiento
-        print(f"\n⚖️  Calculando pesos de clase...")
-        class_weights = calculate_class_weights(y_train, len(class_names))
+        print("\n✅ Preparación completada exitosamente")
         
-        print(f"\n📊 Pesos de clase calculados:")
-        for idx, weight in class_weights.items():
-            print(f"  {class_names[idx]:<45} Weight: {weight:.3f}")
-        
-        print(f"\n✅ Procesamiento completado:")
-        print(f"  - Entrenamiento: {X_train.shape[0]} muestras")
-        print(f"  - Prueba: {X_test.shape[0]} muestras")
-        print(f"  - Clases: {class_names}")
-        
-        return X_train, y_train, X_test, y_test, class_names, class_weights
+        return X_train_aug, y_train_aug, X_val, y_val, X_test, y_test, class_names, class_weights
     
     def _find_train_dir(self):
         """Encuentra el directorio de entrenamiento."""
@@ -276,32 +175,18 @@ class DatasetProcessor:
             self.processed_path / "train"
         ]
         
+        print("\n🔍 Buscando directorio de entrenamiento...")
         for path in possible_paths:
             if path.exists():
+                print(f"  ✅ Encontrado: {path}")
                 return path
         
-        return None
-    
-    def _find_test_dir(self):
-        """Encuentra el directorio de prueba."""
-        possible_paths = [
-            self.raw_dataset_path / "New Plant Diseases Dataset(Augmented)" / "test",
-            self.raw_dataset_path / "test",
-            self.processed_path / "test"
-        ]
-        
-        for path in possible_paths:
-            if path.exists():
-                # Verificar que tenga subdirectorios
-                subdirs = [d for d in path.iterdir() if d.is_dir()]
-                if subdirs:
-                    return path
-        
+        print("  ❌ No se encontró ningún directorio de entrenamiento")
         return None
     
     def _load_images(self, directory):
         """
-        Carga imágenes de forma rápida y eficiente.
+        Carga imágenes desde un directorio con subdirectorios por clase.
         
         Args:
             directory: Directorio con subdirectorios por clase
@@ -314,20 +199,17 @@ class DatasetProcessor:
         # Obtener subdirectorios (clases)
         all_class_dirs = sorted([d for d in directory.iterdir() if d.is_dir()])
         
-        # Usar las clases específicas tal como están en el dataset
+        # Filtrar solo las clases objetivo
         class_groups = {}
         for class_dir in all_class_dirs:
             dir_name = class_dir.name
-            
-            # Buscar coincidencia exacta con las clases objetivo
             if dir_name in self.classes:
-                class_groups[dir_name] = [class_dir]
+                class_groups[dir_name] = class_dir
         
         X_list = []
         y_list = []
         class_names = sorted(class_groups.keys())
         
-        # Si no hay clases, retornar vacío
         if not class_names:
             print(f"\n⚠️  No se encontraron clases en {directory.name}")
             return np.array([]), np.array([]), []
@@ -335,43 +217,36 @@ class DatasetProcessor:
         print(f"\n📸 Cargando imágenes desde {directory.name}...")
         
         for class_idx, class_name in enumerate(class_names):
-            class_dirs = class_groups.get(class_name, [])
-            if not class_dirs:
-                continue
-            total_images = 0
+            class_dir = class_groups[class_name]
             
-            for class_dir in class_dirs:
-                # Obtener todas las imágenes
-                image_files = []
-                for ext in ['*.jpg', '*.jpeg', '*.png', '*.JPG', '*.JPEG', '*.PNG']:
-                    image_files.extend(list(class_dir.glob(ext)))
-                
-                # Limitar cantidad por clase si es necesario
-                max_per_class = 1000  # Ajusta según necesidad
-                image_files = image_files[:max_per_class]
-                
-                for img_path in image_files:
-                    try:
-                        # Cargar y procesar imagen
-                        img = cv2.imread(str(img_path))
-                        if img is None:
-                            continue
-                        
-                        # Convertir BGR a RGB
-                        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                        
-                        # Redimensionar
-                        img = cv2.resize(img, self.img_size)
-                        
-                        # Normalizar
-                        img = img.astype(np.float32) / 255.0
-                        
-                        X_list.append(img)
-                        y_list.append(class_idx)
-                        total_images += 1
-                    
-                    except Exception as e:
+            # Obtener todas las imágenes
+            image_files = []
+            for ext in ['*.jpg', '*.jpeg', '*.png', '*.JPG', '*.JPEG', '*.PNG']:
+                image_files.extend(list(class_dir.glob(ext)))
+            
+            total_images = 0
+            for img_path in image_files:
+                try:
+                    # Cargar imagen
+                    img = cv2.imread(str(img_path))
+                    if img is None:
                         continue
+                    
+                    # Convertir BGR a RGB
+                    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                    
+                    # Redimensionar
+                    img = cv2.resize(img, self.img_size)
+                    
+                    # Normalizar a [0, 1] (la normalización ImageNet se aplica después)
+                    img = img.astype(np.float32) / 255.0
+                    
+                    X_list.append(img)
+                    y_list.append(class_idx)
+                    total_images += 1
+                
+                except Exception as e:
+                    continue
             
             print(f"  ✅ {class_name}: {total_images} imágenes")
         
@@ -385,6 +260,339 @@ class DatasetProcessor:
         
         return X, y_onehot, class_names
     
+    def _apply_imagenet_normalization(self, X):
+        """
+        Aplica normalización ImageNet a las imágenes.
+        
+        Args:
+            X: Array de imágenes normalizadas a [0, 1]
+            
+        Returns:
+            X normalizado con estadísticas ImageNet
+        """
+        # X está en [0, 1], aplicar normalización ImageNet
+        X_normalized = (X - self.IMAGENET_MEAN) / self.IMAGENET_STD
+        return X_normalized
+    
+    def _balance_dataset(self, X, y, class_names):
+        """
+        Balancea el dataset usando augmentation.
+        
+        Args:
+            X: Imágenes
+            y: Labels one-hot
+            class_names: Nombres de clases
+            
+        Returns:
+            tuple: (X_balanced, y_balanced)
+        """
+        y_indices = np.argmax(y, axis=1)
+        class_counts = {class_names[i]: np.sum(y_indices == i) for i in range(len(class_names))}
+        
+        # Contar antes del balanceo
+        min_before = min(class_counts.values())
+        max_before = max(class_counts.values())
+        ratio_before = max_before / min_before if min_before > 0 else 0
+        
+        print(f"  📊 Antes del balanceo:")
+        print(f"     - Min: {min_before} muestras")
+        print(f"     - Max: {max_before} muestras")
+        print(f"     - Ratio: {ratio_before:.2f}:1")
+        
+        # Aplicar balanceo
+        X_balanced, y_balanced = self.augmenter.balance_dataset(X, y, class_counts)
+        
+        # Contar después del balanceo
+        y_balanced_indices = np.argmax(y_balanced, axis=1)
+        class_counts_after = {class_names[i]: np.sum(y_balanced_indices == i) for i in range(len(class_names))}
+        min_after = min(class_counts_after.values())
+        max_after = max(class_counts_after.values())
+        ratio_after = max_after / min_after if min_after > 0 else 0
+        
+        print(f"  📊 Después del balanceo:")
+        print(f"     - Min: {min_after} muestras")
+        print(f"     - Max: {max_after} muestras")
+        print(f"     - Ratio: {ratio_after:.2f}:1")
+        
+        return X_balanced, y_balanced
+    
+    def _split_dataset(self, X, y):
+        """
+        Divide el dataset en 70/15/15 (train/val/test) con estratificación.
+        
+        Args:
+            X: Imágenes
+            y: Labels one-hot
+            
+        Returns:
+            tuple: (X_train, X_val, X_test, y_train, y_val, y_test)
+        """
+        from sklearn.model_selection import train_test_split
+        
+        print("\n✂️  Dividiendo dataset (70% train / 15% val / 15% test)...")
+        
+        # Paso 1: Dividir en train (70%) y temp (30%)
+        X_train, X_temp, y_train, y_temp = train_test_split(
+            X, y,
+            test_size=0.3,  # 30% para val+test
+            random_state=42,
+            stratify=np.argmax(y, axis=1)
+        )
+        
+        # Paso 2: Dividir temp en val (50%) y test (50%)
+        # 50% de 30% = 15% cada uno
+        X_val, X_test, y_val, y_test = train_test_split(
+            X_temp, y_temp,
+            test_size=0.5,  # 50% de 30% = 15%
+            random_state=42,
+            stratify=np.argmax(y_temp, axis=1)
+        )
+        
+        total = len(X)
+        print(f"  ✅ Train: {len(X_train)} muestras ({len(X_train)/total*100:.1f}%)")
+        print(f"  ✅ Val: {len(X_val)} muestras ({len(X_val)/total*100:.1f}%)")
+        print(f"  ✅ Test: {len(X_test)} muestras ({len(X_test)/total*100:.1f}%)")
+        print(f"  📊 Total: {total} muestras")
+        
+        return X_train, X_val, X_test, y_train, y_val, y_test
+    
+    def _augment_training_set(self, X_train, y_train, class_names):
+        """
+        Aplica augmentation agresiva solo al training set.
+        
+        Args:
+            X_train: Imágenes de entrenamiento
+            y_train: Labels de entrenamiento
+            class_names: Nombres de clases
+            
+        Returns:
+            tuple: (X_train_aug, y_train_aug)
+        """
+        print(f"  📊 Training set antes de augmentation: {len(X_train)} muestras")
+        
+        # Aplicar augmentation para balancear
+        y_train_indices = np.argmax(y_train, axis=1)
+        class_counts = {class_names[i]: np.sum(y_train_indices == i) for i in range(len(class_names))}
+        
+        X_train_aug, y_train_aug = self.augmenter.balance_dataset(X_train, y_train, class_counts)
+        
+        print(f"  📊 Training set después de augmentation: {len(X_train_aug)} muestras")
+        print(f"  ✅ Augmentation completada")
+        
+        return X_train_aug, y_train_aug
+    
+    def _verify_split_integrity(self, X_train, y_train, X_val, y_val, X_test, y_test, class_names):
+        """
+        Verifica la integridad de los splits.
+        
+        Args:
+            X_train, y_train: Training data
+            X_val, y_val: Validation data
+            X_test, y_test: Test data
+            class_names: Nombres de clases
+        """
+        print("\n🔍 VERIFICACIÓN DE INTEGRIDAD DE SPLITS")
+        print("=" * 60)
+        
+        # 1. Verificar totales
+        total = len(X_train) + len(X_val) + len(X_test)
+        print(f"\n1️⃣  Total de muestras:")
+        print(f"   - Train: {len(X_train)}")
+        print(f"   - Val: {len(X_val)}")
+        print(f"   - Test: {len(X_test)}")
+        print(f"   - TOTAL: {total}")
+        print(f"   ✅ Verificación de totales completada")
+        
+        # 2. Verificar que cada split tiene todas las clases
+        y_train_indices = np.argmax(y_train, axis=1)
+        y_val_indices = np.argmax(y_val, axis=1)
+        y_test_indices = np.argmax(y_test, axis=1)
+        
+        train_classes = set(y_train_indices)
+        val_classes = set(y_val_indices)
+        test_classes = set(y_test_indices)
+        
+        print(f"\n2️⃣  Clases por split:")
+        print(f"   - Train: {len(train_classes)}/{len(class_names)} clases")
+        print(f"   - Val: {len(val_classes)}/{len(class_names)} clases")
+        print(f"   - Test: {len(test_classes)}/{len(class_names)} clases")
+        
+        if len(train_classes) == len(val_classes) == len(test_classes) == len(class_names):
+            print(f"   ✅ Todas las clases representadas en todos los splits")
+        else:
+            print(f"   ⚠️  Algunas clases faltantes en algún split")
+        
+        # 3. Verificar balance en cada split
+        print(f"\n3️⃣  Balance de clases:")
+        
+        for split_name, y_indices in [('Train', y_train_indices), ('Val', y_val_indices), ('Test', y_test_indices)]:
+            counts = np.bincount(y_indices, minlength=len(class_names))
+            min_count = np.min(counts[counts > 0]) if np.any(counts > 0) else 0
+            max_count = np.max(counts)
+            ratio = max_count / min_count if min_count > 0 else 0
+            
+            print(f"   - {split_name}:")
+            print(f"     • Min: {min_count} muestras")
+            print(f"     • Max: {max_count} muestras")
+            print(f"     • Ratio: {ratio:.2f}:1 {'✅' if ratio <= 2.0 else '⚠️'}")
+        
+        print(f"\n✅ Verificación de integridad completada")
+    
+    def _generate_distribution_report(self, y_train, y_val, y_test, class_names):
+        """
+        Genera un reporte detallado de la distribución de clases.
+        
+        Args:
+            y_train: Labels de entrenamiento
+            y_val: Labels de validación
+            y_test: Labels de test
+            class_names: Nombres de clases
+        """
+        print("\n📊 GENERANDO REPORTE DE DISTRIBUCIÓN")
+        print("=" * 60)
+        
+        # Convertir one-hot a índices
+        y_train_indices = np.argmax(y_train, axis=1)
+        y_val_indices = np.argmax(y_val, axis=1)
+        y_test_indices = np.argmax(y_test, axis=1)
+        
+        # Contar muestras por clase
+        train_counts = np.bincount(y_train_indices, minlength=len(class_names))
+        val_counts = np.bincount(y_val_indices, minlength=len(class_names))
+        test_counts = np.bincount(y_test_indices, minlength=len(class_names))
+        
+        # Crear reporte
+        report_path = self.processed_path / "distribution_report.txt"
+        
+        with open(report_path, 'w', encoding='utf-8') as f:
+            f.write("=" * 80 + "\n")
+            f.write("REPORTE DE DISTRIBUCIÓN DE DATASET\n")
+            f.write(f"Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write("=" * 80 + "\n\n")
+            
+            # Resumen general
+            f.write("RESUMEN GENERAL\n")
+            f.write("-" * 80 + "\n")
+            f.write(f"Total Train: {len(y_train):,} muestras ({len(y_train)/(len(y_train)+len(y_val)+len(y_test))*100:.1f}%)\n")
+            f.write(f"Total Val: {len(y_val):,} muestras ({len(y_val)/(len(y_train)+len(y_val)+len(y_test))*100:.1f}%)\n")
+            f.write(f"Total Test: {len(y_test):,} muestras ({len(y_test)/(len(y_train)+len(y_val)+len(y_test))*100:.1f}%)\n")
+            f.write(f"TOTAL: {len(y_train)+len(y_val)+len(y_test):,} muestras\n\n")
+            
+            # Distribución por clase
+            f.write("DISTRIBUCIÓN POR CLASE\n")
+            f.write("-" * 80 + "\n")
+            f.write(f"{'Clase':<45} {'Train':>10} {'Val':>8} {'Test':>8} {'Total':>10}\n")
+            f.write("-" * 80 + "\n")
+            
+            for i, class_name in enumerate(class_names):
+                train_c = train_counts[i]
+                val_c = val_counts[i]
+                test_c = test_counts[i]
+                total_c = train_c + val_c + test_c
+                
+                f.write(f"{class_name:<45} {train_c:>10} {val_c:>8} {test_c:>8} {total_c:>10}\n")
+            
+            # Balance
+            f.write("\n\nBALANCE DE CLASES\n")
+            f.write("-" * 80 + "\n")
+            
+            for split_name, counts in [('Train', train_counts), ('Val', val_counts), ('Test', test_counts)]:
+                min_count = np.min(counts[counts > 0]) if np.any(counts > 0) else 0
+                max_count = np.max(counts)
+                ratio = max_count / min_count if min_count > 0 else 0
+                
+                f.write(f"\n{split_name}:\n")
+                f.write(f"  Min: {min_count} muestras\n")
+                f.write(f"  Max: {max_count} muestras\n")
+                f.write(f"  Ratio: {ratio:.2f}:1 {'✅ Balanceado' if ratio <= 2.0 else '⚠️ Desbalanceado'}\n")
+        
+        print(f"  ✅ Reporte guardado en: {report_path}")
+        
+        # Mostrar resumen en consola
+        print(f"\n📋 Resumen de distribución:")
+        print(f"{'Clase':<45} {'Train':>10} {'Val':>8} {'Test':>8}")
+        print("-" * 80)
+        for i, class_name in enumerate(class_names):
+            print(f"{class_name:<45} {train_counts[i]:>10} {val_counts[i]:>8} {test_counts[i]:>8}")
+    
+    def _load_from_cache(self):
+        """
+        Carga datos desde cache.
+        
+        Returns:
+            tuple o None: (X_train, y_train, X_val, y_val, X_test, y_test, class_names, class_weights) o None
+        """
+        print("\n🔍 Buscando cache...")
+        
+        train_data = self.cache.load('train')
+        val_data = self.cache.load('val')
+        test_data = self.cache.load('test')
+        
+        if train_data and val_data and test_data:
+            print("  ✅ Cache encontrado - Cargando datos...")
+            
+            X_train = train_data['X']
+            y_train = train_data['y']
+            class_names = train_data['class_names']
+            
+            X_val = val_data['X']
+            y_val = val_data['y']
+            
+            X_test = test_data['X']
+            y_test = test_data['y']
+            
+            print(f"  - Train: {X_train.shape[0]} muestras")
+            print(f"  - Val: {X_val.shape[0]} muestras")
+            print(f"  - Test: {X_test.shape[0]} muestras")
+            print(f"  - Clases: {len(class_names)}")
+            
+            # Calcular class weights
+            class_weights = calculate_class_weights(y_train)
+            
+            # Verificar integridad
+            self._verify_split_integrity(X_train, y_train, X_val, y_val, X_test, y_test, class_names)
+            
+            return X_train, y_train, X_val, y_val, X_test, y_test, class_names, class_weights
+        
+        print("  ⚠️  Cache no encontrado o incompleto")
+        return None
+    
+    def _save_to_cache(self, X_train, y_train, X_val, y_val, X_test, y_test, class_names):
+        """
+        Guarda datos en cache.
+        
+        Args:
+            X_train, y_train: Training data
+            X_val, y_val: Validation data
+            X_test, y_test: Test data
+            class_names: Nombres de clases
+        """
+        print("\n💾 Guardando en cache...")
+        
+        # Guardar train
+        self.cache.save({
+            'X': X_train,
+            'y': y_train,
+            'class_names': class_names
+        }, 'train')
+        print(f"  ✅ Train guardado ({X_train.shape[0]} muestras)")
+        
+        # Guardar val
+        self.cache.save({
+            'X': X_val,
+            'y': y_val,
+            'class_names': class_names
+        }, 'val')
+        print(f"  ✅ Val guardado ({X_val.shape[0]} muestras)")
+        
+        # Guardar test
+        self.cache.save({
+            'X': X_test,
+            'y': y_test,
+            'class_names': class_names
+        }, 'test')
+        print(f"  ✅ Test guardado ({X_test.shape[0]} muestras)")
+    
     def clear_cache(self):
         """Limpia el cache."""
         print("\n🗑️  Limpiando cache...")
@@ -397,20 +605,21 @@ class DatasetProcessor:
 
 def main():
     """Función principal para preparar el dataset."""
-    print("\n🚀 PREPARACIÓN DE DATASET")
-    print("=" * 60)
+    print("\n" + "=" * 80)
+    print("🚀 FASE 2 - PASO 1: PREPARACIÓN DE DATASET")
+    print("=" * 80)
     
     # Configuración
     RAW_DATASET = "dataset/raw"
     PROCESSED_DATASET = "dataset/processed"
-    IMG_SIZE = (224, 224)  # Usar 224x224 como está configurado
+    IMG_SIZE = (224, 224)  # Tamaño estándar para MobileNetV2
     APPLY_BALANCING = True  # Activar balanceo de clases
     TARGET_SAMPLES = 2500  # Objetivo de muestras por clase
     
     # Crear procesador
     processor = DatasetProcessor(
-        RAW_DATASET, 
-        PROCESSED_DATASET, 
+        RAW_DATASET,
+        PROCESSED_DATASET,
         IMG_SIZE,
         apply_balancing=APPLY_BALANCING,
         target_samples=TARGET_SAMPLES
@@ -418,7 +627,7 @@ def main():
     
     # Opciones
     print("\n⚙️  Opciones:")
-    print("  1. Usar cache")
+    print("  1. Usar cache (recomendado)")
     print("  2. Forzar reprocesamiento")
     print("  3. Ver información del cache")
     print("  4. Limpiar cache")
@@ -437,39 +646,29 @@ def main():
     force_reprocess = (option == "2")
     
     # Preparar datos
-    result = processor.prepare_optimized(
+    result = processor.prepare_dataset(
         use_cache=True,
         force_reprocess=force_reprocess
     )
     
     if result:
-        X_train, y_train, X_test, y_test, class_names, class_weights = result
+        X_train, y_train, X_val, y_val, X_test, y_test, class_names, class_weights = result
         
         print("\n" + "=" * 80)
         print("✅ DATOS LISTOS PARA ENTRENAMIENTO")
         print("=" * 80)
-        print(f"\n📊 Resumen:")
+        print(f"\n📊 Resumen Final:")
         print(f"  - X_train: {X_train.shape}")
         print(f"  - y_train: {y_train.shape}")
+        print(f"  - X_val: {X_val.shape}")
+        print(f"  - y_val: {y_val.shape}")
         print(f"  - X_test: {X_test.shape}")
         print(f"  - y_test: {y_test.shape}")
         print(f"  - Clases: {len(class_names)}")
         print(f"  - Class weights: {len(class_weights)} clases")
         
-        # Verificar balance final
-        y_train_indices = np.argmax(y_train, axis=1)
-        final_counts = np.bincount(y_train_indices, minlength=len(class_names))
-        final_ratio = np.max(final_counts) / np.min(final_counts) if np.min(final_counts) > 0 else 0
-        
-        print(f"\n⚖️  Balance final del dataset:")
-        print(f"  - Ratio: {final_ratio:.2f}:1")
-        if final_ratio <= 2.0:
-            print(f"  - ✅ Objetivo alcanzado (≤ 2:1)")
-        else:
-            print(f"  - ⚠️  Ratio mayor a 2:1")
-        
         print("\n💡 Siguiente paso:")
-        print("   Ejecuta 'python backend/scripts/train.py' para entrenar")
+        print("   Ejecuta 'python backend/scripts/train.py' para entrenar el modelo")
 
 
 if __name__ == "__main__":
