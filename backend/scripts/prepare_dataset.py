@@ -32,7 +32,8 @@ backend_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(backend_dir))
 
 from utils.data_cache import DataCache
-from utils.manage_cache import AggressiveAugmenter, calculate_class_weights
+from utils.aggressive_augmenter import AggressiveAugmenter
+from utils.model_metrics import calculate_class_weights
 
 
 class DatasetProcessor:
@@ -86,6 +87,13 @@ class DatasetProcessor:
         # Inicializar cache y augmenter
         self.cache = DataCache()
         self.augmenter = AggressiveAugmenter()
+        
+        # Configuración para el cache
+        self.cache_config = {
+            'img_size': img_size,
+            'classes': self.TARGET_CLASSES,
+            'balance': apply_balancing
+        }
         
         print(f"\n🔧 Configuración del Procesador:")
         print(f"  - Dataset raw: {self.raw_dataset_path}")
@@ -524,9 +532,14 @@ class DatasetProcessor:
         """
         print("\n🔍 Buscando cache...")
         
-        train_data = self.cache.load('train')
-        val_data = self.cache.load('val')
-        test_data = self.cache.load('test')
+        train_result = self.cache.load(str(self.raw_dataset_path), self.cache_config, 'train')
+        val_result = self.cache.load(str(self.raw_dataset_path), self.cache_config, 'val')
+        test_result = self.cache.load(str(self.raw_dataset_path), self.cache_config, 'test')
+        
+        # Convertir resultados a diccionarios
+        train_data = {'X': train_result[0], 'y': train_result[1], 'class_names': train_result[2]} if train_result else None
+        val_data = {'X': val_result[0], 'y': val_result[1], 'class_names': val_result[2]} if val_result else None
+        test_data = {'X': test_result[0], 'y': test_result[1], 'class_names': test_result[2]} if test_result else None
         
         if train_data and val_data and test_data:
             print("  ✅ Cache encontrado - Cargando datos...")
@@ -570,27 +583,15 @@ class DatasetProcessor:
         print("\n💾 Guardando en cache...")
         
         # Guardar train
-        self.cache.save({
-            'X': X_train,
-            'y': y_train,
-            'class_names': class_names
-        }, 'train')
+        self.cache.save(X_train, y_train, class_names, str(self.raw_dataset_path), self.cache_config, 'train')
         print(f"  ✅ Train guardado ({X_train.shape[0]} muestras)")
         
         # Guardar val
-        self.cache.save({
-            'X': X_val,
-            'y': y_val,
-            'class_names': class_names
-        }, 'val')
+        self.cache.save(X_val, y_val, class_names, str(self.raw_dataset_path), self.cache_config, 'val')
         print(f"  ✅ Val guardado ({X_val.shape[0]} muestras)")
         
         # Guardar test
-        self.cache.save({
-            'X': X_test,
-            'y': y_test,
-            'class_names': class_names
-        }, 'test')
+        self.cache.save(X_test, y_test, class_names, str(self.raw_dataset_path), self.cache_config, 'test')
         print(f"  ✅ Test guardado ({X_test.shape[0]} muestras)")
     
     def clear_cache(self):
