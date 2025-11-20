@@ -237,8 +237,8 @@ class PlantDiseaseClassifier:
                 layers.Dense(self.num_classes, activation='softmax')
             ])
         
-        # Compilar con learning rate ajustado
-        initial_lr = 0.001 if self.use_transfer_learning else 0.0005
+        # Compilar con configuración del Paso 2: Adam lr=1e-4
+        initial_lr = 1e-4 if self.use_transfer_learning else 5e-5
         model.compile(
             optimizer=keras.optimizers.Adam(learning_rate=initial_lr),
             loss='categorical_crossentropy',
@@ -248,10 +248,12 @@ class PlantDiseaseClassifier:
         self.model = model
         
         print(f"\n✅ Modelo construido: {model.count_params():,} parámetros")
+        print(f"   - Optimizer: Adam (lr={initial_lr})")
+        print(f"   - Loss: CrossEntropyLoss")
         return model
     
     def train_with_arrays(self, X_train, y_train, X_val, y_val, X_test, y_test, 
-                         epochs=20, batch_size=64):
+                         epochs=20, batch_size=64, class_weights=None):
         """
         Entrena el modelo con arrays numpy (datos desde cache).
         
@@ -264,6 +266,7 @@ class PlantDiseaseClassifier:
             y_test: Labels de prueba (one-hot)
             epochs: Número de épocas
             batch_size: Tamaño del batch
+            class_weights: Dict con pesos por clase (del config.py)
             
         Returns:
             History object
@@ -275,17 +278,20 @@ class PlantDiseaseClassifier:
         print(f"  - Muestras val: {len(X_val):,}")
         print(f"  - Muestras test: {len(X_test):,}")
         print(f"  - Batch size: {batch_size}")
-        print(f"  - Épocas: {epochs}")
+        print(f"  - Épocas máximas: {epochs}")
+        if class_weights:
+            print(f"  - Class weights: ✅ Aplicados (balance de clases)")
         print()
         
-        # Crear directorio para modelos
+        # Crear directorios
         Path('models').mkdir(exist_ok=True)
+        Path('metrics').mkdir(exist_ok=True)
         
-        # Callbacks optimizados para Fase 1
+        # Callbacks optimizados para Fase 1 según Paso 2
         callbacks = [
             EarlyStopping(
                 monitor='val_accuracy',
-                patience=7,
+                patience=15,          # Paso 2: paciencia 15-20 epochs
                 restore_best_weights=True,
                 verbose=1
             ),
@@ -293,13 +299,21 @@ class PlantDiseaseClassifier:
                 'models/best_model.keras',
                 monitor='val_accuracy',
                 save_best_only=True,
+                save_weights_only=False,
                 verbose=1
+            ),
+            ModelCheckpoint(
+                'models/last_model.keras',
+                monitor='val_loss',
+                save_best_only=False,
+                save_weights_only=False,
+                verbose=0
             ),
             ReduceLROnPlateau(
                 monitor='val_loss',
-                factor=0.5,          # Decay agresivo para convergencia rápida
-                patience=3,          # Reacción rápida a estancamiento
-                min_lr=0.0001,       # Mínimo para Fase 1
+                factor=0.5,          # Paso 2: factor=0.5
+                patience=5,          # Paso 2: paciencia=5
+                min_lr=1e-7,
                 verbose=1
             )
         ]
@@ -319,6 +333,9 @@ class PlantDiseaseClassifier:
         training_time = time.time() - start_time
         
         print(f"\n⏱️  Tiempo de entrenamiento: {training_time/60:.2f} minutos")
+        
+        # Guardar historial de entrenamiento como JSON (Paso 2)
+        self._save_training_history(self.history, 'metrics/training_history.json')
         
         return self.history
     
@@ -788,6 +805,22 @@ class PlantDiseaseClassifier:
         
         print(f"✅ Historial guardado en: {viz_path / 'training_history.png'}")
     
+    def _save_training_history(self, history, filepath):
+        """Guarda el historial de entrenamiento como JSON (Paso 2)."""
+        history_dict = {
+            'loss': [float(x) for x in history.history.get('loss', [])],
+            'accuracy': [float(x) for x in history.history.get('accuracy', [])],
+            'val_loss': [float(x) for x in history.history.get('val_loss', [])],
+            'val_accuracy': [float(x) for x in history.history.get('val_accuracy', [])],
+            'epochs': len(history.history.get('loss', [])),
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        with open(filepath, 'w') as f:
+            json.dump(history_dict, f, indent=4)
+        
+        print(f"✅ Training history guardado: {filepath}")
+    
     def save_model(self, filepath='models/fruit_classifier.keras', class_names=None):
         """Guarda el modelo y metadatos."""
         self.model.save(filepath)
@@ -826,18 +859,24 @@ def main():
     PROCESSED_DATASET = "dataset/processed"
     # IMG_SIZE importado desde config.py para consistencia (224x224)
     
-    # Parámetros de entrenamiento optimizados
-    EPOCHS_PHASE1 = 15      # Entrenamiento inicial (capas Dense)
-    EPOCHS_PHASE2 = 10      # Fine-tuning gradual (2 subfases) - Reducido: converge más rápido con balance corregido
-    # BATCH_SIZE importado desde config.py (16 para resolución 224x224)
+    # Parámetros de entrenamiento - Paso 2
+    EPOCHS_PHASE1 = 100     # Epochs máximo con early stopping (15-20 epochs paciencia)
+    EPOCHS_PHASE2 = 10      # Fine-tuning gradual (2 subfases)
+    BATCH_SIZE_OVERRIDE = 64  # Paso 2: batch size recomendado 32-64
+    # BATCH_SIZE importado desde config.py pero se puede sobrescribir
     USE_TRANSFER_LEARNING = True
     DO_FINE_TUNING = True   # ✅ Activado con estrategia gradual optimizada
     
-    print("\n⚙️  CONFIGURACIÓN:")
+    # Usar batch size del Paso 2
+    BATCH_SIZE_TRAIN = BATCH_SIZE_OVERRIDE
+    
+    print("\n⚙️  CONFIGURACIÓN - PASO 2:")
     print(f"  - Transfer Learning: {'✅ MobileNetV2' if USE_TRANSFER_LEARNING else '❌'}")
     print(f"  - Resolución de Imagen: {IMG_SIZE[0]}x{IMG_SIZE[1]} ({IMG_SIZE[0]*IMG_SIZE[1]:,} píxeles)")
-    print(f"  - Batch Size: {BATCH_SIZE} (ajustado para resolución alta)")
-    print(f"  - Épocas Fase 1 (clasificador): {EPOCHS_PHASE1}")
+    print(f"  - Batch Size: {BATCH_SIZE_TRAIN} (Paso 2: 32-64 recomendado)")
+    print(f"  - Epochs máximo Fase 1: {EPOCHS_PHASE1} (con early stopping 15-20)")
+    print(f"  - Optimizer: Adam (lr=1e-4)")
+    print(f"  - Scheduler: ReduceLROnPlateau (factor=0.5, patience=5)")
     if DO_FINE_TUNING and USE_TRANSFER_LEARNING:
         print(f"  - Épocas Fase 2 (fine-tuning gradual): {EPOCHS_PHASE2}")
         print(f"    • Subfase 2a: ~{EPOCHS_PHASE2//2} epochs (capas 101-154: features complejas)")
@@ -930,6 +969,10 @@ def main():
     else:
         print(f"  ✅ Validación de shape exitosa: {actual_shape}")
     
+    # Calcular class_weights desde y_train (necesario para Paso 2)
+    from utils.manage_cache import calculate_class_weights
+    class_weights = calculate_class_weights(y_train)
+    
     # Crear y construir modelo
     classifier = PlantDiseaseClassifier(
         img_size=IMG_SIZE,
@@ -951,7 +994,8 @@ def main():
         X_val, y_val,
         X_test, y_test,
         epochs=EPOCHS_PHASE1,
-        batch_size=BATCH_SIZE
+        batch_size=BATCH_SIZE_TRAIN,
+        class_weights=class_weights
     )
     
     # FASE 2: Fine-tuning (opcional)
@@ -980,21 +1024,25 @@ def main():
     print("✅ ENTRENAMIENTO COMPLETADO")
     print("=" * 60)
     print(f"\n⏱️  Tiempo total: {total_time/60:.2f} minutos")
-    print(f"\n📁 Archivos generados:")
-    print("  - models/best_model.keras")
-    print("  - models/fruit_classifier.keras")
+    print(f"\n📁 Archivos generados (Paso 2):")
+    print("  - models/best_model.keras (mejor checkpoint)")
+    print("  - models/last_model.keras (último checkpoint)")
+    print("  - models/fruit_classifier.keras (modelo final)")
     print("  - models/class_mapping.json")
+    print("  - metrics/training_history.json (pérdida y accuracy por epoch)")
     print("  - models/visualizations/")
     
-    print("\n💡 CARACTERÍSTICAS:")
-    print("  ✅ Preparación automática: Detecta y prepara datos si es necesario")
-    print("  ✅ Cache PKL: Datos se guardan para reuso")
-    print("  ✅ Transfer Learning: Usa MobileNetV2 pre-entrenado")
-    print("  ✅ Alta Resolución: 224x224 para mejor detección de texturas y manchas")
-    print("  ✅ Data Augmentation: Previene overfitting")
-    print("  ✅ Fine-tuning Gradual: Descongelamiento progresivo en 2 fases")
-    print("  ✅ Monitoreo Inteligente: Detecta automáticamente éxito y problemas")
-    print("  ✅ Optimizado: Hiperparámetros balanceados")
+    print("\n💡 CARACTERÍSTICAS (Paso 2):")
+    print("  ✅ Split 70/15/15: Train/Val/Test separados")
+    print("  ✅ Class Weights: Balance de clases aplicado")
+    print("  ✅ Transfer Learning: MobileNetV2 pre-entrenado (ImageNet)")
+    print("  ✅ Optimizer: Adam (lr=1e-4)")
+    print("  ✅ Scheduler: ReduceLROnPlateau (factor=0.5, patience=5)")
+    print("  ✅ Early Stopping: Patience 15 epochs")
+    print("  ✅ Checkpoints: Best + Last model guardados")
+    print("  ✅ Training History: JSON con métricas por epoch")
+    print("  ✅ Batch Size: 64 (optimizado)")
+    print("  ✅ Max Epochs: 100 (con early stopping)")
     
     print("\n🎯 PRÓXIMOS PASOS:")
     print("  1. Probar predicciones: python backend/scripts/predict.py <imagen>")
