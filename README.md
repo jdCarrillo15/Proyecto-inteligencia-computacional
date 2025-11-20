@@ -429,56 +429,6 @@ python backend/scripts/validate_paso6.py  # Validar readiness
 
 ---
 
-## 🤝 Contribución
-
-### Proceso de Contribución
-
-1. Fork el repositorio
-2. Crear branch (`git checkout -b feature/nueva-caracteristica`)
-3. Commit cambios (`git commit -m 'feat: agregar característica'`)
-4. Push al branch (`git push origin feature/nueva-caracteristica`)
-5. Crear Pull Request
-
-### Conventional Commits
-
-- `feat:` - Nueva característica
-- `fix:` - Corrección de bug
-- `docs:` - Cambios en documentación
-- `refactor:` - Refactorización
-- `test:` - Tests
-
----
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver archivo [LICENSE](LICENSE) para más detalles.
-
----
-
-## 👥 Autores
-
-- **Equipo de Desarrollo** - *Proyecto de Inteligencia Computacional*
-- **Universidad** - UPTC
-
----
-
-## 🙏 Agradecimientos
-
-- Dataset: [Plant Village Dataset (Kaggle)](https://www.kaggle.com/datasets/vipoooool/new-plant-diseases-dataset)
-- Framework: TensorFlow & Keras
-- Arquitectura: MobileNetV2 (ImageNet)
-- Frontend: React 18
-- Backend: Flask
-
----
-
-## 📞 Soporte
-
-Para reportar bugs o solicitar features:
-https://github.com/jdCarrillo15/Proyecto-inteligencia-computacional/issues
-
----
-
 ## 📈 Estadísticas
 
 - **Líneas de código**: ~15,000+
@@ -494,7 +444,5 @@ https://github.com/jdCarrillo15/Proyecto-inteligencia-computacional/issues
 <div align="center">
 
 **[⬆ Volver arriba](#-sistema-de-detección-de-enfermedades-en-plantas)**
-
-Made with ❤️ for agriculture
 
 </div>
