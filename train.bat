@@ -1,20 +1,23 @@
 @echo off
 REM ================================================================
-REM ENTRENAMIENTO OPTIMIZADO CON PKL CACHE
-REM Este script ejecuta el entrenamiento completo automaticamente
+REM FASE 2 - ENTRENAMIENTO OPTIMIZADO
+REM Pipeline completo: Preparacion -> Entrenamiento -> Evaluacion
 REM ================================================================
 
 echo.
 echo ================================================================
-echo   ENTRENAMIENTO CON OPTIMIZACIONES v2.0
+echo   PIPELINE DE ENTRENAMIENTO - FASE 2
 echo ================================================================
 echo.
-echo Optimizaciones activas:
-echo   [x] Fine-tuning progresivo (3 fases)
-echo   [x] Learning rates conservadoras (prevenir forgetting)
-echo   [x] Resolucion 224x224 (5x mas detalle)
-echo   [x] Metricas detalladas (20+ metricas)
-echo   [x] Cache PKL automatico
+echo Configuracion optimizada (Paso 2):
+echo   [x] Adam optimizer (lr=1e-4)
+echo   [x] Batch size: 64
+echo   [x] Max epochs: 100
+echo   [x] Early stopping (patience=15)
+echo   [x] ReduceLROnPlateau (factor=0.5, patience=5)
+echo   [x] Dual checkpoints (best + last)
+echo   [x] Class weights balancing
+echo   [x] Cache PKL (70/15/15 split)
 echo.
 echo ================================================================
 echo.
@@ -38,15 +41,21 @@ if errorlevel 1 (
 )
 
 echo.
-echo [2/3] Iniciando entrenamiento optimizado...
+echo [2/3] Iniciando entrenamiento (Fase 2 - Paso 2)...
+echo.
+echo Esto puede tomar varias horas dependiendo de tu hardware.
+echo El progreso se guardara en:
+echo   - models/best_model.keras (mejor modelo)
+echo   - models/last_model.keras (ultimo checkpoint)
+echo   - metrics/training_history.json (historial completo)
 echo.
 
-REM Ejecutar el script de entrenamiento unificado
+REM Ejecutar el script de entrenamiento
 python backend\scripts\train.py
 
 if errorlevel 1 (
     echo.
-    echo ERROR: El entrenamiento fallo
+    echo ERROR: El entrenamiento fallo. Revisa los logs.
     pause
     exit /b 1
 )

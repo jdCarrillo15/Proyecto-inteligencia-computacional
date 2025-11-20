@@ -237,7 +237,7 @@ class PlantDiseaseClassifier:
                 layers.Dense(self.num_classes, activation='softmax')
             ])
         
-        # Compilar con configuración del Paso 2: Adam lr=1e-4
+        # Compilar con configuración: Adam lr=1e-4
         initial_lr = 1e-4 if self.use_transfer_learning else 5e-5
         model.compile(
             optimizer=keras.optimizers.Adam(learning_rate=initial_lr),
@@ -272,7 +272,7 @@ class PlantDiseaseClassifier:
             History object
         """
         print("\n" + "=" * 60)
-        print("🎯 INICIANDO ENTRENAMIENTO (FASE 1 - SPLIT 70/15/15)")
+        print("🎯 INICIANDO ENTRENAMIENTO (SPLIT 70/15/15)")
         print("=" * 60)
         print(f"  - Muestras train: {len(X_train):,}")
         print(f"  - Muestras val: {len(X_val):,}")
@@ -287,11 +287,11 @@ class PlantDiseaseClassifier:
         Path('models').mkdir(exist_ok=True)
         Path('metrics').mkdir(exist_ok=True)
         
-        # Callbacks optimizados para Fase 1 según Paso 2
+        # Callbacks optimizados
         callbacks = [
             EarlyStopping(
                 monitor='val_accuracy',
-                patience=15,          # Paso 2: paciencia 15-20 epochs
+                patience=15,          # paciencia 15-20 epochs
                 restore_best_weights=True,
                 verbose=1
             ),
@@ -311,8 +311,8 @@ class PlantDiseaseClassifier:
             ),
             ReduceLROnPlateau(
                 monitor='val_loss',
-                factor=0.5,          # Paso 2: factor=0.5
-                patience=5,          # Paso 2: paciencia=5
+                factor=0.5,   
+                patience=5,   
                 min_lr=1e-7,
                 verbose=1
             )
@@ -334,7 +334,7 @@ class PlantDiseaseClassifier:
         
         print(f"\n⏱️  Tiempo de entrenamiento: {training_time/60:.2f} minutos")
         
-        # Guardar historial de entrenamiento como JSON (Paso 2)
+        # Guardar historial de entrenamiento como JSON
         self._save_training_history(self.history, 'metrics/training_history.json')
         
         return self.history
@@ -346,18 +346,18 @@ class PlantDiseaseClassifier:
         
         Estrategia basada en análisis de features de MobileNetV2:
         - Capas 0-50:   Features básicas (bordes, texturas) → MANTENER CONGELADAS
-        - Capas 51-100: Features intermedias (patrones) → Fase 2b
-        - Capas 101-154: Features complejas (objetos) → Fase 2a (más relevantes para hojas)
+        - Capas 51-100: Features intermedias (patrones)
+        - Capas 101-154: Features complejas (objetos)
         
-        Fase 2a: Descongela capas 101-154 (features complejas)
-        Fase 2b: Descongela capas 51-154 (añade features intermedias)
+        Descongela capas 101-154 (features complejas)
+        Descongela capas 51-154 (añade features intermedias)
         
         Nota: BatchNormalization layers se manejan cuidadosamente con batch_size pequeño.
         
         Args:
             X_train, y_train: Datos de entrenamiento
             X_test, y_test: Datos de prueba
-            epochs_phase2: Épocas totales de fine-tuning (se divide en 2 subfases)
+            epochs_phase2: Épocas totales de fine-tuning
             batch_size: Tamaño del batch
         """
         if not self.use_transfer_learning:
@@ -368,10 +368,10 @@ class PlantDiseaseClassifier:
         print(f"\n📊 Base model tiene {total_layers} capas totales")
         
         # ==================================================================
-        # FASE 2a: Descongelamiento de features complejas (capas 101-154)
+        # Descongelamiento de features complejas (capas 101-154)
         # ==================================================================
         print("\n" + "=" * 60)
-        print("🔥 FASE 2a: FINE-TUNING - Features Complejas (Capas 101-154)")
+        print("🔥 FINE-TUNING - Features Complejas (Capas 101-154)")
         print("=" * 60)
         print("  🌿 Objetivo: Adaptar detección de objetos completos a morfología de hojas")
         
@@ -401,7 +401,7 @@ class PlantDiseaseClassifier:
         print(f"  - Capas descongeladas: {trainable_layers}")
         if frozen_bn > 0:
             print(f"  - BatchNorm protegidas: {frozen_bn} (batch_size={batch_size} < 16)")
-        print(f"  - Learning Rate: 0.00005 (20x más bajo que Fase 1 - proteger ImageNet)")
+        print(f"  - Learning Rate: 0.00005 (20x más bajo que proteger ImageNet)")
         print(f"  - LR Decay: factor=0.2, patience=5, min_lr=0.000001")
         
         # Recompilar con LR más conservador
@@ -806,7 +806,7 @@ class PlantDiseaseClassifier:
         print(f"✅ Historial guardado en: {viz_path / 'training_history.png'}")
     
     def _save_training_history(self, history, filepath):
-        """Guarda el historial de entrenamiento como JSON (Paso 2)."""
+        """Guarda el historial de entrenamiento como JSON."""
         history_dict = {
             'loss': [float(x) for x in history.history.get('loss', [])],
             'accuracy': [float(x) for x in history.history.get('accuracy', [])],
@@ -859,21 +859,21 @@ def main():
     PROCESSED_DATASET = "dataset/processed"
     # IMG_SIZE importado desde config.py para consistencia (224x224)
     
-    # Parámetros de entrenamiento - Paso 2
+    # Parámetros de entrenamiento
     EPOCHS_PHASE1 = 100     # Epochs máximo con early stopping (15-20 epochs paciencia)
     EPOCHS_PHASE2 = 10      # Fine-tuning gradual (2 subfases)
-    BATCH_SIZE_OVERRIDE = 64  # Paso 2: batch size recomendado 32-64
+    BATCH_SIZE_OVERRIDE = 64  # batch size recomendado 32-64
     # BATCH_SIZE importado desde config.py pero se puede sobrescribir
     USE_TRANSFER_LEARNING = True
     DO_FINE_TUNING = True   # ✅ Activado con estrategia gradual optimizada
     
-    # Usar batch size del Paso 2
+    # Usar batch size
     BATCH_SIZE_TRAIN = BATCH_SIZE_OVERRIDE
     
-    print("\n⚙️  CONFIGURACIÓN - PASO 2:")
+    print("\n⚙️  CONFIGURACIÓN:")
     print(f"  - Transfer Learning: {'✅ MobileNetV2' if USE_TRANSFER_LEARNING else '❌'}")
     print(f"  - Resolución de Imagen: {IMG_SIZE[0]}x{IMG_SIZE[1]} ({IMG_SIZE[0]*IMG_SIZE[1]:,} píxeles)")
-    print(f"  - Batch Size: {BATCH_SIZE_TRAIN} (Paso 2: 32-64 recomendado)")
+    print(f"  - Batch Size: {BATCH_SIZE_TRAIN} (32-64 recomendado)")
     print(f"  - Epochs máximo Fase 1: {EPOCHS_PHASE1} (con early stopping 15-20)")
     print(f"  - Optimizer: Adam (lr=1e-4)")
     print(f"  - Scheduler: ReduceLROnPlateau (factor=0.5, patience=5)")
@@ -969,7 +969,7 @@ def main():
     else:
         print(f"  ✅ Validación de shape exitosa: {actual_shape}")
     
-    # Calcular class_weights desde y_train (necesario para Paso 2)
+    # Calcular class_weights desde y_train
     from utils.manage_cache import calculate_class_weights
     class_weights = calculate_class_weights(y_train)
     
@@ -982,9 +982,9 @@ def main():
     
     classifier.build_model()
     
-    # FASE 1: Entrenamiento inicial
+    # Entrenamiento inicial
     print("\n" + "=" * 60)
-    print("FASE 1: ENTRENAMIENTO INICIAL")
+    print("ENTRENAMIENTO INICIAL")
     print("=" * 60)
     
     total_start = time.time()
@@ -998,7 +998,7 @@ def main():
         class_weights=class_weights
     )
     
-    # FASE 2: Fine-tuning (opcional)
+    # Fine-tuning
     if DO_FINE_TUNING and USE_TRANSFER_LEARNING:
         classifier.fine_tune(
             X_train, y_train,
@@ -1024,7 +1024,7 @@ def main():
     print("✅ ENTRENAMIENTO COMPLETADO")
     print("=" * 60)
     print(f"\n⏱️  Tiempo total: {total_time/60:.2f} minutos")
-    print(f"\n📁 Archivos generados (Paso 2):")
+    print(f"\n📁 Archivos generados:")
     print("  - models/best_model.keras (mejor checkpoint)")
     print("  - models/last_model.keras (último checkpoint)")
     print("  - models/fruit_classifier.keras (modelo final)")
@@ -1032,7 +1032,7 @@ def main():
     print("  - metrics/training_history.json (pérdida y accuracy por epoch)")
     print("  - models/visualizations/")
     
-    print("\n💡 CARACTERÍSTICAS (Paso 2):")
+    print("\n💡 CARACTERÍSTICAS:")
     print("  ✅ Split 70/15/15: Train/Val/Test separados")
     print("  ✅ Class Weights: Balance de clases aplicado")
     print("  ✅ Transfer Learning: MobileNetV2 pre-entrenado (ImageNet)")
