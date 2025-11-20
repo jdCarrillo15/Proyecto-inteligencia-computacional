@@ -507,6 +507,28 @@ def main():
     validator = RequirementsValidator(args.results)
     approved = validator.run_validation()
     
+    # Análisis automático si el modelo no es aprobado
+    if not approved:
+        print(f"\n{BOLD}{'='*70}{RESET}")
+        print(f"{BOLD}🔍 EJECUTANDO ANÁLISIS DE PROBLEMAS (PASO 5){RESET}")
+        print(f"{BOLD}{'='*70}{RESET}\n")
+        
+        try:
+            from scripts.analyze_failures import FailureAnalyzer
+            
+            analyzer = FailureAnalyzer(args.results)
+            analysis = analyzer.run_analysis()
+            
+            if analysis:
+                print(f"\n{GREEN}✅ Análisis de problemas completado{RESET}")
+                print(f"{BLUE}📄 Revisa el reporte detallado en: metrics/failure_analysis.json{RESET}")
+            
+        except ImportError as e:
+            print(f"\n{YELLOW}⚠️  No se pudo ejecutar análisis automático: {e}{RESET}")
+            print("   Ejecuta manualmente: python backend/scripts/analyze_failures.py")
+        except Exception as e:
+            print(f"\n{YELLOW}⚠️  Error en análisis: {e}{RESET}")
+    
     # Exit code
     sys.exit(0 if approved else 1)
 
