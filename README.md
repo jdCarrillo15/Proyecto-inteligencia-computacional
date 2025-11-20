@@ -94,6 +94,19 @@ npm install
 
 ## ⚡ Uso Rápido
 
+### ⚠️ IMPORTANTE: Si tienes problemas de RAM
+
+Si el sistema colapsa o la RAM sube a 90%+, lee **[SOLUCION_RAM.md](./SOLUCION_RAM.md)** primero.
+
+**Solución rápida:**
+```bat
+# Si tienes 12-16 GB RAM
+.\prepare_safe.bat
+
+# Si tienes 8 GB RAM o menos
+python prepare_ultralight.py
+```
+
 ### Scripts Batch (Windows) - **RECOMENDADO**
 
 ```bat

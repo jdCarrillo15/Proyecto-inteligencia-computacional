@@ -80,7 +80,7 @@ DROPOUT_RATE = 0.5
 CONV_DROPOUT_RATE = 0.25
 
 # Hiperparámetros de entrenamiento
-BATCH_SIZE = 16  # Reducido de 32 debido a resolución 224x224 (5x más píxeles)
+BATCH_SIZE = 8  # Reducido para evitar OOM (Out of Memory)
 EPOCHS = 50
 LEARNING_RATE = 0.001  # LR inicial para transfer learning
 
@@ -166,10 +166,10 @@ FN_FP_TOLERANCE_RATIO = 1.5  # Preferimos 1.5x falsos positivos sobre falsos neg
 # ============================================================================
 
 # Activar balanceo de clases en prepare_dataset.py
-APPLY_CLASS_BALANCING = True
+APPLY_CLASS_BALANCING = False  # DESACTIVADO para evitar OOM
 
 # Target de muestras por clase después de oversampling
-TARGET_SAMPLES_PER_CLASS = 2500
+TARGET_SAMPLES_PER_CLASS = 0  # 0 = Sin augmentation (evita OOM totalmente)
 
 # Objetivo de ratio de balance (max/min samples)
 TARGET_BALANCE_RATIO = 2.0  # Máximo 2:1 de diferencia entre clases
