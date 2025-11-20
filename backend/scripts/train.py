@@ -911,9 +911,9 @@ def main():
     }
     
     print("\n📂 Cargando datos desde cache (split 70/15/15)...")
-    train_data = cache.load('train')
-    val_data = cache.load('val')
-    test_data = cache.load('test')
+    train_data = cache.load(RAW_DATASET, config, 'train')
+    val_data = cache.load(RAW_DATASET, config, 'val')
+    test_data = cache.load(RAW_DATASET, config, 'test')
     
     if not train_data or not val_data or not test_data:
         print("\n⚠️  Cache no encontrado o incompleto. Preparando datos automáticamente...")
@@ -970,8 +970,8 @@ def main():
         print(f"  ✅ Validación de shape exitosa: {actual_shape}")
     
     # Calcular class_weights desde y_train
-    from utils.manage_cache import calculate_class_weights
-    class_weights = calculate_class_weights(y_train)
+    from utils.model_metrics import calculate_class_weights
+    class_weights = calculate_class_weights(y_train, num_classes)
     
     # Crear y construir modelo
     classifier = PlantDiseaseClassifier(
